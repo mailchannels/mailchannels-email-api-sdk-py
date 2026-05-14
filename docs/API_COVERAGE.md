@@ -2,7 +2,7 @@
 
 This report is generated from the MailChannels OpenAPI document and the SDK route registry.
 
-- SDK version: `0.1.0`
+- SDK version: `0.1.1`
 - OpenAPI source: `https://docs.mailchannels.net/email-api.yaml`
 - OpenAPI version: `0.21.1`
 - OpenAPI SHA-256: `4e3f511e41a095792194626e35552e08602fd1257073758fdcb030b120c5ec33`

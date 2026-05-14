@@ -4,7 +4,7 @@ This reference is generated from public SDK exports, type hints, Pydantic models
 
 For task-oriented examples, start with the README. This file is the formal public surface reference.
 
-- SDK version: `0.1.0`
+- SDK version: `0.1.1`
 - Top-level exports: `68`
 - Documented public module exports: `188`
 
