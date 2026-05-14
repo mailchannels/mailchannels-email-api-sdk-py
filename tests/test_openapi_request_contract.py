@@ -558,16 +558,10 @@ ROUTE_CONTRACTS: tuple[OperationContract, ...] = (
     OperationContract(
         "POST",
         "/webhook-batch/{batch_id}/resend",
-        lambda client: client.webhooks.resend_batch(123, customer_handle="clienta"),
-        lambda client: client.webhooks.resend_batch_async(
-            123,
-            customer_handle="clienta",
-        ),
+        lambda client: client.webhooks.resend_batch(123),
+        lambda client: client.webhooks.resend_batch_async(123),
         path="/webhook-batch/123/resend",
-        headers_required=frozenset(
-            {"Content-Type", "User-Agent", "X-Customer-Handle"}
-        ),
-        headers_forbidden=frozenset({"X-Api-Key"}),
+        headers_required=frozenset({"Content-Type", "User-Agent", "X-Api-Key"}),
     ),
     OperationContract(
         "GET",

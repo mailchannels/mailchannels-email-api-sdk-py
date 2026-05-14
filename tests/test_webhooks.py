@@ -58,7 +58,7 @@ def test_webhook_batches_public_key_and_resend() -> None:
 
     client.webhooks.batches(statuses=["4xx", "5xx"], limit=25, offset=5)
     client.webhooks.public_key("mckey")
-    client.webhooks.resend_batch(123, customer_handle="customer_123")
+    client.webhooks.resend_batch(123)
 
     assert transport.calls[0]["url"] == (
         "https://api.mailchannels.net/tx/v1/webhook-batch"
@@ -73,10 +73,13 @@ def test_webhook_batches_public_key_and_resend() -> None:
         "https://api.mailchannels.net/tx/v1/webhook/public-key"
     )
     assert transport.calls[1]["params"] == {"id": "mckey"}
+    assert transport.calls[2]["url"] == (
+        "https://api.mailchannels.net/tx/v1/webhook-batch/123/resend"
+    )
     assert transport.calls[2]["headers"] == {
         "Content-Type": "application/json",
         "User-Agent": user_agent(),
-        "X-Customer-Handle": "customer_123",
+        "X-Api-Key": "test-key",
     }
 
 
@@ -89,7 +92,7 @@ def test_webhook_destructive_operations_log_at_info(
 
     with caplog.at_level(logging.INFO, logger="mailchannels.webhooks.webhooks"):
         client.webhooks.delete()
-        client.webhooks.resend_batch(123, customer_handle="customer_123")
+        client.webhooks.resend_batch(123)
 
     records = [
         record

@@ -573,10 +573,7 @@ mailchannels.Webhooks.create("https://example.com/mailchannels/events")
 validation = mailchannels.Webhooks.validate(request_id="test_request_1")
 batches = mailchannels.Webhooks.batches(statuses=["4xx", "5xx"], limit=50)
 
-mailchannels.Webhooks.resend_batch(
-    12345,
-    customer_handle="customer_123",
-)
+mailchannels.Webhooks.resend_batch(12345)
 ```
 
 Webhook receivers should verify the `customer_handle` in each event and check

@@ -23,6 +23,7 @@ from .types import (
     WebhookBatchResult,
     WebhookBatchStatus,
     WebhookPublicKey,
+    WebhookResendResponse,
     WebhookValidationResults,
 )
 
@@ -233,38 +234,70 @@ class WebhooksResource(Generic[StrictResponses]):
             response_model=WebhookBatchResult,
         )
 
-    def resend_batch(self, batch_id: int, *, customer_handle: str) -> dict[str, Any]:
+    @overload
+    def resend_batch(
+        self: WebhooksResource[Literal[True]],
+        batch_id: int,
+    ) -> WebhookResendResponse: ...
+
+    @overload
+    def resend_batch(
+        self: WebhooksResource[Literal[False]],
+        batch_id: int,
+    ) -> MailChannelsResponse: ...
+
+    @overload
+    def resend_batch(
+        self,
+        batch_id: int,
+    ) -> WebhookResendResponse | MailChannelsResponse: ...
+
+    def resend_batch(
+        self,
+        batch_id: int,
+    ) -> WebhookResendResponse | MailChannelsResponse:
         """Synchronously resend one webhook batch."""
         logger.info(
-            "Resending MailChannels webhook batch batch_id=%s customer_handle=%s",
+            "Resending MailChannels webhook batch batch_id=%s",
             batch_id,
-            customer_handle,
         )
         return self._client.request(
             "POST",
             f"/webhook-batch/{batch_id}/resend",
-            extra_headers={"X-Customer-Handle": customer_handle},
-            require_api_key=False,
+            response_model=WebhookResendResponse,
         )
+
+    @overload
+    async def resend_batch_async(
+        self: WebhooksResource[Literal[True]],
+        batch_id: int,
+    ) -> WebhookResendResponse: ...
+
+    @overload
+    async def resend_batch_async(
+        self: WebhooksResource[Literal[False]],
+        batch_id: int,
+    ) -> MailChannelsResponse: ...
+
+    @overload
+    async def resend_batch_async(
+        self,
+        batch_id: int,
+    ) -> WebhookResendResponse | MailChannelsResponse: ...
 
     async def resend_batch_async(
         self,
         batch_id: int,
-        *,
-        customer_handle: str,
-    ) -> dict[str, Any]:
+    ) -> WebhookResendResponse | MailChannelsResponse:
         """Synchronously resend one webhook batch using async HTTP."""
         logger.info(
-            "Resending MailChannels webhook batch using async HTTP batch_id=%s "
-            "customer_handle=%s",
+            "Resending MailChannels webhook batch using async HTTP batch_id=%s",
             batch_id,
-            customer_handle,
         )
         return await self._client.request_async(
             "POST",
             f"/webhook-batch/{batch_id}/resend",
-            extra_headers={"X-Customer-Handle": customer_handle},
-            require_api_key=False,
+            response_model=WebhookResendResponse,
         )
 
     @overload
@@ -494,29 +527,24 @@ class Webhooks:
         )
 
     @classmethod
-    def resend_batch(cls, batch_id: int, *, customer_handle: str) -> dict[str, Any]:
+    def resend_batch(
+        cls,
+        batch_id: int,
+    ) -> WebhookResendResponse | MailChannelsResponse:
         """Synchronously resend one webhook batch."""
         from ..client import get_default_client
 
-        return get_default_client().webhooks.resend_batch(
-            batch_id,
-            customer_handle=customer_handle,
-        )
+        return get_default_client().webhooks.resend_batch(batch_id)
 
     @classmethod
     async def resend_batch_async(
         cls,
         batch_id: int,
-        *,
-        customer_handle: str,
-    ) -> dict[str, Any]:
+    ) -> WebhookResendResponse | MailChannelsResponse:
         """Synchronously resend one webhook batch using async HTTP."""
         from ..client import get_default_client
 
-        return await get_default_client().webhooks.resend_batch_async(
-            batch_id,
-            customer_handle=customer_handle,
-        )
+        return await get_default_client().webhooks.resend_batch_async(batch_id)
 
     @classmethod
     def public_key(cls, key_id: str) -> WebhookPublicKey | MailChannelsResponse:

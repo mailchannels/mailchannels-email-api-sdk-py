@@ -39,8 +39,6 @@ Priority: low.
   responses.
 - Split SDK payload validation errors from Pydantic validation errors with a
   more specific exception or richer error details.
-- Document that `Webhooks.resend_batch` is unauthenticated and identified only
-  by `X-Customer-Handle`.
 - Simplify `limit_payload` dead paths and make the `monthly_limit` alias
   decision explicit.
 - Add an async attachment fetch helper or document that `Attachment.from_url`

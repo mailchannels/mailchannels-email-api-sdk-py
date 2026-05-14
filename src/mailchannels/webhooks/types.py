@@ -61,6 +61,20 @@ class WebhookBatchResult(BaseModel):
     webhook_batches: list[WebhookBatch]
 
 
+class WebhookResendResponse(BaseModel):
+    """Result of a webhook batch resend attempt."""
+
+    model_config = ConfigDict(extra="allow")
+
+    batch_id: int
+    webhook: str
+    created_at: str
+    event_count: int
+    customer_handle: str | None = None
+    status_code: int | None = None
+    duration_in_ms: int | None = None
+
+
 class WebhookValidationRequest(TypedDict, total=False):
     """Request body used to validate enrolled webhooks."""
 
