@@ -1,0 +1,867 @@
+"""Webhook resource implementation and verification helpers."""
+
+from __future__ import annotations
+
+import base64
+import binascii
+import hashlib
+import logging
+import re
+import time
+from builtins import list as list_type
+from collections.abc import Mapping
+from typing import Any, Generic, Literal, TypeVar, overload
+
+from cryptography.exceptions import InvalidSignature
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from cryptography.hazmat.primitives.serialization import load_pem_public_key
+
+from ..query import compact_query, pagination_query
+from ..response import MailChannelsResponse
+from .types import (
+    SignatureParameters,
+    WebhookBatchResult,
+    WebhookBatchStatus,
+    WebhookPublicKey,
+    WebhookValidationResults,
+)
+
+logger = logging.getLogger(__name__)
+StrictResponses = TypeVar("StrictResponses", bound=bool)
+
+_SIGNATURE_INPUT_RE = re.compile(
+    r"^(?P<name>[^=]+)=\((?P<covered>[^)]*)\)(?P<params>.*)$"
+)
+_PARAM_RE = re.compile(r";(?P<key>[a-zA-Z0-9_-]+)=(?P<value>\"[^\"]*\"|[^;]+)")
+_DIGEST_RE = re.compile(r"sha-256=:(?P<digest>[^:]+):")
+_SIGNATURE_RE = re.compile(r"(?P<name>[^=, ]+)=:(?P<signature>[^:]+):")
+
+
+class WebhooksResource(Generic[StrictResponses]):
+    """Client-bound webhook operations."""
+
+    def __init__(self, client: Any) -> None:
+        """Create a webhook resource bound to a client."""
+        self._client = client
+
+    @staticmethod
+    def verify(
+        headers: dict[str, str],
+        body: bytes | str,
+        public_key: str | bytes | Mapping[str, Any] | WebhookPublicKey,
+        *,
+        max_age_seconds: int = 300,
+        max_skew_seconds: int = 30,
+        tolerance_seconds: int | None = None,
+        now: int | None = None,
+    ) -> bool:
+        """Verify a MailChannels webhook digest, freshness, and Ed25519 signature."""
+        return verify_webhook_signature(
+            headers,
+            body,
+            public_key,
+            max_age_seconds=max_age_seconds,
+            max_skew_seconds=max_skew_seconds,
+            tolerance_seconds=tolerance_seconds,
+            now=now,
+        )
+
+    def list(self) -> dict[str, Any]:
+        """Retrieve configured webhook endpoints."""
+        logger.info("Listing MailChannels webhooks")
+        return self._client.request("GET", "/webhook")
+
+    async def list_async(self) -> dict[str, Any]:
+        """Retrieve configured webhook endpoints using async HTTP."""
+        logger.info("Listing MailChannels webhooks using async HTTP")
+        return await self._client.request_async("GET", "/webhook")
+
+    def create(self, endpoint: str) -> dict[str, Any]:
+        """Enroll a webhook endpoint for delivery events."""
+        logger.info("Creating MailChannels webhook endpoint=%s", endpoint)
+        return self._client.request(
+            "POST",
+            "/webhook",
+            params={"endpoint": endpoint},
+        )
+
+    async def create_async(self, endpoint: str) -> dict[str, Any]:
+        """Enroll a webhook endpoint for delivery events using async HTTP."""
+        logger.info(
+            "Creating MailChannels webhook using async HTTP endpoint=%s",
+            endpoint,
+        )
+        return await self._client.request_async(
+            "POST",
+            "/webhook",
+            params={"endpoint": endpoint},
+        )
+
+    def delete(self) -> dict[str, Any]:
+        """Delete all configured webhook endpoints."""
+        logger.info("Deleting all MailChannels webhooks")
+        return self._client.request("DELETE", "/webhook")
+
+    async def delete_async(self) -> dict[str, Any]:
+        """Delete all configured webhook endpoints using async HTTP."""
+        logger.info("Deleting all MailChannels webhooks using async HTTP")
+        return await self._client.request_async("DELETE", "/webhook")
+
+    @overload
+    def batches(
+        self: WebhooksResource[Literal[True]],
+        *,
+        created_after: str | None = None,
+        created_before: str | None = None,
+        statuses: list_type[WebhookBatchStatus] | None = None,
+        webhook: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> WebhookBatchResult: ...
+
+    @overload
+    def batches(
+        self: WebhooksResource[Literal[False]],
+        *,
+        created_after: str | None = None,
+        created_before: str | None = None,
+        statuses: list_type[WebhookBatchStatus] | None = None,
+        webhook: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> MailChannelsResponse: ...
+
+    @overload
+    def batches(
+        self,
+        *,
+        created_after: str | None = None,
+        created_before: str | None = None,
+        statuses: list_type[WebhookBatchStatus] | None = None,
+        webhook: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> WebhookBatchResult | MailChannelsResponse: ...
+
+    def batches(
+        self,
+        *,
+        created_after: str | None = None,
+        created_before: str | None = None,
+        statuses: list_type[WebhookBatchStatus] | None = None,
+        webhook: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> WebhookBatchResult | MailChannelsResponse:
+        """Retrieve webhook delivery batches."""
+        logger.info("Listing MailChannels webhook batches")
+        return self._client.request(
+            "GET",
+            "/webhook-batch",
+            params=pagination_query(
+                limit=limit,
+                offset=offset,
+                created_after=created_after,
+                created_before=created_before,
+                statuses=statuses,
+                webhook=webhook,
+            )
+            or None,
+            response_model=WebhookBatchResult,
+        )
+
+    @overload
+    async def batches_async(
+        self: WebhooksResource[Literal[True]],
+        *,
+        created_after: str | None = None,
+        created_before: str | None = None,
+        statuses: list_type[WebhookBatchStatus] | None = None,
+        webhook: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> WebhookBatchResult: ...
+
+    @overload
+    async def batches_async(
+        self: WebhooksResource[Literal[False]],
+        *,
+        created_after: str | None = None,
+        created_before: str | None = None,
+        statuses: list_type[WebhookBatchStatus] | None = None,
+        webhook: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> MailChannelsResponse: ...
+
+    @overload
+    async def batches_async(
+        self,
+        *,
+        created_after: str | None = None,
+        created_before: str | None = None,
+        statuses: list_type[WebhookBatchStatus] | None = None,
+        webhook: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> WebhookBatchResult | MailChannelsResponse: ...
+
+    async def batches_async(
+        self,
+        *,
+        created_after: str | None = None,
+        created_before: str | None = None,
+        statuses: list_type[WebhookBatchStatus] | None = None,
+        webhook: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> WebhookBatchResult | MailChannelsResponse:
+        """Retrieve webhook delivery batches using async HTTP."""
+        logger.info("Listing MailChannels webhook batches using async HTTP")
+        return await self._client.request_async(
+            "GET",
+            "/webhook-batch",
+            params=pagination_query(
+                limit=limit,
+                offset=offset,
+                created_after=created_after,
+                created_before=created_before,
+                statuses=statuses,
+                webhook=webhook,
+            )
+            or None,
+            response_model=WebhookBatchResult,
+        )
+
+    def resend_batch(self, batch_id: int, *, customer_handle: str) -> dict[str, Any]:
+        """Synchronously resend one webhook batch."""
+        logger.info(
+            "Resending MailChannels webhook batch batch_id=%s customer_handle=%s",
+            batch_id,
+            customer_handle,
+        )
+        return self._client.request(
+            "POST",
+            f"/webhook-batch/{batch_id}/resend",
+            extra_headers={"X-Customer-Handle": customer_handle},
+            require_api_key=False,
+        )
+
+    async def resend_batch_async(
+        self,
+        batch_id: int,
+        *,
+        customer_handle: str,
+    ) -> dict[str, Any]:
+        """Synchronously resend one webhook batch using async HTTP."""
+        logger.info(
+            "Resending MailChannels webhook batch using async HTTP batch_id=%s "
+            "customer_handle=%s",
+            batch_id,
+            customer_handle,
+        )
+        return await self._client.request_async(
+            "POST",
+            f"/webhook-batch/{batch_id}/resend",
+            extra_headers={"X-Customer-Handle": customer_handle},
+            require_api_key=False,
+        )
+
+    @overload
+    def public_key(
+        self: WebhooksResource[Literal[True]],
+        key_id: str,
+    ) -> WebhookPublicKey: ...
+
+    @overload
+    def public_key(
+        self: WebhooksResource[Literal[False]],
+        key_id: str,
+    ) -> MailChannelsResponse: ...
+
+    @overload
+    def public_key(self, key_id: str) -> WebhookPublicKey | MailChannelsResponse: ...
+
+    def public_key(self, key_id: str) -> WebhookPublicKey | MailChannelsResponse:
+        """Retrieve a webhook public signing key by ID."""
+        logger.info("Retrieving MailChannels webhook public key key_id=%s", key_id)
+        return self._client.request(
+            "GET",
+            "/webhook/public-key",
+            params={"id": key_id},
+            require_api_key=False,
+            response_model=WebhookPublicKey,
+        )
+
+    @overload
+    async def public_key_async(
+        self: WebhooksResource[Literal[True]],
+        key_id: str,
+    ) -> WebhookPublicKey: ...
+
+    @overload
+    async def public_key_async(
+        self: WebhooksResource[Literal[False]],
+        key_id: str,
+    ) -> MailChannelsResponse: ...
+
+    @overload
+    async def public_key_async(
+        self,
+        key_id: str,
+    ) -> WebhookPublicKey | MailChannelsResponse: ...
+
+    async def public_key_async(
+        self,
+        key_id: str,
+    ) -> WebhookPublicKey | MailChannelsResponse:
+        """Retrieve a webhook public signing key by ID using async HTTP."""
+        logger.info(
+            "Retrieving MailChannels webhook public key using async HTTP key_id=%s",
+            key_id,
+        )
+        return await self._client.request_async(
+            "GET",
+            "/webhook/public-key",
+            params={"id": key_id},
+            require_api_key=False,
+            response_model=WebhookPublicKey,
+        )
+
+    @overload
+    def validate(
+        self: WebhooksResource[Literal[True]],
+        *,
+        request_id: str | None = None,
+    ) -> WebhookValidationResults: ...
+
+    @overload
+    def validate(
+        self: WebhooksResource[Literal[False]],
+        *,
+        request_id: str | None = None,
+    ) -> MailChannelsResponse: ...
+
+    @overload
+    def validate(
+        self,
+        *,
+        request_id: str | None = None,
+    ) -> WebhookValidationResults | MailChannelsResponse: ...
+
+    def validate(
+        self,
+        *,
+        request_id: str | None = None,
+    ) -> WebhookValidationResults | MailChannelsResponse:
+        """Validate enrolled webhook endpoints with a test event."""
+        logger.info("Validating MailChannels webhooks request_id=%s", request_id)
+        return self._client.request(
+            "POST",
+            "/webhook/validate",
+            json=compact_query({"request_id": request_id}) or None,
+            response_model=WebhookValidationResults,
+        )
+
+    @overload
+    async def validate_async(
+        self: WebhooksResource[Literal[True]],
+        *,
+        request_id: str | None = None,
+    ) -> WebhookValidationResults: ...
+
+    @overload
+    async def validate_async(
+        self: WebhooksResource[Literal[False]],
+        *,
+        request_id: str | None = None,
+    ) -> MailChannelsResponse: ...
+
+    @overload
+    async def validate_async(
+        self,
+        *,
+        request_id: str | None = None,
+    ) -> WebhookValidationResults | MailChannelsResponse: ...
+
+    async def validate_async(
+        self,
+        *,
+        request_id: str | None = None,
+    ) -> WebhookValidationResults | MailChannelsResponse:
+        """Validate enrolled webhook endpoints with a test event using async HTTP."""
+        logger.info(
+            "Validating MailChannels webhooks using async HTTP request_id=%s",
+            request_id,
+        )
+        return await self._client.request_async(
+            "POST",
+            "/webhook/validate",
+            json=compact_query({"request_id": request_id}) or None,
+            response_model=WebhookValidationResults,
+        )
+
+
+class Webhooks:
+    """Module-level webhook operations using global SDK configuration."""
+
+    @classmethod
+    def list(cls) -> dict[str, Any]:
+        """Retrieve configured webhook endpoints."""
+        from ..client import get_default_client
+
+        return get_default_client().webhooks.list()
+
+    @classmethod
+    async def list_async(cls) -> dict[str, Any]:
+        """Retrieve configured webhook endpoints using async HTTP."""
+        from ..client import get_default_client
+
+        return await get_default_client().webhooks.list_async()
+
+    @classmethod
+    def create(cls, endpoint: str) -> dict[str, Any]:
+        """Enroll a webhook endpoint for delivery events."""
+        from ..client import get_default_client
+
+        return get_default_client().webhooks.create(endpoint)
+
+    @classmethod
+    async def create_async(cls, endpoint: str) -> dict[str, Any]:
+        """Enroll a webhook endpoint for delivery events using async HTTP."""
+        from ..client import get_default_client
+
+        return await get_default_client().webhooks.create_async(endpoint)
+
+    @classmethod
+    def delete(cls) -> dict[str, Any]:
+        """Delete all configured webhook endpoints."""
+        from ..client import get_default_client
+
+        return get_default_client().webhooks.delete()
+
+    @classmethod
+    async def delete_async(cls) -> dict[str, Any]:
+        """Delete all configured webhook endpoints using async HTTP."""
+        from ..client import get_default_client
+
+        return await get_default_client().webhooks.delete_async()
+
+    @classmethod
+    def batches(
+        cls,
+        *,
+        created_after: str | None = None,
+        created_before: str | None = None,
+        statuses: list_type[WebhookBatchStatus] | None = None,
+        webhook: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> WebhookBatchResult | MailChannelsResponse:
+        """Retrieve webhook delivery batches."""
+        from ..client import get_default_client
+
+        return get_default_client().webhooks.batches(
+            created_after=created_after,
+            created_before=created_before,
+            statuses=statuses,
+            webhook=webhook,
+            limit=limit,
+            offset=offset,
+        )
+
+    @classmethod
+    async def batches_async(
+        cls,
+        *,
+        created_after: str | None = None,
+        created_before: str | None = None,
+        statuses: list_type[WebhookBatchStatus] | None = None,
+        webhook: str | None = None,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> WebhookBatchResult | MailChannelsResponse:
+        """Retrieve webhook delivery batches using async HTTP."""
+        from ..client import get_default_client
+
+        return await get_default_client().webhooks.batches_async(
+            created_after=created_after,
+            created_before=created_before,
+            statuses=statuses,
+            webhook=webhook,
+            limit=limit,
+            offset=offset,
+        )
+
+    @classmethod
+    def resend_batch(cls, batch_id: int, *, customer_handle: str) -> dict[str, Any]:
+        """Synchronously resend one webhook batch."""
+        from ..client import get_default_client
+
+        return get_default_client().webhooks.resend_batch(
+            batch_id,
+            customer_handle=customer_handle,
+        )
+
+    @classmethod
+    async def resend_batch_async(
+        cls,
+        batch_id: int,
+        *,
+        customer_handle: str,
+    ) -> dict[str, Any]:
+        """Synchronously resend one webhook batch using async HTTP."""
+        from ..client import get_default_client
+
+        return await get_default_client().webhooks.resend_batch_async(
+            batch_id,
+            customer_handle=customer_handle,
+        )
+
+    @classmethod
+    def public_key(cls, key_id: str) -> WebhookPublicKey | MailChannelsResponse:
+        """Retrieve a webhook public signing key by ID."""
+        from ..client import get_default_client
+
+        return get_default_client().webhooks.public_key(key_id)
+
+    @classmethod
+    async def public_key_async(
+        cls,
+        key_id: str,
+    ) -> WebhookPublicKey | MailChannelsResponse:
+        """Retrieve a webhook public signing key by ID using async HTTP."""
+        from ..client import get_default_client
+
+        return await get_default_client().webhooks.public_key_async(key_id)
+
+    @classmethod
+    def validate(
+        cls,
+        *,
+        request_id: str | None = None,
+    ) -> WebhookValidationResults | MailChannelsResponse:
+        """Validate enrolled webhook endpoints with a test event."""
+        from ..client import get_default_client
+
+        return get_default_client().webhooks.validate(request_id=request_id)
+
+    @classmethod
+    async def validate_async(
+        cls,
+        *,
+        request_id: str | None = None,
+    ) -> WebhookValidationResults | MailChannelsResponse:
+        """Validate enrolled webhook endpoints with a test event using async HTTP."""
+        from ..client import get_default_client
+
+        return await get_default_client().webhooks.validate_async(request_id=request_id)
+
+    @staticmethod
+    def parse_signature_input(value: str) -> SignatureParameters:
+        """Parse a MailChannels RFC 9421 Signature-Input header value."""
+        return parse_signature_input(value)
+
+    @staticmethod
+    def verify_content_digest(headers: dict[str, str], body: bytes | str) -> bool:
+        """Verify the webhook Content-Digest header against the raw body."""
+        return verify_content_digest(headers, body)
+
+    @staticmethod
+    def verify(
+        headers: dict[str, str],
+        body: bytes | str,
+        public_key: str | bytes | Mapping[str, Any] | WebhookPublicKey,
+        *,
+        max_age_seconds: int = 300,
+        max_skew_seconds: int = 30,
+        tolerance_seconds: int | None = None,
+        now: int | None = None,
+    ) -> bool:
+        """Verify a MailChannels webhook digest, freshness, and Ed25519 signature."""
+        return verify_webhook_signature(
+            headers,
+            body,
+            public_key,
+            max_age_seconds=max_age_seconds,
+            max_skew_seconds=max_skew_seconds,
+            tolerance_seconds=tolerance_seconds,
+            now=now,
+        )
+
+    @staticmethod
+    def signature_key_id(headers: dict[str, str]) -> str | None:
+        """Extract the signing key ID from webhook headers."""
+        return signature_key_id(headers)
+
+    @staticmethod
+    def signature_is_fresh(
+        parameters: SignatureParameters,
+        *,
+        max_age_seconds: int = 300,
+        max_skew_seconds: int = 30,
+        tolerance_seconds: int | None = None,
+        now: int | None = None,
+    ) -> bool:
+        """Return whether a signature timestamp is within the allowed replay window."""
+        return signature_is_fresh(
+            parameters,
+            max_age_seconds=max_age_seconds,
+            max_skew_seconds=max_skew_seconds,
+            tolerance_seconds=tolerance_seconds,
+            now=now,
+        )
+
+
+def parse_signature_input(value: str) -> SignatureParameters:
+    """Parse a MailChannels RFC 9421 Signature-Input header value."""
+    match = _SIGNATURE_INPUT_RE.match(value.strip())
+    if not match:
+        logger.error("Invalid MailChannels Signature-Input header")
+        raise ValueError("Invalid Signature-Input header.")
+
+    covered = [
+        component.strip().strip('"')
+        for component in match.group("covered").split()
+        if component.strip()
+    ]
+    parameters = {
+        param.group("key"): _unquote(param.group("value"))
+        for param in _PARAM_RE.finditer(match.group("params"))
+    }
+    created = parameters.get("created")
+    return SignatureParameters(
+        signature_name=match.group("name").strip(),
+        covered_components=covered,
+        created=int(created) if created and created.isdigit() else None,
+        algorithm=parameters.get("alg"),
+        key_id=parameters.get("keyid"),
+        raw=value,
+    )
+
+
+def signature_key_id(headers: dict[str, str]) -> str | None:
+    """Extract the signing key ID from webhook headers."""
+    signature_input = _header(headers, "Signature-Input")
+    if signature_input is None:
+        logger.warning("Webhook request is missing Signature-Input header")
+        return None
+    return parse_signature_input(signature_input).key_id
+
+
+def signature_is_fresh(
+    parameters: SignatureParameters,
+    *,
+    max_age_seconds: int = 300,
+    max_skew_seconds: int = 30,
+    tolerance_seconds: int | None = None,
+    now: int | None = None,
+) -> bool:
+    """Return whether a signature timestamp is within the allowed replay window."""
+    if parameters.created is None:
+        logger.warning("Webhook signature is missing created timestamp")
+        return False
+    reference = now if now is not None else int(time.time())
+    age_window = tolerance_seconds if tolerance_seconds is not None else max_age_seconds
+    age_seconds = reference - parameters.created
+    if age_seconds < 0:
+        fresh = abs(age_seconds) <= max_skew_seconds
+        logger.debug(
+            "Webhook signature future_skew=%s max_skew=%s fresh=%s",
+            abs(age_seconds),
+            max_skew_seconds,
+            fresh,
+        )
+        return fresh
+    fresh = age_seconds <= age_window
+    logger.debug(
+        "Webhook signature age=%s max_age=%s fresh=%s",
+        age_seconds,
+        age_window,
+        fresh,
+    )
+    return fresh
+
+
+def verify_content_digest(headers: dict[str, str], body: bytes | str) -> bool:
+    """Verify the webhook Content-Digest header against the raw request body."""
+    digest_header = _header(headers, "Content-Digest")
+    if digest_header is None:
+        logger.warning("Webhook request is missing Content-Digest header")
+        return False
+    match = _DIGEST_RE.search(digest_header)
+    if not match:
+        logger.warning("Webhook Content-Digest header is not sha-256 encoded")
+        return False
+    raw_body = body.encode() if isinstance(body, str) else body
+    try:
+        expected = base64.b64decode(match.group("digest"), validate=True)
+    except binascii.Error:
+        logger.warning("Webhook Content-Digest header is not valid base64")
+        return False
+    actual = hashlib.sha256(raw_body).digest()
+    verified = expected == actual
+    logger.debug("Webhook content digest verified=%s", verified)
+    return verified
+
+
+def verify_webhook_signature(
+    headers: dict[str, str],
+    body: bytes | str,
+    public_key: str | bytes | Mapping[str, Any] | WebhookPublicKey,
+    *,
+    max_age_seconds: int = 300,
+    max_skew_seconds: int = 30,
+    tolerance_seconds: int | None = None,
+    now: int | None = None,
+) -> bool:
+    """Verify a MailChannels webhook digest, freshness, and Ed25519 signature."""
+    if not verify_content_digest(headers, body):
+        logger.warning("Webhook signature verification failed digest check")
+        return False
+    signature_input = _header(headers, "Signature-Input")
+    signature_header = _header(headers, "Signature")
+    if signature_input is None or signature_header is None:
+        logger.warning("Webhook request is missing signature headers")
+        return False
+    try:
+        parameters = parse_signature_input(signature_input)
+    except ValueError:
+        logger.warning("Webhook Signature-Input header is malformed")
+        return False
+    if parameters.algorithm not in {None, "ed25519"}:
+        logger.warning(
+            "Webhook signature algorithm is unsupported alg=%s",
+            parameters.algorithm,
+        )
+        return False
+    if not signature_is_fresh(
+        parameters,
+        max_age_seconds=max_age_seconds,
+        max_skew_seconds=max_skew_seconds,
+        tolerance_seconds=tolerance_seconds,
+        now=now,
+    ):
+        logger.warning("Webhook signature timestamp is stale")
+        return False
+    try:
+        signature = _signature_bytes(signature_header, parameters.signature_name)
+        verifier = _ed25519_public_key(public_key)
+        verifier.verify(signature, _signature_base(headers, parameters))
+    except (InvalidSignature, ValueError, TypeError) as error:
+        logger.warning("Webhook Ed25519 signature verification failed: %s", error)
+        return False
+    logger.debug("Webhook Ed25519 signature verified key_id=%s", parameters.key_id)
+    return True
+
+
+def _signature_bytes(signature_header: str, signature_name: str) -> bytes:
+    """Extract the named RFC 9421 signature bytes from a Signature header."""
+    for match in _SIGNATURE_RE.finditer(signature_header):
+        if match.group("name").strip() != signature_name:
+            continue
+        try:
+            return base64.b64decode(match.group("signature"), validate=True)
+        except binascii.Error as error:
+            raise ValueError("Signature header is not valid base64.") from error
+    raise ValueError("Signature header does not include the Signature-Input name.")
+
+
+def _signature_base(
+    headers: dict[str, str],
+    parameters: SignatureParameters,
+) -> bytes:
+    """Build the RFC 9421 signature base for MailChannels webhook signatures."""
+    lines: list[str] = []
+    for component in parameters.covered_components:
+        normalized = component.lower()
+        if normalized.startswith("@"):
+            raise ValueError(f"Unsupported derived signature component: {component}")
+        value = _header(headers, normalized)
+        if value is None:
+            raise ValueError(f"Signed header is missing: {component}")
+        lines.append(f'"{normalized}": {value}')
+    lines.append(f'"@signature-params": {_signature_params(parameters)}')
+    return "\n".join(lines).encode()
+
+
+def _signature_params(parameters: SignatureParameters) -> str:
+    """Return the Signature-Input value after the signature name."""
+    if parameters.raw is None or "=" not in parameters.raw:
+        covered = " ".join(
+            f'"{component}"' for component in parameters.covered_components
+        )
+        params = f"({covered})"
+        if parameters.created is not None:
+            params += f";created={parameters.created}"
+        if parameters.algorithm is not None:
+            params += f';alg="{parameters.algorithm}"'
+        if parameters.key_id is not None:
+            params += f';keyid="{parameters.key_id}"'
+        return params
+    return parameters.raw.split("=", maxsplit=1)[1].strip()
+
+
+def _ed25519_public_key(
+    public_key: str | bytes | Mapping[str, Any] | WebhookPublicKey,
+) -> Ed25519PublicKey:
+    """Load a MailChannels Ed25519 public key from common SDK response shapes."""
+    key_value = _public_key_value(public_key)
+    if isinstance(key_value, bytes):
+        if key_value.startswith(b"-----BEGIN"):
+            loaded = load_pem_public_key(key_value)
+            if not isinstance(loaded, Ed25519PublicKey):
+                raise ValueError("Public key is not an Ed25519 key.")
+            return loaded
+        raw = key_value if len(key_value) == 32 else _base64_public_key(key_value)
+    else:
+        stripped = key_value.strip()
+        raw = stripped.encode()
+        if stripped.startswith("-----BEGIN"):
+            loaded = load_pem_public_key(raw)
+            if not isinstance(loaded, Ed25519PublicKey):
+                raise ValueError("Public key is not an Ed25519 key.")
+            return loaded
+        raw = _base64_public_key(stripped)
+    if len(raw) != 32:
+        raise ValueError("Ed25519 public keys must be 32 raw bytes.")
+    return Ed25519PublicKey.from_public_bytes(raw)
+
+
+def _base64_public_key(value: str | bytes) -> bytes:
+    """Decode a Base64-encoded Ed25519 public key."""
+    try:
+        return base64.b64decode(value, validate=True)
+    except binascii.Error as error:
+        raise ValueError("Public key is not valid base64.") from error
+
+
+def _public_key_value(
+    public_key: str | bytes | Mapping[str, Any] | WebhookPublicKey,
+) -> str | bytes:
+    """Extract a public key value from a string, bytes, model, or response mapping."""
+    if isinstance(public_key, (str, bytes)):
+        return public_key
+    if isinstance(public_key, WebhookPublicKey):
+        return public_key.key
+    value = public_key.get("key")
+    if isinstance(value, (str, bytes)):
+        return value
+    raise ValueError("Public key must be a key string, bytes, or response with `key`.")
+
+
+def _header(headers: dict[str, str], name: str) -> str | None:
+    """Read an HTTP header case-insensitively."""
+    lowered = name.lower()
+    for key, value in headers.items():
+        if key.lower() == lowered:
+            return value
+    return None
+
+
+def _unquote(value: str) -> str:
+    """Remove optional HTTP structured field quotes."""
+    stripped = value.strip()
+    if stripped.startswith('"') and stripped.endswith('"'):
+        return stripped[1:-1]
+    return stripped
