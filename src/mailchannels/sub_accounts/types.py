@@ -30,6 +30,7 @@ class SubAccount(BaseModel):
 
     handle: str | None = None
     company_name: str | None = None
+    enabled: bool | None = None
 
 
 class SubAccountLimit(BaseModel):

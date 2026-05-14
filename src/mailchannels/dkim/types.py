@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 DkimAlgorithm = Literal["rsa"]
 DkimKeyStatus = Literal["active", "retired", "revoked", "rotated"]
@@ -42,7 +42,7 @@ class DkimDnsRecord(BaseModel):
 class DkimKeyInfo(BaseModel):
     """MailChannels-hosted DKIM key metadata."""
 
-    model_config = ConfigDict(extra="allow")
+    model_config = ConfigDict(extra="allow", populate_by_name=True)
 
     domain: str
     selector: str
@@ -51,6 +51,13 @@ class DkimKeyInfo(BaseModel):
     algorithm: str
     key_length: int | None = None
     dkim_dns_records: list[DkimDnsRecord] | None = None
+    created_at: str | None = None
+    status_modified_at: str | None = None
+    grace_period_expires_at: str | None = Field(
+        default=None,
+        alias="gracePeriodExpiresAt",
+    )
+    retires_at: str | None = Field(default=None, alias="retiresAt")
 
 
 class DkimKeyList(BaseModel):
