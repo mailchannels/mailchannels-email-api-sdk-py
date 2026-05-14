@@ -253,12 +253,15 @@ def _normalize_mapping(params: SendParamsType) -> dict[str, Any]:
         "personalizations": personalizations,
     }
     _copy_optional(payload, normalized, "reply_to")
+    _copy_optional(payload, normalized, "envelope_from")
     _copy_optional(payload, normalized, "headers")
     _copy_optional(payload, normalized, "attachments")
     _copy_optional(payload, normalized, "transactional")
     _copy_optional(payload, normalized, "dkim_domain")
     _copy_optional(payload, normalized, "dkim_private_key")
     _copy_optional(payload, normalized, "dkim_selector")
+    _copy_optional(payload, normalized, "campaign_id")
+    _copy_optional(payload, normalized, "tracking_settings")
     return normalized
 
 

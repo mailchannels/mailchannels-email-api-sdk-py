@@ -60,6 +60,19 @@ class AttachmentDict(TypedDict, total=False):
     content_id: str
 
 
+class TrackingToggleDict(TypedDict, total=False):
+    """Dictionary form of an open/click tracking toggle."""
+
+    enable: bool
+
+
+class TrackingSettingsDict(TypedDict, total=False):
+    """Dictionary form of MailChannels tracking settings."""
+
+    open_tracking: TrackingToggleDict
+    click_tracking: TrackingToggleDict
+
+
 class PersonalizationDict(TypedDict, total=False):
     """Dictionary form of a MailChannels personalization."""
 
@@ -69,6 +82,7 @@ class PersonalizationDict(TypedDict, total=False):
     subject: NotRequired[str]
     from_: NotRequired[EmailAddressDict]
     reply_to: NotRequired[EmailAddressDict]
+    envelope_from: NotRequired[EmailAddressDict]
     headers: NotRequired[EmailHeaders]
     substitutions: NotRequired[dict[str, str]]
     dynamic_template_data: NotRequired[dict[str, Any]]
@@ -101,6 +115,9 @@ class SendParams(TypedDict, total=False):
     dkim_domain: str
     dkim_private_key: str
     dkim_selector: str
+    envelope_from: EmailAddressDict
+    campaign_id: str
+    tracking_settings: TrackingSettingsDict
 
 
 class EmailAddress(BaseModel):
@@ -248,6 +265,19 @@ class Attachment(BaseModel):
         )
 
 
+class TrackingToggle(BaseModel):
+    """Open or click tracking toggle for a MailChannels send."""
+
+    enable: bool = False
+
+
+class TrackingSettings(BaseModel):
+    """Open and click tracking settings for a MailChannels send."""
+
+    open_tracking: TrackingToggle | None = None
+    click_tracking: TrackingToggle | None = None
+
+
 class Personalization(BaseModel):
     """Recipient-specific message customization."""
 
@@ -259,6 +289,7 @@ class Personalization(BaseModel):
     subject: str | None = None
     from_: EmailAddress | None = Field(default=None, alias="from")
     reply_to: EmailAddress | None = Field(default=None, alias="reply_to")
+    envelope_from: EmailAddress | None = None
     headers: EmailHeaders | None = None
     substitutions: dict[str, str] | None = None
     dynamic_template_data: dict[str, Any] | None = None
@@ -283,18 +314,35 @@ class EmailParams(BaseModel):
     subject: str = Field(min_length=1)
     content: list[Content] = Field(min_length=1)
     reply_to: EmailAddress | None = Field(default=None, alias="reply_to")
+    envelope_from: EmailAddress | None = None
     headers: EmailHeaders | None = None
     attachments: list[Attachment] | None = None
     transactional: bool | None = None
     dkim_domain: str | None = None
     dkim_private_key: str | None = None
     dkim_selector: str | None = None
+    campaign_id: str | None = None
+    tracking_settings: TrackingSettings | None = None
 
     @field_validator("headers")
     @classmethod
     def _validate_headers(cls, value: EmailHeaders | None) -> EmailHeaders | None:
         """Reject custom headers that are controlled by the API payload."""
         return _validate_custom_headers(value)
+
+    @field_validator("campaign_id")
+    @classmethod
+    def _validate_campaign_id(cls, value: str | None) -> str | None:
+        """Enforce the campaign_id length and spacing rules."""
+        if value is None:
+            return None
+        if " " in value:
+            logger.error("MailChannels campaign_id contains spaces value=%r", value)
+            raise ValueError("campaign_id must not contain spaces")
+        if len(value.encode("utf-8")) > 48:
+            logger.error("MailChannels campaign_id exceeds 48 UTF-8 bytes")
+            raise ValueError("campaign_id must be at most 48 UTF-8 bytes")
+        return value
 
     def to_payload(self) -> dict[str, Any]:
         """Convert this email model to a MailChannels API payload."""

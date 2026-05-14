@@ -17,6 +17,10 @@ from .types import (
     SendParams,
     SendResponse,
     SendResult,
+    TrackingSettings,
+    TrackingSettingsDict,
+    TrackingToggle,
+    TrackingToggleDict,
 )
 
 __all__ = [
@@ -36,6 +40,10 @@ __all__ = [
     "SendParams",
     "SendResponse",
     "SendResult",
+    "TrackingSettings",
+    "TrackingSettingsDict",
+    "TrackingToggle",
+    "TrackingToggleDict",
     "UNSUBSCRIBE_URL_PLACEHOLDER",
     "normalize_email_params",
 ]

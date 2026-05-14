@@ -34,6 +34,8 @@ from .emails import (
     SendParams,
     SendResponse,
     SendResult,
+    TrackingSettings,
+    TrackingToggle,
 )
 from .exceptions import (
     ApiError,
@@ -125,6 +127,8 @@ __all__ = [
     "SubAccounts",
     "Suppressions",
     "SyncHTTPClient",
+    "TrackingSettings",
+    "TrackingToggle",
     "UNSUBSCRIBE_URL_PLACEHOLDER",
     "Usage",
     "UsageStats",

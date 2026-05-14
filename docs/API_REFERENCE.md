@@ -5,8 +5,8 @@ This reference is generated from public SDK exports, type hints, Pydantic models
 For task-oriented examples, start with the README. This file is the formal public surface reference.
 
 - SDK version: `0.1.0`
-- Top-level exports: `66`
-- Documented public module exports: `182`
+- Top-level exports: `68`
+- Documented public module exports: `188`
 
 ## Top-Level Exports
 
@@ -61,6 +61,8 @@ For task-oriented examples, start with the README. This file is the formal publi
 | `SubAccounts` | `class` | Module-level sub-account operations using global SDK configuration. |
 | `Suppressions` | `class` | Module-level suppression list operations. |
 | `SyncHTTPClient` | `protocol` | Protocol implemented by synchronous MailChannels HTTP transports. |
+| `TrackingSettings` | `Pydantic model` | Open and click tracking settings for a MailChannels send. |
+| `TrackingToggle` | `Pydantic model` | Open or click tracking toggle for a MailChannels send. |
 | `UNSUBSCRIBE_URL_PLACEHOLDER` | `constant` | Mustache placeholder for MailChannels-hosted one-click unsubscribe URLs. |
 | `Usage` | `class` | Module-level parent-account usage operations. |
 | `UsageStats` | `Pydantic model` | MailChannels usage statistics for the current billing period. |
@@ -399,7 +401,7 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Validated MailChannels email send payload.
-- Signature: `mailchannels.EmailParams(personalizations: list[Personalization], from: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None)`
+- Signature: `mailchannels.EmailParams(personalizations: list[Personalization], from: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None, campaign_id: str | None, tracking_settings: TrackingSettings | None)`
 
 Fields:
 
@@ -410,12 +412,15 @@ Fields:
 | `subject` | `str` | yes | `` |
 | `content` | `list[Content]` | yes | `` |
 | `reply_to` | `EmailAddress \| None` | no | `None` |
+| `envelope_from` | `EmailAddress \| None` | no | `None` |
 | `headers` | `EmailHeaders \| None` | no | `None` |
 | `attachments` | `list[Attachment] \| None` | no | `None` |
 | `transactional` | `bool \| None` | no | `None` |
 | `dkim_domain` | `str \| None` | no | `None` |
 | `dkim_private_key` | `str \| None` | no | `None` |
 | `dkim_selector` | `str \| None` | no | `None` |
+| `campaign_id` | `str \| None` | no | `None` |
+| `tracking_settings` | `TrackingSettings \| None` | no | `None` |
 
 Methods:
 
@@ -534,7 +539,7 @@ mailchannels.Metrics.volume(start_time="2026-04-01", interval="day")
 
 - Kind: `Pydantic model`
 - Summary: Recipient-specific message customization.
-- Signature: `mailchannels.Personalization(to: list[EmailAddress], cc: list[EmailAddress] | None, bcc: list[EmailAddress] | None, subject: str | None, from: EmailAddress | None, reply_to: EmailAddress | None, headers: EmailHeaders | None, substitutions: dict[str, str] | None, dynamic_template_data: dict[str, Any] | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None)`
+- Signature: `mailchannels.Personalization(to: list[EmailAddress], cc: list[EmailAddress] | None, bcc: list[EmailAddress] | None, subject: str | None, from: EmailAddress | None, reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, substitutions: dict[str, str] | None, dynamic_template_data: dict[str, Any] | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None)`
 
 Fields:
 
@@ -546,6 +551,7 @@ Fields:
 | `subject` | `str \| None` | no | `None` |
 | `from_` | `EmailAddress \| None` | no | `None` |
 | `reply_to` | `EmailAddress \| None` | no | `None` |
+| `envelope_from` | `EmailAddress \| None` | no | `None` |
 | `headers` | `EmailHeaders \| None` | no | `None` |
 | `substitutions` | `dict[str, str] \| None` | no | `None` |
 | `dynamic_template_data` | `dict[str, Any] \| None` | no | `None` |
@@ -606,11 +612,13 @@ Fields:
 | --- | --- | --- |
 | `attachments` | `list[AttachmentDict \| Attachment]` | no |
 | `bcc` | `list[EmailAddressDict] \| EmailAddressDict \| list[str] \| str` | no |
+| `campaign_id` | `str` | no |
 | `cc` | `list[EmailAddressDict] \| EmailAddressDict \| list[str] \| str` | no |
 | `content` | `list[ContentDict]` | no |
 | `dkim_domain` | `str` | no |
 | `dkim_private_key` | `str` | no |
 | `dkim_selector` | `str` | no |
+| `envelope_from` | `EmailAddressDict` | no |
 | `from_` | `EmailAddressDict` | no |
 | `from_address` | `EmailAddressDict` | no |
 | `from_display_name` | `str` | no |
@@ -624,6 +632,7 @@ Fields:
 | `subject` | `str` | no |
 | `text` | `str` | no |
 | `to` | `list[EmailAddressDict] \| EmailAddressDict \| list[str] \| str` | no |
+| `tracking_settings` | `TrackingSettingsDict` | no |
 | `transactional` | `bool` | no |
 
 #### `mailchannels.SendResponse`
@@ -767,6 +776,31 @@ Methods:
 | Method | Signature | Summary |
 | --- | --- | --- |
 | `request` | `request(method: str, url: str, *, headers: dict[str, str], json: dict[str, Any] | None = None, params: dict[str, Any] | None = None) -> SDKResponse` | Send an HTTP request and return a normalized SDK response. |
+
+#### `mailchannels.TrackingSettings`
+
+- Kind: `Pydantic model`
+- Summary: Open and click tracking settings for a MailChannels send.
+- Signature: `mailchannels.TrackingSettings(open_tracking: TrackingToggle | None, click_tracking: TrackingToggle | None)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `open_tracking` | `TrackingToggle \| None` | no | `None` |
+| `click_tracking` | `TrackingToggle \| None` | no | `None` |
+
+#### `mailchannels.TrackingToggle`
+
+- Kind: `Pydantic model`
+- Summary: Open or click tracking toggle for a MailChannels send.
+- Signature: `mailchannels.TrackingToggle(enable: bool)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `enable` | `bool` | no | `False` |
 
 #### `mailchannels.UNSUBSCRIBE_URL_PLACEHOLDER`
 
@@ -1031,7 +1065,7 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Validated MailChannels email send payload.
-- Signature: `mailchannels.emails.EmailParams(personalizations: list[Personalization], from: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None)`
+- Signature: `mailchannels.emails.EmailParams(personalizations: list[Personalization], from: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None, campaign_id: str | None, tracking_settings: TrackingSettings | None)`
 
 Fields:
 
@@ -1042,12 +1076,15 @@ Fields:
 | `subject` | `str` | yes | `` |
 | `content` | `list[Content]` | yes | `` |
 | `reply_to` | `EmailAddress \| None` | no | `None` |
+| `envelope_from` | `EmailAddress \| None` | no | `None` |
 | `headers` | `EmailHeaders \| None` | no | `None` |
 | `attachments` | `list[Attachment] \| None` | no | `None` |
 | `transactional` | `bool \| None` | no | `None` |
 | `dkim_domain` | `str \| None` | no | `None` |
 | `dkim_private_key` | `str \| None` | no | `None` |
 | `dkim_selector` | `str \| None` | no | `None` |
+| `campaign_id` | `str \| None` | no | `None` |
+| `tracking_settings` | `TrackingSettings \| None` | no | `None` |
 
 Methods:
 
@@ -1088,7 +1125,7 @@ Methods:
 
 - Kind: `Pydantic model`
 - Summary: Recipient-specific message customization.
-- Signature: `mailchannels.emails.Personalization(to: list[EmailAddress], cc: list[EmailAddress] | None, bcc: list[EmailAddress] | None, subject: str | None, from: EmailAddress | None, reply_to: EmailAddress | None, headers: EmailHeaders | None, substitutions: dict[str, str] | None, dynamic_template_data: dict[str, Any] | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None)`
+- Signature: `mailchannels.emails.Personalization(to: list[EmailAddress], cc: list[EmailAddress] | None, bcc: list[EmailAddress] | None, subject: str | None, from: EmailAddress | None, reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, substitutions: dict[str, str] | None, dynamic_template_data: dict[str, Any] | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None)`
 
 Fields:
 
@@ -1100,6 +1137,7 @@ Fields:
 | `subject` | `str \| None` | no | `None` |
 | `from_` | `EmailAddress \| None` | no | `None` |
 | `reply_to` | `EmailAddress \| None` | no | `None` |
+| `envelope_from` | `EmailAddress \| None` | no | `None` |
 | `headers` | `EmailHeaders \| None` | no | `None` |
 | `substitutions` | `dict[str, str] \| None` | no | `None` |
 | `dynamic_template_data` | `dict[str, Any] \| None` | no | `None` |
@@ -1122,6 +1160,7 @@ Fields:
 | `dkim_private_key` | `NotRequired[str]` | no |
 | `dkim_selector` | `NotRequired[str]` | no |
 | `dynamic_template_data` | `NotRequired[dict[str, Any]]` | no |
+| `envelope_from` | `NotRequired[EmailAddressDict]` | no |
 | `from_` | `NotRequired[EmailAddressDict]` | no |
 | `headers` | `NotRequired[EmailHeaders]` | no |
 | `reply_to` | `NotRequired[EmailAddressDict]` | no |
@@ -1153,11 +1192,13 @@ Fields:
 | --- | --- | --- |
 | `attachments` | `list[AttachmentDict \| Attachment]` | no |
 | `bcc` | `list[EmailAddressDict] \| EmailAddressDict \| list[str] \| str` | no |
+| `campaign_id` | `str` | no |
 | `cc` | `list[EmailAddressDict] \| EmailAddressDict \| list[str] \| str` | no |
 | `content` | `list[ContentDict]` | no |
 | `dkim_domain` | `str` | no |
 | `dkim_private_key` | `str` | no |
 | `dkim_selector` | `str` | no |
+| `envelope_from` | `EmailAddressDict` | no |
 | `from_` | `EmailAddressDict` | no |
 | `from_address` | `EmailAddressDict` | no |
 | `from_display_name` | `str` | no |
@@ -1171,6 +1212,7 @@ Fields:
 | `subject` | `str` | no |
 | `text` | `str` | no |
 | `to` | `list[EmailAddressDict] \| EmailAddressDict \| list[str] \| str` | no |
+| `tracking_settings` | `TrackingSettingsDict` | no |
 | `transactional` | `bool` | no |
 
 #### `mailchannels.emails.SendResponse`
@@ -1201,6 +1243,54 @@ Fields:
 | `message_id` | `str` | yes | `` |
 | `status` | `Literal['sent', 'failed']` | yes | `` |
 | `reason` | `str \| None` | no | `None` |
+
+#### `mailchannels.emails.TrackingSettings`
+
+- Kind: `Pydantic model`
+- Summary: Open and click tracking settings for a MailChannels send.
+- Signature: `mailchannels.emails.TrackingSettings(open_tracking: TrackingToggle | None, click_tracking: TrackingToggle | None)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `open_tracking` | `TrackingToggle \| None` | no | `None` |
+| `click_tracking` | `TrackingToggle \| None` | no | `None` |
+
+#### `mailchannels.emails.TrackingSettingsDict`
+
+- Kind: `TypedDict`
+- Summary: Dictionary form of MailChannels tracking settings.
+
+Fields:
+
+| Field | Type | Required |
+| --- | --- | --- |
+| `click_tracking` | `TrackingToggleDict` | no |
+| `open_tracking` | `TrackingToggleDict` | no |
+
+#### `mailchannels.emails.TrackingToggle`
+
+- Kind: `Pydantic model`
+- Summary: Open or click tracking toggle for a MailChannels send.
+- Signature: `mailchannels.emails.TrackingToggle(enable: bool)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `enable` | `bool` | no | `False` |
+
+#### `mailchannels.emails.TrackingToggleDict`
+
+- Kind: `TypedDict`
+- Summary: Dictionary form of an open/click tracking toggle.
+
+Fields:
+
+| Field | Type | Required |
+| --- | --- | --- |
+| `enable` | `bool` | no |
 
 #### `mailchannels.emails.UNSUBSCRIBE_URL_PLACEHOLDER`
 
