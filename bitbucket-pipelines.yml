@@ -1,0 +1,100 @@
+image: public.ecr.aws/b4c6f8y3/pipeline-mc-email-api-sdk-py:latest
+
+definitions:
+  caches:
+    uv: ~/.cache/uv
+
+  steps:
+    - step: &checks
+        name: Lint, type-check, tests
+        caches:
+          - uv
+        script:
+          - uv sync --extra async --extra dev
+          - uv run ruff check src tests examples scripts typing_tests
+          - uv run mypy
+          - uv run pytest --cov --cov-report=term-missing
+          - uv run python scripts/check_openapi_drift.py
+          - uv run python scripts/run_consumer_typing.py
+          - uv build
+          - uv run python scripts/smoke_wheel_install.py
+
+    - step: &py39
+        name: Tests (Python 3.9)
+        caches:
+          - uv
+        script:
+          - uv sync --python 3.9 --extra async --extra dev
+          - uv run pytest -q
+
+    - step: &py310
+        name: Tests (Python 3.10)
+        caches:
+          - uv
+        script:
+          - uv sync --python 3.10 --extra async --extra dev
+          - uv run pytest -q
+
+    - step: &py311
+        name: Tests (Python 3.11)
+        caches:
+          - uv
+        script:
+          - uv sync --python 3.11 --extra async --extra dev
+          - uv run pytest -q
+
+    - step: &py312
+        name: Tests (Python 3.12)
+        caches:
+          - uv
+        script:
+          - uv sync --python 3.12 --extra async --extra dev
+          - uv run pytest -q
+
+    - step: &py313
+        name: Tests (Python 3.13)
+        caches:
+          - uv
+        script:
+          - uv sync --python 3.13 --extra async --extra dev
+          - uv run pytest -q
+
+pipelines:
+  default:
+    - step: *checks
+
+  branches:
+    main:
+      # On merge to main: run the full checks once, then validate that the
+      # offline test suite still passes on every supported Python version.
+      - step: *checks
+      - parallel:
+          - step: *py39
+          - step: *py310
+          - step: *py311
+          - step: *py312
+          - step: *py313
+
+  custom:
+    multi-python:
+      # Ad-hoc trigger for the same matrix that runs on main. Useful when
+      # validating a feature branch before merging without waiting for the
+      # main-branch run.
+      - parallel:
+          - step: *py39
+          - step: *py310
+          - step: *py311
+          - step: *py312
+          - step: *py313
+
+    online-tests:
+      # Run live MailChannels API tests. Requires MAILCHANNELS_API_KEY,
+      # MAILCHANNELS_API_URL, MAILCHANNELS_ONLINE_FROM, MAILCHANNELS_ONLINE_TO
+      # configured as repository or deployment variables. Trigger manually.
+      - step:
+          name: Live MailChannels API tests
+          caches:
+            - uv
+          script:
+            - uv sync --extra async --extra dev
+            - uv run pytest -m online --online
