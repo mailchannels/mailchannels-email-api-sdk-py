@@ -6,7 +6,7 @@ For task-oriented examples, start with the README. This file is the formal publi
 
 - SDK version: `0.1.0`
 - Top-level exports: `66`
-- Documented public module exports: `181`
+- Documented public module exports: `182`
 
 ## Top-Level Exports
 
@@ -845,8 +845,8 @@ Methods:
 | `parse_signature_input` | `parse_signature_input(value: str) -> SignatureParameters` | Parse a MailChannels RFC 9421 Signature-Input header value. |
 | `public_key` | `public_key(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID. |
 | `public_key_async` | `public_key_async(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID using async HTTP. |
-| `resend_batch` | `resend_batch(batch_id: int, *, customer_handle: str) -> dict[str, Any]` | Synchronously resend one webhook batch. |
-| `resend_batch_async` | `resend_batch_async(batch_id: int, *, customer_handle: str) -> dict[str, Any]` | Synchronously resend one webhook batch using async HTTP. |
+| `resend_batch` | `resend_batch(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch. |
+| `resend_batch_async` | `resend_batch_async(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch using async HTTP. |
 | `signature_is_fresh` | `signature_is_fresh(parameters: SignatureParameters, *, max_age_seconds: int = 300, max_skew_seconds: int = 30, tolerance_seconds: int | None = None, now: int | None = None) -> bool` | Return whether a signature timestamp is within the allowed replay window. |
 | `signature_key_id` | `signature_key_id(headers: dict[str, str]) -> str | None` | Extract the signing key ID from webhook headers. |
 | `validate` | `validate(*, request_id: str | None = None) -> WebhookValidationResults | MailChannelsResponse` | Validate enrolled webhook endpoints with a test event. |
@@ -2351,6 +2351,24 @@ Fields:
 | `id` | `str` | yes | `` |
 | `key` | `str` | yes | `` |
 
+#### `mailchannels.webhooks.WebhookResendResponse`
+
+- Kind: `Pydantic model`
+- Summary: Result of a webhook batch resend attempt.
+- Signature: `mailchannels.webhooks.WebhookResendResponse(batch_id: int, webhook: str, created_at: str, event_count: int, customer_handle: str | None, status_code: int | None, duration_in_ms: int | None)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `batch_id` | `int` | yes | `` |
+| `webhook` | `str` | yes | `` |
+| `created_at` | `str` | yes | `` |
+| `event_count` | `int` | yes | `` |
+| `customer_handle` | `str \| None` | no | `None` |
+| `status_code` | `int \| None` | no | `None` |
+| `duration_in_ms` | `int \| None` | no | `None` |
+
 #### `mailchannels.webhooks.WebhookValidationRequest`
 
 - Kind: `TypedDict`
@@ -2422,8 +2440,8 @@ Methods:
 | `parse_signature_input` | `parse_signature_input(value: str) -> SignatureParameters` | Parse a MailChannels RFC 9421 Signature-Input header value. |
 | `public_key` | `public_key(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID. |
 | `public_key_async` | `public_key_async(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID using async HTTP. |
-| `resend_batch` | `resend_batch(batch_id: int, *, customer_handle: str) -> dict[str, Any]` | Synchronously resend one webhook batch. |
-| `resend_batch_async` | `resend_batch_async(batch_id: int, *, customer_handle: str) -> dict[str, Any]` | Synchronously resend one webhook batch using async HTTP. |
+| `resend_batch` | `resend_batch(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch. |
+| `resend_batch_async` | `resend_batch_async(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch using async HTTP. |
 | `signature_is_fresh` | `signature_is_fresh(parameters: SignatureParameters, *, max_age_seconds: int = 300, max_skew_seconds: int = 30, tolerance_seconds: int | None = None, now: int | None = None) -> bool` | Return whether a signature timestamp is within the allowed replay window. |
 | `signature_key_id` | `signature_key_id(headers: dict[str, str]) -> str | None` | Extract the signing key ID from webhook headers. |
 | `validate` | `validate(*, request_id: str | None = None) -> WebhookValidationResults | MailChannelsResponse` | Validate enrolled webhook endpoints with a test event. |
@@ -2451,8 +2469,8 @@ Methods:
 | `list_async` | `list_async() -> dict[str, Any]` | Retrieve configured webhook endpoints using async HTTP. |
 | `public_key` | `public_key(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID. |
 | `public_key_async` | `public_key_async(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID using async HTTP. |
-| `resend_batch` | `resend_batch(batch_id: int, *, customer_handle: str) -> dict[str, Any]` | Synchronously resend one webhook batch. |
-| `resend_batch_async` | `resend_batch_async(batch_id: int, *, customer_handle: str) -> dict[str, Any]` | Synchronously resend one webhook batch using async HTTP. |
+| `resend_batch` | `resend_batch(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch. |
+| `resend_batch_async` | `resend_batch_async(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch using async HTTP. |
 | `validate` | `validate(*, request_id: str | None = None) -> WebhookValidationResults | MailChannelsResponse` | Validate enrolled webhook endpoints with a test event. |
 | `validate_async` | `validate_async(*, request_id: str | None = None) -> WebhookValidationResults | MailChannelsResponse` | Validate enrolled webhook endpoints with a test event using async HTTP. |
 | `verify` | `verify(headers: dict[str, str], body: bytes | str, public_key: str | bytes | Mapping[str, Any] | WebhookPublicKey, *, max_age_seconds: int = 300, max_skew_seconds: int = 30, tolerance_seconds: int | None = None, now: int | None = None) -> bool` | Verify a MailChannels webhook digest, freshness, and Ed25519 signature. |
