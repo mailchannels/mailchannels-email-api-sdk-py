@@ -29,7 +29,7 @@ def test_usage_retrieve_uses_top_level_usage_endpoint() -> None:
 
     assert result.total_usage == 5000
     assert transport.calls[0]["method"] == "GET"
-    assert transport.calls[0]["url"] == "https://api.mailchannels.net/tx/v1/usage"
+    assert transport.calls[0]["url"] == "https://api.example.test/tx/v1/usage"
 
 
 async def test_usage_retrieve_async_uses_async_transport() -> None:
@@ -41,7 +41,7 @@ async def test_usage_retrieve_async_uses_async_transport() -> None:
 
     assert result.total_usage == 5000
     assert transport.calls[0]["method"] == "GET"
-    assert transport.calls[0]["url"] == "https://api.mailchannels.net/tx/v1/usage"
+    assert transport.calls[0]["url"] == "https://api.example.test/tx/v1/usage"
 
 
 def test_module_level_usage_api_uses_global_configuration(
@@ -55,4 +55,4 @@ def test_module_level_usage_api_uses_global_configuration(
     mailchannels.Usage.retrieve()
 
     assert transport.calls[0]["headers"]["X-Api-Key"] == "module-key"
-    assert transport.calls[0]["url"] == "https://api.mailchannels.net/tx/v1/usage"
+    assert transport.calls[0]["url"] == "https://api.example.test/tx/v1/usage"

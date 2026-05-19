@@ -46,7 +46,7 @@ def test_create_dkim_key_uses_expected_path_and_payload() -> None:
     assert result["selector"] == "mcdkim"
     assert transport.calls[0]["method"] == "POST"
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/domains/example.com/dkim-keys"
+        "https://api.example.test/tx/v1/domains/example.com/dkim-keys"
     )
     assert transport.calls[0]["json"] == {
         "selector": "mcdkim",
@@ -71,7 +71,7 @@ def test_list_dkim_keys_uses_filters() -> None:
 
     assert transport.calls[0]["method"] == "GET"
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/domains/example.com/dkim-keys"
+        "https://api.example.test/tx/v1/domains/example.com/dkim-keys"
     )
     assert transport.calls[0]["params"] == {
         "selector": "mcdkim",
@@ -91,9 +91,9 @@ def test_update_and_rotate_dkim_keys_use_documented_paths() -> None:
     client.dkim.rotate("example.com", "mcdkim", new_selector="mcdkim2")
 
     assert [call["url"] for call in transport.calls] == [
-        "https://api.mailchannels.net/tx/v1/domains/example.com/dkim-keys/mcdkim",
+        "https://api.example.test/tx/v1/domains/example.com/dkim-keys/mcdkim",
         (
-            "https://api.mailchannels.net/tx/v1/domains/example.com/"
+            "https://api.example.test/tx/v1/domains/example.com/"
             "dkim-keys/mcdkim/rotate"
         ),
     ]
@@ -132,7 +132,7 @@ def test_module_level_dkim_api_uses_global_configuration(
 
     assert transport.calls[0]["headers"]["X-Api-Key"] == "module-key"
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/domains/example.com/dkim-keys"
+        "https://api.example.test/tx/v1/domains/example.com/dkim-keys"
     )
 
 

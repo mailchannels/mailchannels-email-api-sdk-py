@@ -35,7 +35,7 @@ def test_domain_check_posts_expected_payload() -> None:
     assert result.check_results["spf"]["verdict"] == "passed"
     assert transport.calls[0]["method"] == "POST"
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/check-domain"
+        "https://api.example.test/tx/v1/check-domain"
     )
     assert transport.calls[0]["json"] == {
         "domain": "example.com",
@@ -57,7 +57,7 @@ def test_check_domain_alias_posts_expected_payload() -> None:
     assert client.check_domain is client.domain_checks
     assert transport.calls[0]["method"] == "POST"
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/check-domain"
+        "https://api.example.test/tx/v1/check-domain"
     )
     assert transport.calls[0]["json"] == {"domain": "example.com"}
 
@@ -71,7 +71,7 @@ async def test_domain_check_async_uses_async_transport() -> None:
 
     assert transport.calls[0]["method"] == "POST"
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/check-domain"
+        "https://api.example.test/tx/v1/check-domain"
     )
     assert transport.calls[0]["json"] == {"domain": "example.com"}
 
@@ -85,7 +85,7 @@ def test_domain_check_module_level_proxy_uses_default_client(monkeypatch) -> Non
     mailchannels.DomainChecks.check("example.com")
 
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/check-domain"
+        "https://api.example.test/tx/v1/check-domain"
     )
 
 

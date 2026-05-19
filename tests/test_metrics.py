@@ -44,7 +44,7 @@ def test_engagement_metrics_uses_expected_path_and_query() -> None:
     assert result["open"] == 1
     assert transport.calls[0]["method"] == "GET"
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/metrics/engagement"
+        "https://api.example.test/tx/v1/metrics/engagement"
     )
     assert transport.calls[0]["params"] == {
         "start_time": "2026-04-01",
@@ -65,10 +65,10 @@ def test_metrics_time_series_endpoints_use_documented_paths() -> None:
     client.metrics.volume(end_time="2026-04-24T00:00:00Z")
 
     assert [call["url"] for call in transport.calls] == [
-        "https://api.mailchannels.net/tx/v1/metrics/performance",
-        "https://api.mailchannels.net/tx/v1/metrics/recipient-behaviour",
-        "https://api.mailchannels.net/tx/v1/metrics/recipient-behaviour",
-        "https://api.mailchannels.net/tx/v1/metrics/volume",
+        "https://api.example.test/tx/v1/metrics/performance",
+        "https://api.example.test/tx/v1/metrics/recipient-behaviour",
+        "https://api.example.test/tx/v1/metrics/recipient-behaviour",
+        "https://api.example.test/tx/v1/metrics/volume",
     ]
     assert transport.calls[0]["params"] == {
         "start_time": "2026-04-01",
@@ -114,7 +114,7 @@ def test_sender_metrics_uses_sender_type_path_and_pagination_query() -> None:
 
     assert result["total"] == 1
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/metrics/senders/campaigns"
+        "https://api.example.test/tx/v1/metrics/senders/campaigns"
     )
     assert transport.calls[0]["params"] == {
         "start_time": "2026-04-01",
@@ -137,7 +137,7 @@ def test_module_level_metrics_api_uses_global_configuration(
 
     assert transport.calls[0]["headers"]["X-Api-Key"] == "module-key"
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/metrics/volume"
+        "https://api.example.test/tx/v1/metrics/volume"
     )
     assert transport.calls[0]["params"] == {"campaign_id": "newsletter"}
 
@@ -151,6 +151,6 @@ async def test_metrics_async_methods_use_async_transport() -> None:
 
     assert transport.calls[0]["method"] == "GET"
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/metrics/volume"
+        "https://api.example.test/tx/v1/metrics/volume"
     )
     assert transport.calls[0]["params"] == {"campaign_id": "newsletter"}

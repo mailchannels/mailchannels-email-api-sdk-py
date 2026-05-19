@@ -28,7 +28,7 @@ def test_suppression_list_uses_filters() -> None:
 
     assert result.suppression_list == [{"recipient": "a@example.net"}]
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/suppression-list"
+        "https://api.example.test/tx/v1/suppression-list"
     )
     assert transport.calls[0]["params"] == {
         "recipient": "a@example.net",
@@ -67,7 +67,7 @@ def test_create_and_delete_suppression_entries() -> None:
     }
     assert transport.calls[1]["method"] == "DELETE"
     assert transport.calls[1]["url"] == (
-        "https://api.mailchannels.net/tx/v1/suppression-list/recipients/a@example.net"
+        "https://api.example.test/tx/v1/suppression-list/recipients/a@example.net"
     )
     assert transport.calls[1]["params"] == {"source": "all"}
 

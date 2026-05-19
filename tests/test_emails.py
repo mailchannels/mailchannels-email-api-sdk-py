@@ -352,7 +352,7 @@ def test_queue_uses_send_async_endpoint() -> None:
     assert result.id == "queued_123"
     call = transport.calls[0]
     assert call["method"] == "POST"
-    assert call["url"] == "https://api.mailchannels.net/tx/v1/send-async"
+    assert call["url"] == "https://api.example.test/tx/v1/send-async"
     assert call["headers"]["X-Api-Key"] == "test-key"
     assert call["json"]["content"] == [{"type": "text/plain", "value": "Plain text"}]
 
@@ -372,7 +372,7 @@ def test_send_supports_dry_run_query() -> None:
         dry_run=True,
     )
 
-    assert transport.calls[0]["url"] == "https://api.mailchannels.net/tx/v1/send"
+    assert transport.calls[0]["url"] == "https://api.example.test/tx/v1/send"
     assert transport.calls[0]["params"] == {"dry-run": "true"}
 
 
@@ -392,7 +392,7 @@ async def test_queue_async_uses_async_transport() -> None:
     )
 
     assert result.id == "queued_123"
-    assert transport.calls[0]["url"] == "https://api.mailchannels.net/tx/v1/send-async"
+    assert transport.calls[0]["url"] == "https://api.example.test/tx/v1/send-async"
 
 
 def test_module_level_email_api_uses_global_configuration(

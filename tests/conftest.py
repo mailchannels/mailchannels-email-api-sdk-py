@@ -3,13 +3,21 @@
 from __future__ import annotations
 
 import os
+from collections.abc import Iterator
 from typing import Any
 
 import pytest
 
+import mailchannels
 from mailchannels.http_client import RequestsClient
 from mailchannels.http_client_async import HTTPXClient
 from mailchannels.response import SDKResponse
+
+# Non-routable base URL used by the offline test suite. The `.test` TLD is
+# reserved by RFC 6761 and is guaranteed never to resolve, so a test that
+# accidentally bypasses the fake transport fails fast on DNS instead of
+# potentially leaking a request to the production MailChannels API.
+OFFLINE_TEST_BASE_URL = "https://api.example.test/tx/v1"
 
 
 def pytest_addoption(parser: pytest.Parser) -> None:
@@ -60,6 +68,33 @@ def pytest_collection_modifyitems(
     for item in items:
         if "online_destructive" in item.keywords:
             item.add_marker(skip_destructive)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def _force_offline_base_url(request: pytest.FixtureRequest) -> Iterator[None]:
+    """Force offline tests to use a non-routable base URL.
+
+    Belt-and-suspenders against a misconfigured test: if a Client is created
+    without a fake transport, the request fails fast on DNS resolution
+    instead of leaking out to the production MailChannels API. Skipped when
+    `--online` is enabled so live tests can reach the real API via the
+    MAILCHANNELS_API_URL the user configured.
+    """
+    if request.config.getoption("--online"):
+        yield
+        return
+    original_env = os.environ.get("MAILCHANNELS_API_URL")
+    original_module = mailchannels.base_url
+    os.environ["MAILCHANNELS_API_URL"] = OFFLINE_TEST_BASE_URL
+    mailchannels.base_url = OFFLINE_TEST_BASE_URL
+    try:
+        yield
+    finally:
+        mailchannels.base_url = original_module
+        if original_env is None:
+            os.environ.pop("MAILCHANNELS_API_URL", None)
+        else:
+            os.environ["MAILCHANNELS_API_URL"] = original_env
 
 
 class FakeRequestsClient(RequestsClient):

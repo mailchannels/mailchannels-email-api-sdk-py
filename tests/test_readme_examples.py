@@ -148,7 +148,7 @@ def readme_snippet_environment(
     monkeypatch.setattr(client_module, "RequestsClient", lambda: sync_transport)
     monkeypatch.setattr(client_module, "HTTPXClient", lambda: async_transport)
     monkeypatch.setattr(mailchannels, "api_key", "README-TEST-KEY")
-    monkeypatch.setattr(mailchannels, "base_url", "https://api.mailchannels.net/tx/v1")
+    monkeypatch.setattr(mailchannels, "base_url", "https://api.example.test/tx/v1")
     monkeypatch.setattr(mailchannels, "default_http_client", sync_transport)
     monkeypatch.setattr(mailchannels, "default_async_http_client", async_transport)
     monkeypatch.setattr(mailchannels, "strict_responses", False)

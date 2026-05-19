@@ -21,7 +21,7 @@ def test_create_sub_account_posts_expected_payload() -> None:
 
     assert result["handle"] == "clienta"
     assert transport.calls[0]["method"] == "POST"
-    assert transport.calls[0]["url"] == "https://api.mailchannels.net/tx/v1/sub-account"
+    assert transport.calls[0]["url"] == "https://api.example.test/tx/v1/sub-account"
     assert transport.calls[0]["json"] == {
         "company_name": "Client A",
         "handle": "clienta",
@@ -41,18 +41,18 @@ def test_sub_account_nested_resources_use_expected_paths() -> None:
     client.sub_accounts.limits.delete("clienta")
     client.sub_accounts.retrieve_usage("clienta")
 
-    expected_limit_url = "https://api.mailchannels.net/tx/v1/sub-account/clienta/limit"
+    expected_limit_url = "https://api.example.test/tx/v1/sub-account/clienta/limit"
     assert [(call["method"], call["url"]) for call in transport.calls] == [
-        ("GET", "https://api.mailchannels.net/tx/v1/sub-account"),
-        ("POST", "https://api.mailchannels.net/tx/v1/sub-account/clienta/api-key"),
+        ("GET", "https://api.example.test/tx/v1/sub-account"),
+        ("POST", "https://api.example.test/tx/v1/sub-account/clienta/api-key"),
         (
             "POST",
-            "https://api.mailchannels.net/tx/v1/sub-account/clienta/smtp-password",
+            "https://api.example.test/tx/v1/sub-account/clienta/smtp-password",
         ),
         ("PUT", expected_limit_url),
         ("GET", expected_limit_url),
         ("DELETE", expected_limit_url),
-        ("GET", "https://api.mailchannels.net/tx/v1/sub-account/clienta/usage"),
+        ("GET", "https://api.example.test/tx/v1/sub-account/clienta/usage"),
     ]
     assert transport.calls[0]["params"] == {"limit": 25, "offset": 5}
     assert transport.calls[3]["json"] == {"sends": 100_000}
@@ -67,7 +67,7 @@ def test_sub_account_limit_keeps_monthly_limit_alias() -> None:
 
     assert transport.calls[0]["method"] == "PUT"
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/sub-account/clienta/limit"
+        "https://api.example.test/tx/v1/sub-account/clienta/limit"
     )
     assert transport.calls[0]["json"] == {"sends": 50_000}
 
@@ -114,7 +114,7 @@ async def test_sub_account_async_methods_use_async_transport() -> None:
     await client.sub_accounts.limits.retrieve_async("clienta")
 
     assert [call["url"] for call in transport.calls] == [
-        "https://api.mailchannels.net/tx/v1/sub-account",
-        "https://api.mailchannels.net/tx/v1/sub-account/clienta/limit",
+        "https://api.example.test/tx/v1/sub-account",
+        "https://api.example.test/tx/v1/sub-account/clienta/limit",
     ]
     assert transport.calls[0]["params"] == {"limit": 25, "offset": 5}

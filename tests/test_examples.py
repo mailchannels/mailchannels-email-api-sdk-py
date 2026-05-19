@@ -91,7 +91,7 @@ async def test_async_email_example_queues_message() -> None:
     result = await async_email.queue_async_email(client)
 
     assert result.id == "queued_async"
-    assert transport.calls[0]["url"] == "https://api.mailchannels.net/tx/v1/send-async"
+    assert transport.calls[0]["url"] == "https://api.example.test/tx/v1/send-async"
 
 
 def test_attachment_example_builds_and_queues_payload(tmp_path: Path) -> None:
@@ -164,8 +164,8 @@ def test_usage_example_retrieves_parent_and_sub_account_usage() -> None:
     assert parent.total_usage == 10
     assert child.total_usage == 10
     assert [call["url"] for call in transport.calls] == [
-        "https://api.mailchannels.net/tx/v1/usage",
-        "https://api.mailchannels.net/tx/v1/sub-account/clienta/usage",
+        "https://api.example.test/tx/v1/usage",
+        "https://api.example.test/tx/v1/sub-account/clienta/usage",
     ]
 
 
@@ -178,8 +178,8 @@ def test_domain_check_example_checks_configuration() -> None:
     domain_checks.check_domain_with_dkim_selector(client, "example.com", "mcdkim")
 
     assert [call["url"] for call in transport.calls] == [
-        "https://api.mailchannels.net/tx/v1/check-domain",
-        "https://api.mailchannels.net/tx/v1/check-domain",
+        "https://api.example.test/tx/v1/check-domain",
+        "https://api.example.test/tx/v1/check-domain",
     ]
     assert transport.calls[1]["json"] == {
         "domain": "example.com",
@@ -197,7 +197,7 @@ def test_template_example_builds_dry_run_payload() -> None:
     result = templates.preview_template(client)
 
     assert result.id == "previewed"
-    assert transport.calls[0]["url"] == "https://api.mailchannels.net/tx/v1/send"
+    assert transport.calls[0]["url"] == "https://api.example.test/tx/v1/send"
     assert transport.calls[0]["params"] == {"dry-run": "true"}
     assert transport.calls[0]["json"]["content"][0]["template_type"] == "mustache"
     assert transport.calls[0]["json"]["personalizations"][0][
@@ -389,7 +389,7 @@ def test_custom_http_client_example_wraps_delegate_transport() -> None:
 
     assert result.total_usage == 5
     assert transport.calls == [
-        {"method": "GET", "url": "https://api.mailchannels.net/tx/v1/usage"}
+        {"method": "GET", "url": "https://api.example.test/tx/v1/usage"}
     ]
 
 

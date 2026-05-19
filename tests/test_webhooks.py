@@ -40,10 +40,10 @@ def test_webhook_management_uses_documented_paths() -> None:
         "POST",
     ]
     assert [call["url"] for call in transport.calls] == [
-        "https://api.mailchannels.net/tx/v1/webhook",
-        "https://api.mailchannels.net/tx/v1/webhook",
-        "https://api.mailchannels.net/tx/v1/webhook",
-        "https://api.mailchannels.net/tx/v1/webhook/validate",
+        "https://api.example.test/tx/v1/webhook",
+        "https://api.example.test/tx/v1/webhook",
+        "https://api.example.test/tx/v1/webhook",
+        "https://api.example.test/tx/v1/webhook/validate",
     ]
     assert transport.calls[0]["params"] == {
         "endpoint": "https://example.com/mailchannels"
@@ -61,7 +61,7 @@ def test_webhook_batches_public_key_and_resend() -> None:
     client.webhooks.resend_batch(123)
 
     assert transport.calls[0]["url"] == (
-        "https://api.mailchannels.net/tx/v1/webhook-batch"
+        "https://api.example.test/tx/v1/webhook-batch"
     )
     assert transport.calls[0]["params"] == {
         "statuses": "4xx,5xx",
@@ -70,11 +70,11 @@ def test_webhook_batches_public_key_and_resend() -> None:
     }
     assert "X-Api-Key" not in transport.calls[1]["headers"]
     assert transport.calls[1]["url"] == (
-        "https://api.mailchannels.net/tx/v1/webhook/public-key"
+        "https://api.example.test/tx/v1/webhook/public-key"
     )
     assert transport.calls[1]["params"] == {"id": "mckey"}
     assert transport.calls[2]["url"] == (
-        "https://api.mailchannels.net/tx/v1/webhook-batch/123/resend"
+        "https://api.example.test/tx/v1/webhook-batch/123/resend"
     )
     assert transport.calls[2]["headers"] == {
         "Content-Type": "application/json",
