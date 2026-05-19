@@ -1,15 +1,12 @@
-"""Compatibility exports for the documented `/check-domain` endpoint."""
+"""Domain-check resource exports."""
 
-from mailchannels.domain_checks import (
-    CheckDomain,
+from .check_domain import CheckDomain, CheckDomainResource
+from .types import (
     CheckDomainParams,
-    CheckDomainResource,
     CheckDomainResult,
     CheckResults,
     DkimResult,
     DkimSetting,
-    DomainChecks,
-    DomainChecksResource,
     DomainCheckVerdict,
     LockdownResult,
     SenderDomainResult,
@@ -25,8 +22,6 @@ __all__ = [
     "DkimResult",
     "DkimSetting",
     "DomainCheckVerdict",
-    "DomainChecks",
-    "DomainChecksResource",
     "LockdownResult",
     "SenderDomainResult",
     "SpfResult",

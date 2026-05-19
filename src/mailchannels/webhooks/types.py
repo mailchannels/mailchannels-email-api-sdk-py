@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, Literal, TypedDict
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 WebhookBatchStatus = Literal["1xx", "2xx", "3xx", "4xx", "5xx", "no_response"]
 WebhookEvent = Literal[
@@ -27,6 +27,15 @@ class Webhook(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     webhook: str
+
+
+class WebhookList(BaseModel):
+    """List of configured webhook endpoints returned from `/webhook`."""
+
+    model_config = ConfigDict(extra="allow")
+
+    data: list[Webhook] = Field(default_factory=list)
+    http_headers: dict[str, str] = Field(default_factory=dict)
 
 
 class WebhookBatchDuration(BaseModel):

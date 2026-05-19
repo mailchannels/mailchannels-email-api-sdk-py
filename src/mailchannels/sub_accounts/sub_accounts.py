@@ -6,12 +6,15 @@ import logging
 from typing import Any, Generic, Literal, TypeVar, overload
 
 from ..query import pagination_query
-from ..response import MailChannelsResponse
+from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
     ApiKey,
+    ApiKeyList,
     SmtpPassword,
+    SmtpPasswordList,
     SubAccount,
     SubAccountLimit,
+    SubAccountList,
     UsageStats,
     compact_payload,
     limit_payload,
@@ -79,12 +82,16 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
             response_model=ApiKey,
         )
 
-    def list(self, handle: str) -> dict[str, Any]:
+    def list(self, handle: str) -> ApiKeyList | MailChannelsResponse:
         """Retrieve API keys for a sub-account."""
         logger.info("Listing MailChannels sub-account API keys handle=%s", handle)
-        return self._client.request("GET", f"/sub-account/{handle}/api-key")
+        return self._client.request(
+            "GET",
+            f"/sub-account/{handle}/api-key",
+            response_model=ApiKeyList,
+        )
 
-    async def list_async(self, handle: str) -> dict[str, Any]:
+    async def list_async(self, handle: str) -> ApiKeyList | MailChannelsResponse:
         """Retrieve API keys for a sub-account using async HTTP."""
         logger.info(
             "Listing MailChannels sub-account API keys using async HTTP handle=%s",
@@ -93,18 +100,27 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
         return await self._client.request_async(
             "GET",
             f"/sub-account/{handle}/api-key",
+            response_model=ApiKeyList,
         )
 
-    def delete(self, handle: str, key_id: str) -> dict[str, Any]:
+    def delete(self, handle: str, key_id: str) -> EmptyResponse | MailChannelsResponse:
         """Delete an API key from a sub-account."""
         logger.info(
             "Deleting MailChannels sub-account API key handle=%s key_id=%s",
             handle,
             key_id,
         )
-        return self._client.request("DELETE", f"/sub-account/{handle}/api-key/{key_id}")
+        return self._client.request(
+            "DELETE",
+            f"/sub-account/{handle}/api-key/{key_id}",
+            response_model=EmptyResponse,
+        )
 
-    async def delete_async(self, handle: str, key_id: str) -> dict[str, Any]:
+    async def delete_async(
+        self,
+        handle: str,
+        key_id: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete an API key from a sub-account using async HTTP."""
         logger.info(
             "Deleting MailChannels sub-account API key using async HTTP handle=%s "
@@ -115,6 +131,7 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
         return await self._client.request_async(
             "DELETE",
             f"/sub-account/{handle}/api-key/{key_id}",
+            response_model=EmptyResponse,
         )
 
 
@@ -180,12 +197,19 @@ class SubAccountSmtpPasswordsResource(Generic[StrictResponses]):
             response_model=SmtpPassword,
         )
 
-    def list(self, handle: str) -> dict[str, Any]:
+    def list(self, handle: str) -> SmtpPasswordList | MailChannelsResponse:
         """Retrieve SMTP passwords for a sub-account."""
         logger.info("Listing MailChannels sub-account SMTP passwords handle=%s", handle)
-        return self._client.request("GET", f"/sub-account/{handle}/smtp-password")
+        return self._client.request(
+            "GET",
+            f"/sub-account/{handle}/smtp-password",
+            response_model=SmtpPasswordList,
+        )
 
-    async def list_async(self, handle: str) -> dict[str, Any]:
+    async def list_async(
+        self,
+        handle: str,
+    ) -> SmtpPasswordList | MailChannelsResponse:
         """Retrieve SMTP passwords for a sub-account using async HTTP."""
         logger.info(
             "Listing MailChannels sub-account SMTP passwords using async HTTP "
@@ -195,9 +219,14 @@ class SubAccountSmtpPasswordsResource(Generic[StrictResponses]):
         return await self._client.request_async(
             "GET",
             f"/sub-account/{handle}/smtp-password",
+            response_model=SmtpPasswordList,
         )
 
-    def delete(self, handle: str, password_id: str) -> dict[str, Any]:
+    def delete(
+        self,
+        handle: str,
+        password_id: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete an SMTP password from a sub-account."""
         logger.info(
             "Deleting MailChannels sub-account SMTP password handle=%s password_id=%s",
@@ -207,9 +236,14 @@ class SubAccountSmtpPasswordsResource(Generic[StrictResponses]):
         return self._client.request(
             "DELETE",
             f"/sub-account/{handle}/smtp-password/{password_id}",
+            response_model=EmptyResponse,
         )
 
-    async def delete_async(self, handle: str, password_id: str) -> dict[str, Any]:
+    async def delete_async(
+        self,
+        handle: str,
+        password_id: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete an SMTP password from a sub-account using async HTTP."""
         logger.info(
             "Deleting MailChannels sub-account SMTP password using async HTTP "
@@ -220,6 +254,7 @@ class SubAccountSmtpPasswordsResource(Generic[StrictResponses]):
         return await self._client.request_async(
             "DELETE",
             f"/sub-account/{handle}/smtp-password/{password_id}",
+            response_model=EmptyResponse,
         )
 
 
@@ -384,12 +419,19 @@ class SubAccountLimitsResource(Generic[StrictResponses]):
             response_model=SubAccountLimit,
         )
 
-    def delete(self, handle: str) -> dict[str, Any]:
+    def delete(self, handle: str) -> EmptyResponse | MailChannelsResponse:
         """Delete the sending limit for a sub-account."""
         logger.info("Deleting MailChannels sub-account limit handle=%s", handle)
-        return self._client.request("DELETE", f"/sub-account/{handle}/limit")
+        return self._client.request(
+            "DELETE",
+            f"/sub-account/{handle}/limit",
+            response_model=EmptyResponse,
+        )
 
-    async def delete_async(self, handle: str) -> dict[str, Any]:
+    async def delete_async(
+        self,
+        handle: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete the sending limit for a sub-account using async HTTP."""
         logger.info(
             "Deleting MailChannels sub-account limit using async HTTP handle=%s",
@@ -398,6 +440,7 @@ class SubAccountLimitsResource(Generic[StrictResponses]):
         return await self._client.request_async(
             "DELETE",
             f"/sub-account/{handle}/limit",
+            response_model=EmptyResponse,
         )
 
 
@@ -505,13 +548,14 @@ class SubAccountsResource(Generic[StrictResponses]):
         *,
         limit: int | None = None,
         offset: int | None = None,
-    ) -> dict[str, Any]:
+    ) -> SubAccountList | MailChannelsResponse:
         """Retrieve sub-accounts for the parent account."""
         logger.info("Listing MailChannels sub-accounts")
         return self._client.request(
             "GET",
             "/sub-account",
             params=pagination_query(limit=limit, offset=offset) or None,
+            response_model=SubAccountList,
         )
 
     async def list_async(
@@ -519,13 +563,14 @@ class SubAccountsResource(Generic[StrictResponses]):
         *,
         limit: int | None = None,
         offset: int | None = None,
-    ) -> dict[str, Any]:
+    ) -> SubAccountList | MailChannelsResponse:
         """Retrieve sub-accounts for the parent account using async HTTP."""
         logger.info("Listing MailChannels sub-accounts using async HTTP")
         return await self._client.request_async(
             "GET",
             "/sub-account",
             params=pagination_query(limit=limit, offset=offset) or None,
+            response_model=SubAccountList,
         )
 
     @overload
@@ -585,13 +630,28 @@ class SubAccountsResource(Generic[StrictResponses]):
             response_model=UsageStats,
         )
 
-    def suspend(self, handle: str) -> dict[str, Any]:
-        """Suspend a sub-account."""
-        logger.info("Suspending MailChannels sub-account handle=%s", handle)
-        return self._client.request("POST", f"/sub-account/{handle}/suspend")
+    def suspend(self, handle: str) -> EmptyResponse | MailChannelsResponse:
+        """Suspend a sub-account.
 
-    async def suspend_async(self, handle: str) -> dict[str, Any]:
-        """Suspend a sub-account using async HTTP."""
+        Suspension stops the sub-account from sending email. Use `activate`
+        to restore it.
+        """
+        logger.info("Suspending MailChannels sub-account handle=%s", handle)
+        return self._client.request(
+            "POST",
+            f"/sub-account/{handle}/suspend",
+            response_model=EmptyResponse,
+        )
+
+    async def suspend_async(
+        self,
+        handle: str,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Suspend a sub-account using async HTTP.
+
+        Suspension stops the sub-account from sending email. Use `activate`
+        to restore it.
+        """
         logger.info(
             "Suspending MailChannels sub-account using async HTTP handle=%s",
             handle,
@@ -599,14 +659,22 @@ class SubAccountsResource(Generic[StrictResponses]):
         return await self._client.request_async(
             "POST",
             f"/sub-account/{handle}/suspend",
+            response_model=EmptyResponse,
         )
 
-    def activate(self, handle: str) -> dict[str, Any]:
+    def activate(self, handle: str) -> EmptyResponse | MailChannelsResponse:
         """Activate a suspended sub-account."""
         logger.info("Activating MailChannels sub-account handle=%s", handle)
-        return self._client.request("POST", f"/sub-account/{handle}/activate")
+        return self._client.request(
+            "POST",
+            f"/sub-account/{handle}/activate",
+            response_model=EmptyResponse,
+        )
 
-    async def activate_async(self, handle: str) -> dict[str, Any]:
+    async def activate_async(
+        self,
+        handle: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Activate a suspended sub-account using async HTTP."""
         logger.info(
             "Activating MailChannels sub-account using async HTTP handle=%s",
@@ -615,20 +683,38 @@ class SubAccountsResource(Generic[StrictResponses]):
         return await self._client.request_async(
             "POST",
             f"/sub-account/{handle}/activate",
+            response_model=EmptyResponse,
         )
 
-    def delete(self, handle: str) -> dict[str, Any]:
-        """Delete a sub-account."""
-        logger.info("Deleting MailChannels sub-account handle=%s", handle)
-        return self._client.request("DELETE", f"/sub-account/{handle}")
+    def delete(self, handle: str) -> EmptyResponse | MailChannelsResponse:
+        """Delete a sub-account.
 
-    async def delete_async(self, handle: str) -> dict[str, Any]:
-        """Delete a sub-account using async HTTP."""
+        This permanently removes the sub-account and revokes its credentials.
+        """
+        logger.info("Deleting MailChannels sub-account handle=%s", handle)
+        return self._client.request(
+            "DELETE",
+            f"/sub-account/{handle}",
+            response_model=EmptyResponse,
+        )
+
+    async def delete_async(
+        self,
+        handle: str,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Delete a sub-account using async HTTP.
+
+        This permanently removes the sub-account and revokes its credentials.
+        """
         logger.info(
             "Deleting MailChannels sub-account using async HTTP handle=%s",
             handle,
         )
-        return await self._client.request_async("DELETE", f"/sub-account/{handle}")
+        return await self._client.request_async(
+            "DELETE",
+            f"/sub-account/{handle}",
+            response_model=EmptyResponse,
+        )
 
 
 class _ApiKeysProxy:
@@ -649,28 +735,36 @@ class _ApiKeysProxy:
         return await get_default_client().sub_accounts.api_keys.create_async(handle)
 
     @classmethod
-    def list(cls, handle: str) -> dict[str, Any]:
+    def list(cls, handle: str) -> ApiKeyList | MailChannelsResponse:
         """Retrieve API keys for a sub-account."""
         from ..client import get_default_client
 
         return get_default_client().sub_accounts.api_keys.list(handle)
 
     @classmethod
-    async def list_async(cls, handle: str) -> dict[str, Any]:
+    async def list_async(cls, handle: str) -> ApiKeyList | MailChannelsResponse:
         """Retrieve API keys for a sub-account using async HTTP."""
         from ..client import get_default_client
 
         return await get_default_client().sub_accounts.api_keys.list_async(handle)
 
     @classmethod
-    def delete(cls, handle: str, key_id: str) -> dict[str, Any]:
+    def delete(
+        cls,
+        handle: str,
+        key_id: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete an API key from a sub-account."""
         from ..client import get_default_client
 
         return get_default_client().sub_accounts.api_keys.delete(handle, key_id)
 
     @classmethod
-    async def delete_async(cls, handle: str, key_id: str) -> dict[str, Any]:
+    async def delete_async(
+        cls,
+        handle: str,
+        key_id: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete an API key from a sub-account using async HTTP."""
         from ..client import get_default_client
 
@@ -700,21 +794,28 @@ class _SmtpPasswordsProxy:
         )
 
     @classmethod
-    def list(cls, handle: str) -> dict[str, Any]:
+    def list(cls, handle: str) -> SmtpPasswordList | MailChannelsResponse:
         """Retrieve SMTP passwords for a sub-account."""
         from ..client import get_default_client
 
         return get_default_client().sub_accounts.smtp_passwords.list(handle)
 
     @classmethod
-    async def list_async(cls, handle: str) -> dict[str, Any]:
+    async def list_async(
+        cls,
+        handle: str,
+    ) -> SmtpPasswordList | MailChannelsResponse:
         """Retrieve SMTP passwords for a sub-account using async HTTP."""
         from ..client import get_default_client
 
         return await get_default_client().sub_accounts.smtp_passwords.list_async(handle)
 
     @classmethod
-    def delete(cls, handle: str, password_id: str) -> dict[str, Any]:
+    def delete(
+        cls,
+        handle: str,
+        password_id: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete an SMTP password from a sub-account."""
         from ..client import get_default_client
 
@@ -724,7 +825,11 @@ class _SmtpPasswordsProxy:
         )
 
     @classmethod
-    async def delete_async(cls, handle: str, password_id: str) -> dict[str, Any]:
+    async def delete_async(
+        cls,
+        handle: str,
+        password_id: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete an SMTP password from a sub-account using async HTTP."""
         from ..client import get_default_client
 
@@ -789,14 +894,17 @@ class _LimitsProxy:
         return await get_default_client().sub_accounts.limits.retrieve_async(handle)
 
     @classmethod
-    def delete(cls, handle: str) -> dict[str, Any]:
+    def delete(cls, handle: str) -> EmptyResponse | MailChannelsResponse:
         """Delete the sending limit for a sub-account."""
         from ..client import get_default_client
 
         return get_default_client().sub_accounts.limits.delete(handle)
 
     @classmethod
-    async def delete_async(cls, handle: str) -> dict[str, Any]:
+    async def delete_async(
+        cls,
+        handle: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete the sending limit for a sub-account using async HTTP."""
         from ..client import get_default_client
 
@@ -846,7 +954,7 @@ class SubAccounts:
         *,
         limit: int | None = None,
         offset: int | None = None,
-    ) -> dict[str, Any]:
+    ) -> SubAccountList | MailChannelsResponse:
         """Retrieve sub-accounts for the parent account."""
         from ..client import get_default_client
 
@@ -858,7 +966,7 @@ class SubAccounts:
         *,
         limit: int | None = None,
         offset: int | None = None,
-    ) -> dict[str, Any]:
+    ) -> SubAccountList | MailChannelsResponse:
         """Retrieve sub-accounts for the parent account using async HTTP."""
         from ..client import get_default_client
 
@@ -885,42 +993,58 @@ class SubAccounts:
         return await get_default_client().sub_accounts.retrieve_usage_async(handle)
 
     @classmethod
-    def suspend(cls, handle: str) -> dict[str, Any]:
-        """Suspend a sub-account."""
+    def suspend(cls, handle: str) -> EmptyResponse | MailChannelsResponse:
+        """Suspend a sub-account.
+
+        Suspension stops the sub-account from sending email. Use `activate`
+        to restore it.
+        """
         from ..client import get_default_client
 
         return get_default_client().sub_accounts.suspend(handle)
 
     @classmethod
-    async def suspend_async(cls, handle: str) -> dict[str, Any]:
+    async def suspend_async(
+        cls,
+        handle: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Suspend a sub-account using async HTTP."""
         from ..client import get_default_client
 
         return await get_default_client().sub_accounts.suspend_async(handle)
 
     @classmethod
-    def activate(cls, handle: str) -> dict[str, Any]:
+    def activate(cls, handle: str) -> EmptyResponse | MailChannelsResponse:
         """Activate a suspended sub-account."""
         from ..client import get_default_client
 
         return get_default_client().sub_accounts.activate(handle)
 
     @classmethod
-    async def activate_async(cls, handle: str) -> dict[str, Any]:
+    async def activate_async(
+        cls,
+        handle: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Activate a suspended sub-account using async HTTP."""
         from ..client import get_default_client
 
         return await get_default_client().sub_accounts.activate_async(handle)
 
     @classmethod
-    def delete(cls, handle: str) -> dict[str, Any]:
-        """Delete a sub-account."""
+    def delete(cls, handle: str) -> EmptyResponse | MailChannelsResponse:
+        """Delete a sub-account.
+
+        This permanently removes the sub-account and revokes its credentials.
+        """
         from ..client import get_default_client
 
         return get_default_client().sub_accounts.delete(handle)
 
     @classmethod
-    async def delete_async(cls, handle: str) -> dict[str, Any]:
+    async def delete_async(
+        cls,
+        handle: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete a sub-account using async HTTP."""
         from ..client import get_default_client
 

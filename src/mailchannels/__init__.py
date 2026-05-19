@@ -4,10 +4,7 @@ from __future__ import annotations
 
 import os
 
-from .client import DEFAULT_BASE_URL, Client
-from .compatibility import API_SPEC_COMPATIBILITY, ApiSpecCompatibility
-from .dkim import Dkim
-from .domain_checks import (
+from .check_domain import (
     CheckDomain,
     CheckDomainParams,
     CheckDomainResource,
@@ -15,12 +12,14 @@ from .domain_checks import (
     CheckResults,
     DkimResult,
     DkimSetting,
-    DomainChecks,
     DomainCheckVerdict,
     LockdownResult,
     SenderDomainResult,
     SpfResult,
 )
+from .client import DEFAULT_BASE_URL, Client
+from .compatibility import API_SPEC_COMPATIBILITY, ApiSpecCompatibility
+from .dkim import Dkim
 from .emails import (
     UNSUBSCRIBE_URL_PLACEHOLDER,
     Attachment,
@@ -56,7 +55,7 @@ from .http_client import RequestsClient
 from .http_client_async import HTTPXClient
 from .http_protocols import AsyncHTTPClient, SyncHTTPClient
 from .metrics import Metrics
-from .response import SDKResponse
+from .response import EmptyResponse, SDKResponse
 from .sub_accounts import SubAccounts
 from .suppressions import Suppressions
 from .usage import Usage, UsageStats
@@ -99,8 +98,8 @@ __all__ = [
     "DkimResult",
     "DkimSetting",
     "DomainCheckVerdict",
-    "DomainChecks",
     "EmailAddress",
+    "EmptyResponse",
     "EmailHeaders",
     "EmailParams",
     "Emails",

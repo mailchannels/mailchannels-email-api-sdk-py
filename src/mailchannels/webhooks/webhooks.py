@@ -17,11 +17,12 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
 from ..query import compact_query, pagination_query
-from ..response import MailChannelsResponse
+from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
     SignatureParameters,
     WebhookBatchResult,
     WebhookBatchStatus,
+    WebhookList,
     WebhookPublicKey,
     WebhookResendResponse,
     WebhookValidationResults,
@@ -67,26 +68,38 @@ class WebhooksResource(Generic[StrictResponses]):
             now=now,
         )
 
-    def list(self) -> dict[str, Any]:
+    def list(self) -> WebhookList | MailChannelsResponse:
         """Retrieve configured webhook endpoints."""
         logger.info("Listing MailChannels webhooks")
-        return self._client.request("GET", "/webhook")
+        return self._client.request(
+            "GET",
+            "/webhook",
+            response_model=WebhookList,
+        )
 
-    async def list_async(self) -> dict[str, Any]:
+    async def list_async(self) -> WebhookList | MailChannelsResponse:
         """Retrieve configured webhook endpoints using async HTTP."""
         logger.info("Listing MailChannels webhooks using async HTTP")
-        return await self._client.request_async("GET", "/webhook")
+        return await self._client.request_async(
+            "GET",
+            "/webhook",
+            response_model=WebhookList,
+        )
 
-    def create(self, endpoint: str) -> dict[str, Any]:
+    def create(self, endpoint: str) -> EmptyResponse | MailChannelsResponse:
         """Enroll a webhook endpoint for delivery events."""
         logger.info("Creating MailChannels webhook endpoint=%s", endpoint)
         return self._client.request(
             "POST",
             "/webhook",
             params={"endpoint": endpoint},
+            response_model=EmptyResponse,
         )
 
-    async def create_async(self, endpoint: str) -> dict[str, Any]:
+    async def create_async(
+        self,
+        endpoint: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Enroll a webhook endpoint for delivery events using async HTTP."""
         logger.info(
             "Creating MailChannels webhook using async HTTP endpoint=%s",
@@ -96,17 +109,34 @@ class WebhooksResource(Generic[StrictResponses]):
             "POST",
             "/webhook",
             params={"endpoint": endpoint},
+            response_model=EmptyResponse,
         )
 
-    def delete(self) -> dict[str, Any]:
-        """Delete all configured webhook endpoints."""
-        logger.info("Deleting all MailChannels webhooks")
-        return self._client.request("DELETE", "/webhook")
+    def delete_all(self) -> EmptyResponse | MailChannelsResponse:
+        """Delete every configured webhook endpoint for the account.
 
-    async def delete_async(self) -> dict[str, Any]:
-        """Delete all configured webhook endpoints using async HTTP."""
+        This is a bulk operation: it removes **all** webhooks, not a single
+        endpoint. There is no per-endpoint delete in the underlying API.
+        """
+        logger.info("Deleting all MailChannels webhooks")
+        return self._client.request(
+            "DELETE",
+            "/webhook",
+            response_model=EmptyResponse,
+        )
+
+    async def delete_all_async(self) -> EmptyResponse | MailChannelsResponse:
+        """Delete every configured webhook endpoint using async HTTP.
+
+        This is a bulk operation: it removes **all** webhooks, not a single
+        endpoint. There is no per-endpoint delete in the underlying API.
+        """
         logger.info("Deleting all MailChannels webhooks using async HTTP")
-        return await self._client.request_async("DELETE", "/webhook")
+        return await self._client.request_async(
+            "DELETE",
+            "/webhook",
+            response_model=EmptyResponse,
+        )
 
     @overload
     def batches(
@@ -439,46 +469,57 @@ class Webhooks:
     """Module-level webhook operations using global SDK configuration."""
 
     @classmethod
-    def list(cls) -> dict[str, Any]:
+    def list(cls) -> WebhookList | MailChannelsResponse:
         """Retrieve configured webhook endpoints."""
         from ..client import get_default_client
 
         return get_default_client().webhooks.list()
 
     @classmethod
-    async def list_async(cls) -> dict[str, Any]:
+    async def list_async(cls) -> WebhookList | MailChannelsResponse:
         """Retrieve configured webhook endpoints using async HTTP."""
         from ..client import get_default_client
 
         return await get_default_client().webhooks.list_async()
 
     @classmethod
-    def create(cls, endpoint: str) -> dict[str, Any]:
+    def create(cls, endpoint: str) -> EmptyResponse | MailChannelsResponse:
         """Enroll a webhook endpoint for delivery events."""
         from ..client import get_default_client
 
         return get_default_client().webhooks.create(endpoint)
 
     @classmethod
-    async def create_async(cls, endpoint: str) -> dict[str, Any]:
+    async def create_async(
+        cls,
+        endpoint: str,
+    ) -> EmptyResponse | MailChannelsResponse:
         """Enroll a webhook endpoint for delivery events using async HTTP."""
         from ..client import get_default_client
 
         return await get_default_client().webhooks.create_async(endpoint)
 
     @classmethod
-    def delete(cls) -> dict[str, Any]:
-        """Delete all configured webhook endpoints."""
+    def delete_all(cls) -> EmptyResponse | MailChannelsResponse:
+        """Delete every configured webhook endpoint for the account.
+
+        This is a bulk operation: it removes **all** webhooks, not a single
+        endpoint. There is no per-endpoint delete in the underlying API.
+        """
         from ..client import get_default_client
 
-        return get_default_client().webhooks.delete()
+        return get_default_client().webhooks.delete_all()
 
     @classmethod
-    async def delete_async(cls) -> dict[str, Any]:
-        """Delete all configured webhook endpoints using async HTTP."""
+    async def delete_all_async(cls) -> EmptyResponse | MailChannelsResponse:
+        """Delete every configured webhook endpoint using async HTTP.
+
+        This is a bulk operation: it removes **all** webhooks, not a single
+        endpoint. There is no per-endpoint delete in the underlying API.
+        """
         from ..client import get_default_client
 
-        return await get_default_client().webhooks.delete_async()
+        return await get_default_client().webhooks.delete_all_async()
 
     @classmethod
     def batches(

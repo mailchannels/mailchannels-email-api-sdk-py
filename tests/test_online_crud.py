@@ -112,7 +112,7 @@ def test_online_destructive_webhook_lifecycle() -> None:
     finally:
         # The MailChannels API exposes DELETE /webhook as delete-all, so this
         # test must only run in a dedicated destructive test account.
-        _ignore_live_cleanup_error(client.webhooks.delete)
+        _ignore_live_cleanup_error(client.webhooks.delete_all)
 
 
 def _unique_suffix() -> str:

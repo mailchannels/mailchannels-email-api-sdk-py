@@ -35,7 +35,7 @@ cloudflare_dkim = _load_example("cloudflare_dkim")
 custom_headers = _load_example("custom_headers")
 custom_http_client = _load_example("custom_http_client")
 dkim = _load_example("dkim")
-domain_checks = _load_example("domain_checks")
+check_domain = _load_example("check_domain")
 error_handling = _load_example("error_handling")
 metrics = _load_example("metrics")
 sub_accounts = _load_example("sub_accounts")
@@ -174,8 +174,8 @@ def test_domain_check_example_checks_configuration() -> None:
     transport = FakeRequestsClient(SDKResponse(200, {"references": []}, "{}"))
     client = Client(api_key="test-key", http_client=transport)
 
-    domain_checks.check_domain_configuration(client, "example.com")
-    domain_checks.check_domain_with_dkim_selector(client, "example.com", "mcdkim")
+    check_domain.check_domain_configuration(client, "example.com")
+    check_domain.check_domain_with_dkim_selector(client, "example.com", "mcdkim")
 
     assert [call["url"] for call in transport.calls] == [
         "https://api.example.test/tx/v1/check-domain",

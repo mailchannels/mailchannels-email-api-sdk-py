@@ -53,7 +53,17 @@ class EmailsResource(Generic[StrictResponses]):
         *,
         dry_run: bool = False,
     ) -> SendResponse | MailChannelsResponse:
-        """Send an email through the MailChannels `/send` endpoint."""
+        """Send an email through the synchronous `/send` endpoint.
+
+        This is the documented `/send` endpoint and accepts/rejects the
+        payload synchronously: validation errors come back in the response.
+        For higher throughput where you want MailChannels to accept the
+        message and process it in the background, use `queue()` instead.
+
+        The trailing `_async` on `send_async()` refers to **Python asyncio**,
+        not to the MailChannels server-side queue. `send_async()` is the
+        asyncio version of this same `/send` call.
+        """
         payload = normalize_email_params(params)
         query = {"dry-run": "true"} if dry_run else None
         logger.info("Sending email through MailChannels dry_run=%s", dry_run)
@@ -95,7 +105,12 @@ class EmailsResource(Generic[StrictResponses]):
         *,
         dry_run: bool = False,
     ) -> SendResponse | MailChannelsResponse:
-        """Send an email through `/send` using async HTTP."""
+        """Send an email through `/send` using Python asyncio (httpx).
+
+        This is the asyncio version of `send()`. It hits the same `/send`
+        endpoint synchronously on the server side. To hand the message to
+        MailChannels' server-side queue, use `queue_async()`.
+        """
         payload = normalize_email_params(params)
         query = {"dry-run": "true"} if dry_run else None
         logger.info("Sending email through MailChannels async HTTP dry_run=%s", dry_run)
@@ -129,7 +144,20 @@ class EmailsResource(Generic[StrictResponses]):
         self,
         params: SendParamsType | EmailParams,
     ) -> QueuedSendResponse | MailChannelsResponse:
-        """Queue an email through the MailChannels `/send-async` endpoint."""
+        """Queue an email through MailChannels' `/send-async` endpoint.
+
+        `queue()` performs the same request validation as `send()`
+        (sender/recipient addresses, content, template syntax, attachments,
+        headers, payload size) and returns 4xx for a malformed request. The
+        difference is latency: `/send-async` defers some per-recipient
+        processing into the background so the request returns faster.
+        Delivery semantics are otherwise the same as `send()`, including how
+        bounces and other delivery events are reported via webhooks.
+
+        Despite the name overlap, this is **not** the same as `send_async()`:
+        the `_async` suffix elsewhere refers to Python asyncio. To call
+        `/send-async` from asyncio code, use `queue_async()`.
+        """
         payload = normalize_email_params(params)
         logger.info("Queueing email through MailChannels /send-async")
         return self._client.request(
@@ -161,7 +189,11 @@ class EmailsResource(Generic[StrictResponses]):
         self,
         params: SendParamsType | EmailParams,
     ) -> QueuedSendResponse | MailChannelsResponse:
-        """Queue an email through `/send-async` using async HTTP."""
+        """Queue an email through `/send-async` using Python asyncio (httpx).
+
+        This is the asyncio version of `queue()`. It uses the same MailChannels
+        server-side queue; the `_async` suffix refers to Python asyncio.
+        """
         payload = normalize_email_params(params)
         logger.info("Queueing email through MailChannels /send-async using async HTTP")
         return await self._client.request_async(

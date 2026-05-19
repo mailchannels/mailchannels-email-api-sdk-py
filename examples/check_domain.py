@@ -17,7 +17,7 @@ def check_domain_configuration(
 ) -> dict[str, Any]:
     """Check DKIM, SPF, sender-domain DNS, and Domain Lockdown for a domain."""
     logger.info("Checking example domain configuration domain=%s", domain)
-    return client.domain_checks.check(domain)
+    return client.check_domain.check(domain)
 
 
 def check_domain_with_dkim_selector(
@@ -32,7 +32,7 @@ def check_domain_with_dkim_selector(
         domain,
         selector,
     )
-    return client.domain_checks.check(
+    return client.check_domain.check(
         domain,
         dkim_settings=[
             mailchannels.DkimSetting(

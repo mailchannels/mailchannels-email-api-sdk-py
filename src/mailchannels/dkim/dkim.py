@@ -6,7 +6,7 @@ import logging
 from typing import Any, Generic, Literal, TypeVar, overload
 
 from ..query import pagination_query
-from ..response import MailChannelsResponse
+from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
     DkimAlgorithm,
     DkimKeyInfo,
@@ -274,7 +274,7 @@ class DkimResource(Generic[StrictResponses]):
         selector: str,
         *,
         status: DkimUpdateStatus,
-    ) -> dict[str, Any]:
+    ) -> EmptyResponse | MailChannelsResponse:
         """Update the status of a MailChannels-hosted DKIM key pair."""
         logger.info(
             "Updating MailChannels DKIM key status domain=%s selector=%s status=%s",
@@ -286,6 +286,7 @@ class DkimResource(Generic[StrictResponses]):
             "PATCH",
             f"/domains/{domain}/dkim-keys/{selector}",
             json={"status": status},
+            response_model=EmptyResponse,
         )
 
     async def update_status_async(
@@ -294,7 +295,7 @@ class DkimResource(Generic[StrictResponses]):
         selector: str,
         *,
         status: DkimUpdateStatus,
-    ) -> dict[str, Any]:
+    ) -> EmptyResponse | MailChannelsResponse:
         """Update the status of a MailChannels-hosted DKIM key pair using async HTTP."""
         logger.info(
             "Updating MailChannels DKIM key status using async HTTP domain=%s "
@@ -307,6 +308,7 @@ class DkimResource(Generic[StrictResponses]):
             "PATCH",
             f"/domains/{domain}/dkim-keys/{selector}",
             json={"status": status},
+            response_model=EmptyResponse,
         )
 
     @overload
@@ -501,7 +503,7 @@ class Dkim:
         selector: str,
         *,
         status: DkimUpdateStatus,
-    ) -> dict[str, Any]:
+    ) -> EmptyResponse | MailChannelsResponse:
         """Update the status of a MailChannels-hosted DKIM key pair."""
         from ..client import get_default_client
 
@@ -518,7 +520,7 @@ class Dkim:
         selector: str,
         *,
         status: DkimUpdateStatus,
-    ) -> dict[str, Any]:
+    ) -> EmptyResponse | MailChannelsResponse:
         """Update the status of a MailChannels-hosted DKIM key pair using async HTTP."""
         from ..client import get_default_client
 

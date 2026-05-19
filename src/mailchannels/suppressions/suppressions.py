@@ -7,7 +7,7 @@ from builtins import list as list_type
 from typing import Any, Generic, Literal, TypeVar, overload
 
 from ..query import compact_query, pagination_query
-from ..response import MailChannelsResponse
+from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
     SuppressionDeleteSource,
     SuppressionEntryParams,
@@ -157,7 +157,7 @@ class SuppressionsResource(Generic[StrictResponses]):
         entries: list_type[SuppressionEntryParams],
         *,
         add_to_sub_accounts: bool | None = None,
-    ) -> dict[str, Any]:
+    ) -> EmptyResponse | MailChannelsResponse:
         """Create suppression entries."""
         logger.info("Creating MailChannels suppression entries count=%s", len(entries))
         return self._client.request(
@@ -169,6 +169,7 @@ class SuppressionsResource(Generic[StrictResponses]):
                     "add_to_sub_accounts": add_to_sub_accounts,
                 }
             ),
+            response_model=EmptyResponse,
         )
 
     async def create_async(
@@ -176,7 +177,7 @@ class SuppressionsResource(Generic[StrictResponses]):
         entries: list_type[SuppressionEntryParams],
         *,
         add_to_sub_accounts: bool | None = None,
-    ) -> dict[str, Any]:
+    ) -> EmptyResponse | MailChannelsResponse:
         """Create suppression entries using async HTTP."""
         logger.info(
             "Creating MailChannels suppression entries using async HTTP count=%s",
@@ -191,6 +192,7 @@ class SuppressionsResource(Generic[StrictResponses]):
                     "add_to_sub_accounts": add_to_sub_accounts,
                 }
             ),
+            response_model=EmptyResponse,
         )
 
     def delete(
@@ -198,13 +200,18 @@ class SuppressionsResource(Generic[StrictResponses]):
         recipient: str,
         *,
         source: SuppressionDeleteSource | None = None,
-    ) -> dict[str, Any]:
-        """Delete suppression entries for a recipient."""
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Delete suppression entries for a recipient.
+
+        With `source="all"`, every suppression entry for the recipient is
+        removed regardless of how it was originally added.
+        """
         logger.info("Deleting MailChannels suppression recipient=%s", recipient)
         return self._client.request(
             "DELETE",
             f"/suppression-list/recipients/{recipient}",
             params=compact_query({"source": source}) or None,
+            response_model=EmptyResponse,
         )
 
     async def delete_async(
@@ -212,8 +219,12 @@ class SuppressionsResource(Generic[StrictResponses]):
         recipient: str,
         *,
         source: SuppressionDeleteSource | None = None,
-    ) -> dict[str, Any]:
-        """Delete suppression entries for a recipient using async HTTP."""
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Delete suppression entries for a recipient using async HTTP.
+
+        With `source="all"`, every suppression entry for the recipient is
+        removed regardless of how it was originally added.
+        """
         logger.info(
             "Deleting MailChannels suppression using async HTTP recipient=%s",
             recipient,
@@ -222,6 +233,7 @@ class SuppressionsResource(Generic[StrictResponses]):
             "DELETE",
             f"/suppression-list/recipients/{recipient}",
             params=compact_query({"source": source}) or None,
+            response_model=EmptyResponse,
         )
 
 
@@ -251,7 +263,7 @@ class Suppressions:
         entries: list_type[SuppressionEntryParams],
         *,
         add_to_sub_accounts: bool | None = None,
-    ) -> dict[str, Any]:
+    ) -> EmptyResponse | MailChannelsResponse:
         """Create suppression entries."""
         from ..client import get_default_client
 
@@ -266,7 +278,7 @@ class Suppressions:
         entries: list_type[SuppressionEntryParams],
         *,
         add_to_sub_accounts: bool | None = None,
-    ) -> dict[str, Any]:
+    ) -> EmptyResponse | MailChannelsResponse:
         """Create suppression entries using async HTTP."""
         from ..client import get_default_client
 
@@ -281,7 +293,7 @@ class Suppressions:
         recipient: str,
         *,
         source: SuppressionDeleteSource | None = None,
-    ) -> dict[str, Any]:
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete suppression entries for a recipient."""
         from ..client import get_default_client
 
@@ -293,7 +305,7 @@ class Suppressions:
         recipient: str,
         *,
         source: SuppressionDeleteSource | None = None,
-    ) -> dict[str, Any]:
+    ) -> EmptyResponse | MailChannelsResponse:
         """Delete suppression entries for a recipient using async HTTP."""
         from ..client import get_default_client
 

@@ -30,7 +30,7 @@ def test_webhook_management_uses_documented_paths() -> None:
 
     client.webhooks.create("https://example.com/mailchannels")
     client.webhooks.list()
-    client.webhooks.delete()
+    client.webhooks.delete_all()
     client.webhooks.validate(request_id="test_request_1")
 
     assert [call["method"] for call in transport.calls] == [
@@ -91,7 +91,7 @@ def test_webhook_destructive_operations_log_at_info(
     client = Client(api_key="test-key", http_client=transport)
 
     with caplog.at_level(logging.INFO, logger="mailchannels.webhooks.webhooks"):
-        client.webhooks.delete()
+        client.webhooks.delete_all()
         client.webhooks.resend_batch(123)
 
     records = [

@@ -6,9 +6,8 @@ import pytest
 from conftest import FakeHTTPXClient, FakeRequestsClient
 
 import mailchannels
-from mailchannels.check_domain import CheckDomain
+from mailchannels.check_domain import CheckDomain, DkimSetting
 from mailchannels.client import Client
-from mailchannels.domain_checks import DkimSetting
 from mailchannels.response import SDKResponse
 
 
@@ -23,7 +22,7 @@ def test_domain_check_posts_expected_payload() -> None:
     )
     client = Client(api_key="test-key", http_client=transport)
 
-    result = client.domain_checks.check(
+    result = client.check_domain.check(
         "example.com",
         sender_id="sender-123",
         dkim_settings=[
@@ -47,27 +46,12 @@ def test_domain_check_posts_expected_payload() -> None:
     }
 
 
-def test_check_domain_alias_posts_expected_payload() -> None:
-    """It exposes `/check-domain` through the documented endpoint name."""
-    transport = FakeRequestsClient(SDKResponse(200, {"references": []}, "{}"))
-    client = Client(api_key="test-key", http_client=transport)
-
-    client.check_domain.check("example.com")
-
-    assert client.check_domain is client.domain_checks
-    assert transport.calls[0]["method"] == "POST"
-    assert transport.calls[0]["url"] == (
-        "https://api.example.test/tx/v1/check-domain"
-    )
-    assert transport.calls[0]["json"] == {"domain": "example.com"}
-
-
 async def test_domain_check_async_uses_async_transport() -> None:
     """It checks a domain using async HTTP."""
     transport = FakeHTTPXClient(SDKResponse(200, {"references": []}, "{}"))
     client = Client(api_key="test-key", async_http_client=transport)
 
-    await client.domain_checks.check_async("example.com")
+    await client.check_domain.check_async("example.com")
 
     assert transport.calls[0]["method"] == "POST"
     assert transport.calls[0]["url"] == (
@@ -76,21 +60,8 @@ async def test_domain_check_async_uses_async_transport() -> None:
     assert transport.calls[0]["json"] == {"domain": "example.com"}
 
 
-def test_domain_check_module_level_proxy_uses_default_client(monkeypatch) -> None:
+def test_check_domain_module_level_uses_default_client(monkeypatch) -> None:
     """It exposes module-level domain check operations."""
-    transport = FakeRequestsClient(SDKResponse(200, {"references": []}, "{}"))
-    monkeypatch.setattr(mailchannels, "api_key", "test-key")
-    monkeypatch.setattr(mailchannels, "default_http_client", transport)
-
-    mailchannels.DomainChecks.check("example.com")
-
-    assert transport.calls[0]["url"] == (
-        "https://api.example.test/tx/v1/check-domain"
-    )
-
-
-def test_check_domain_module_alias_uses_default_client(monkeypatch) -> None:
-    """It exposes a top-level CheckDomain alias for discoverability."""
     transport = FakeRequestsClient(SDKResponse(200, {"references": []}, "{}"))
     monkeypatch.setattr(mailchannels, "api_key", "test-key")
     monkeypatch.setattr(mailchannels, "default_http_client", transport)
@@ -98,6 +69,10 @@ def test_check_domain_module_alias_uses_default_client(monkeypatch) -> None:
     mailchannels.CheckDomain.check("example.com")
     CheckDomain.check("example.net")
 
+    assert [call["url"] for call in transport.calls] == [
+        "https://api.example.test/tx/v1/check-domain",
+        "https://api.example.test/tx/v1/check-domain",
+    ]
     assert [call["json"] for call in transport.calls] == [
         {"domain": "example.com"},
         {"domain": "example.net"},
@@ -109,7 +84,7 @@ def test_domain_check_rejects_more_than_ten_dkim_settings() -> None:
     client = Client(api_key="test-key", http_client=FakeRequestsClient())
 
     with pytest.raises(mailchannels.MailChannelsError) as error:
-        client.domain_checks.check(
+        client.check_domain.check(
             "example.com",
             dkim_settings=[{"dkim_selector": str(index)} for index in range(11)],
         )

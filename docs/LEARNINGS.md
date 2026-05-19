@@ -214,6 +214,22 @@ reviewing API coverage naturally look for the documented endpoint spelling.
 Expose `CheckDomain` and `client.check_domain` as first-class aliases while
 keeping `DomainChecks` and `client.domain_checks` for compatibility.
 
+## 2026-05-19: dropped the `DomainChecks` alias in favor of one canonical name
+
+The dual `DomainChecks`/`CheckDomain` names violated the SDK consistency
+guideline (two names for the same thing). Removed `DomainChecks*` and renamed
+the module directory to `check_domain/` so the package, attribute, and class
+all match the documented endpoint `POST /check-domain`.
+
+## 2026-05-19: README API-version line is generated, not hand-written
+
+Per the SDK guidelines, the README must declare the API version it was built
+against. To avoid stale claims, the line lives between
+`<!-- generated:api-version -->` markers and is rewritten by
+`scripts/regen_readme_version.py` from `API_SPEC_COMPATIBILITY.openapi_version`.
+A test in `tests/test_readme_version.py` fails if the README drifts from the
+compatibility constant, so the check runs as part of the normal test suite.
+
 ## 2026-04-25: API coverage needs obvious public signposts
 
 Even when route support exists, reviewers scan the README introduction and test

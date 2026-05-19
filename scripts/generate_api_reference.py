@@ -16,7 +16,6 @@ from pydantic import BaseModel
 import mailchannels
 import mailchannels.check_domain
 import mailchannels.dkim
-import mailchannels.domain_checks
 import mailchannels.emails
 import mailchannels.metrics
 import mailchannels.sub_accounts
@@ -28,7 +27,6 @@ DEFAULT_OUTPUT_PATH = Path("docs/API_REFERENCE.md")
 PUBLIC_MODULES = (
     mailchannels,
     mailchannels.emails,
-    mailchannels.domain_checks,
     mailchannels.check_domain,
     mailchannels.dkim,
     mailchannels.metrics,
@@ -94,9 +92,6 @@ SUMMARY_OVERRIDES = {
         "Module-level flag that enables strict Pydantic response models."
     ),
     "mailchannels.check_domain.DomainCheckVerdict": (
-        "Allowed verdict values returned by domain configuration checks."
-    ),
-    "mailchannels.domain_checks.DomainCheckVerdict": (
         "Allowed verdict values returned by domain configuration checks."
     ),
     "mailchannels.emails.EmailHeaders": (

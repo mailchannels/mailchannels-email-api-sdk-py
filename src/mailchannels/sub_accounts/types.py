@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import Any, TypedDict
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import NotRequired
 
 from ..exceptions import MailChannelsError
@@ -58,6 +58,33 @@ class SmtpPassword(BaseModel):
     """MailChannels sub-account SMTP password response model."""
 
     model_config = ConfigDict(extra="allow")
+
+
+class SubAccountList(BaseModel):
+    """Paged list of sub-accounts returned from `/sub-account`."""
+
+    model_config = ConfigDict(extra="allow")
+
+    data: list[SubAccount] = Field(default_factory=list)
+    http_headers: dict[str, str] = Field(default_factory=dict)
+
+
+class ApiKeyList(BaseModel):
+    """Paged list of API keys for a sub-account."""
+
+    model_config = ConfigDict(extra="allow")
+
+    data: list[ApiKey] = Field(default_factory=list)
+    http_headers: dict[str, str] = Field(default_factory=dict)
+
+
+class SmtpPasswordList(BaseModel):
+    """Paged list of SMTP passwords for a sub-account."""
+
+    model_config = ConfigDict(extra="allow")
+
+    data: list[SmtpPassword] = Field(default_factory=list)
+    http_headers: dict[str, str] = Field(default_factory=dict)
 
 
 def compact_payload(values: dict[str, Any]) -> dict[str, Any]:

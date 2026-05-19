@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 StrictResponses = TypeVar("StrictResponses", bound=bool)
 
 
-class DomainChecksResource(Generic[StrictResponses]):
+class CheckDomainResource(Generic[StrictResponses]):
     """Client-bound domain configuration check operations."""
 
     def __init__(self, client: Any) -> None:
@@ -24,7 +24,7 @@ class DomainChecksResource(Generic[StrictResponses]):
 
     @overload
     def check(
-        self: DomainChecksResource[Literal[True]],
+        self: CheckDomainResource[Literal[True]],
         domain: str,
         *,
         sender_id: str | None = None,
@@ -33,7 +33,7 @@ class DomainChecksResource(Generic[StrictResponses]):
 
     @overload
     def check(
-        self: DomainChecksResource[Literal[False]],
+        self: CheckDomainResource[Literal[False]],
         domain: str,
         *,
         sender_id: str | None = None,
@@ -72,7 +72,7 @@ class DomainChecksResource(Generic[StrictResponses]):
 
     @overload
     async def check_async(
-        self: DomainChecksResource[Literal[True]],
+        self: CheckDomainResource[Literal[True]],
         domain: str,
         *,
         sender_id: str | None = None,
@@ -81,7 +81,7 @@ class DomainChecksResource(Generic[StrictResponses]):
 
     @overload
     async def check_async(
-        self: DomainChecksResource[Literal[False]],
+        self: CheckDomainResource[Literal[False]],
         domain: str,
         *,
         sender_id: str | None = None,
@@ -122,7 +122,7 @@ class DomainChecksResource(Generic[StrictResponses]):
         )
 
 
-class DomainChecks:
+class CheckDomain:
     """Module-level domain configuration check operations."""
 
     @classmethod
@@ -136,7 +136,7 @@ class DomainChecks:
         """Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status."""
         from ..client import get_default_client
 
-        return get_default_client().domain_checks.check(
+        return get_default_client().check_domain.check(
             domain,
             sender_id=sender_id,
             dkim_settings=dkim_settings,
@@ -153,15 +153,11 @@ class DomainChecks:
         """Check domain configuration status using async HTTP."""
         from ..client import get_default_client
 
-        return await get_default_client().domain_checks.check_async(
+        return await get_default_client().check_domain.check_async(
             domain,
             sender_id=sender_id,
             dkim_settings=dkim_settings,
         )
-
-
-CheckDomainResource = DomainChecksResource
-CheckDomain = DomainChecks
 
 
 def _check_domain_payload(

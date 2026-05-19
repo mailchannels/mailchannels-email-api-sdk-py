@@ -95,7 +95,7 @@ SDK_ROUTES: tuple[SDKRoute, ...] = (
     SDKRoute("GET", "/usage", "Usage", "retrieve"),
     SDKRoute("POST", "/webhook", "Webhooks", "create"),
     SDKRoute("GET", "/webhook", "Webhooks", "list"),
-    SDKRoute("DELETE", "/webhook", "Webhooks", "delete"),
+    SDKRoute("DELETE", "/webhook", "Webhooks", "delete_all"),
     SDKRoute("GET", "/webhook-batch", "Webhooks", "batches"),
     SDKRoute("POST", "/webhook-batch/{batch_id}/resend", "Webhooks", "resend_batch"),
     SDKRoute("GET", "/webhook/public-key", "Webhooks", "public_key"),
