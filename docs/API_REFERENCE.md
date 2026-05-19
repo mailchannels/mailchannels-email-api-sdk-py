@@ -1707,7 +1707,7 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: MailChannels-hosted DKIM key metadata.
-- Signature: `mailchannels.dkim.DkimKeyInfo(domain: str, selector: str, public_key: str, status: DkimKeyStatus, algorithm: str, key_length: int | None, dkim_dns_records: list[DkimDnsRecord] | None)`
+- Signature: `mailchannels.dkim.DkimKeyInfo(domain: str, selector: str, public_key: str, status: DkimKeyStatus, algorithm: str, key_length: int | None, dkim_dns_records: list[DkimDnsRecord] | None, created_at: str | None, status_modified_at: str | None, gracePeriodExpiresAt: str | None, retiresAt: str | None)`
 
 Fields:
 
@@ -1720,6 +1720,10 @@ Fields:
 | `algorithm` | `str` | yes | `` |
 | `key_length` | `int \| None` | no | `None` |
 | `dkim_dns_records` | `list[DkimDnsRecord] \| None` | no | `None` |
+| `created_at` | `str \| None` | no | `None` |
+| `status_modified_at` | `str \| None` | no | `None` |
+| `grace_period_expires_at` | `str \| None` | no | `None` |
+| `retires_at` | `str \| None` | no | `None` |
 
 #### `mailchannels.dkim.DkimKeyList`
 
@@ -2045,7 +2049,7 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: MailChannels sub-account response model.
-- Signature: `mailchannels.sub_accounts.SubAccount(handle: str | None, company_name: str | None)`
+- Signature: `mailchannels.sub_accounts.SubAccount(handle: str | None, company_name: str | None, enabled: bool | None)`
 
 Fields:
 
@@ -2053,6 +2057,7 @@ Fields:
 | --- | --- | --- | --- |
 | `handle` | `str \| None` | no | `None` |
 | `company_name` | `str \| None` | no | `None` |
+| `enabled` | `bool \| None` | no | `None` |
 
 #### `mailchannels.sub_accounts.SubAccountApiKeysResource`
 
