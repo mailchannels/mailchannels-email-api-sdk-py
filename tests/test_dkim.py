@@ -130,7 +130,7 @@ def test_module_level_dkim_api_uses_global_configuration(
 
     mailchannels.Dkim.list("example.com")
 
-    assert transport.calls[0]["headers"]["X-Api-Key"] == "module-key"
+    assert transport.calls[0]["headers"]["X-API-Key"] == "module-key"
     assert transport.calls[0]["url"] == (
         "https://api.example.test/tx/v1/domains/example.com/dkim-keys"
     )

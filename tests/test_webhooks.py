@@ -68,7 +68,7 @@ def test_webhook_batches_public_key_and_resend() -> None:
         "limit": 25,
         "offset": 5,
     }
-    assert "X-Api-Key" not in transport.calls[1]["headers"]
+    assert "X-API-Key" not in transport.calls[1]["headers"]
     assert transport.calls[1]["url"] == (
         "https://api.example.test/tx/v1/webhook/public-key"
     )
@@ -79,7 +79,7 @@ def test_webhook_batches_public_key_and_resend() -> None:
     assert transport.calls[2]["headers"] == {
         "Content-Type": "application/json",
         "User-Agent": user_agent(),
-        "X-Api-Key": "test-key",
+        "X-API-Key": "test-key",
     }
 
 

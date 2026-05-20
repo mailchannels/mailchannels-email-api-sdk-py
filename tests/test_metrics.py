@@ -132,7 +132,7 @@ def test_module_level_metrics_api_uses_global_configuration(
 
     mailchannels.Metrics.volume(campaign_id="newsletter")
 
-    assert transport.calls[0]["headers"]["X-Api-Key"] == "module-key"
+    assert transport.calls[0]["headers"]["X-API-Key"] == "module-key"
     assert transport.calls[0]["url"] == (
         "https://api.example.test/tx/v1/metrics/volume"
     )

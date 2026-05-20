@@ -353,7 +353,7 @@ def test_queue_uses_send_async_endpoint() -> None:
     call = transport.calls[0]
     assert call["method"] == "POST"
     assert call["url"] == "https://api.example.test/tx/v1/send-async"
-    assert call["headers"]["X-Api-Key"] == "test-key"
+    assert call["headers"]["X-API-Key"] == "test-key"
     assert call["json"]["content"] == [{"type": "text/plain", "value": "Plain text"}]
 
 
@@ -412,4 +412,4 @@ def test_module_level_email_api_uses_global_configuration(
         }
     )
 
-    assert transport.calls[0]["headers"]["X-Api-Key"] == "module-key"
+    assert transport.calls[0]["headers"]["X-API-Key"] == "module-key"

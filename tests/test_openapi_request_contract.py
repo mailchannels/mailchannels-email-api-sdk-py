@@ -14,7 +14,7 @@ from mailchannels.client import Client
 from mailchannels.routes import sdk_route_keys
 
 BASE_PATH = "/tx/v1"
-DEFAULT_HEADERS = frozenset({"Content-Type", "User-Agent", "X-Api-Key"})
+DEFAULT_HEADERS = frozenset({"Content-Type", "User-Agent", "X-API-Key"})
 
 
 @dataclass(frozen=True)
@@ -561,7 +561,7 @@ ROUTE_CONTRACTS: tuple[OperationContract, ...] = (
         lambda client: client.webhooks.resend_batch(123),
         lambda client: client.webhooks.resend_batch_async(123),
         path="/webhook-batch/123/resend",
-        headers_required=frozenset({"Content-Type", "User-Agent", "X-Api-Key"}),
+        headers_required=frozenset({"Content-Type", "User-Agent", "X-API-Key"}),
     ),
     OperationContract(
         "GET",
@@ -571,7 +571,7 @@ ROUTE_CONTRACTS: tuple[OperationContract, ...] = (
         query_required=frozenset({"id"}),
         query_allowed=frozenset({"id"}),
         headers_required=frozenset({"Content-Type", "User-Agent"}),
-        headers_forbidden=frozenset({"X-Api-Key"}),
+        headers_forbidden=frozenset({"X-API-Key"}),
     ),
     OperationContract(
         "POST",

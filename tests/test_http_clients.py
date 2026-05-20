@@ -121,14 +121,14 @@ def test_requests_client_passes_request_arguments_and_timeout(
     response = client.request(
         "POST",
         "https://api.example.test/send",
-        headers={"X-Api-Key": "test-key"},
+        headers={"X-API-Key": "test-key"},
         json={"hello": "world"},
         params={"dry-run": "true"},
     )
     client.request(
         "GET",
         "https://api.example.test/usage",
-        headers={"X-Api-Key": "test-key"},
+        headers={"X-API-Key": "test-key"},
     )
     client.close()
 
@@ -138,7 +138,7 @@ def test_requests_client_passes_request_arguments_and_timeout(
         {
             "method": "POST",
             "url": "https://api.example.test/send",
-            "headers": {"X-Api-Key": "test-key"},
+            "headers": {"X-API-Key": "test-key"},
             "json": {"hello": "world"},
             "params": {"dry-run": "true"},
             "timeout": 12.5,
@@ -238,14 +238,14 @@ async def test_httpx_client_passes_request_arguments_and_timeout(
     response = await client.request(
         "POST",
         "https://api.example.test/send-async",
-        headers={"X-Api-Key": "test-key"},
+        headers={"X-API-Key": "test-key"},
         json={"hello": "world"},
         params={"dry-run": "true"},
     )
     await client.request(
         "GET",
         "https://api.example.test/usage",
-        headers={"X-Api-Key": "test-key"},
+        headers={"X-API-Key": "test-key"},
     )
     await client.aclose()
 
@@ -255,7 +255,7 @@ async def test_httpx_client_passes_request_arguments_and_timeout(
         {
             "method": "POST",
             "url": "https://api.example.test/send-async",
-            "headers": {"X-Api-Key": "test-key"},
+            "headers": {"X-API-Key": "test-key"},
             "json": {"hello": "world"},
             "params": {"dry-run": "true"},
             "timeout": 7.5,

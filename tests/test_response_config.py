@@ -483,7 +483,7 @@ def test_client_reads_environment_configuration(
         }
     )
 
-    assert transport.calls[0]["headers"]["X-Api-Key"] == "env-key"
+    assert transport.calls[0]["headers"]["X-API-Key"] == "env-key"
     assert transport.calls[0]["url"] == "https://example.test/api/send-async"
 
 
@@ -748,4 +748,4 @@ def test_module_level_api_accepts_custom_http_client(
     )
 
     assert result.id == "custom_123"
-    assert transport.calls[0]["headers"]["X-Api-Key"] == "module-key"
+    assert transport.calls[0]["headers"]["X-API-Key"] == "module-key"

@@ -178,7 +178,7 @@ class Client(Generic[StrictResponses]):
             "User-Agent": user_agent(),
         }
         if require_api_key and api_key:
-            headers["X-Api-Key"] = str(api_key)
+            headers["X-API-Key"] = str(api_key)
         if extra_headers:
             headers.update(extra_headers)
         return headers
