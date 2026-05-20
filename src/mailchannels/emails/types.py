@@ -22,12 +22,15 @@ UNSUBSCRIBE_URL_PLACEHOLDER = "{{mc-unsubscribe-url}}"
 EmailHeaders = dict[str, str]
 RESERVED_EMAIL_HEADERS = frozenset(
     {
+        "authentication-results",
         "bcc",
         "cc",
+        "content-transfer-encoding",
         "content-type",
         "dkim-signature",
         "from",
         "message-id",
+        "received",
         "reply-to",
         "subject",
         "to",
