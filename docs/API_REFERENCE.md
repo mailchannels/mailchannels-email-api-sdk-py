@@ -6,7 +6,7 @@ For task-oriented examples, start with the README. This file is the formal publi
 
 - SDK version: `0.1.1`
 - Top-level exports: `68`
-- Documented public module exports: `188`
+- Documented public module exports: `177`
 
 ## Top-Level Exports
 
@@ -33,11 +33,11 @@ For task-oriented examples, start with the README. This file is the formal publi
 | `DkimResult` | `Pydantic model` | One DKIM result returned by the domain check endpoint. |
 | `DkimSetting` | `Pydantic model` | DKIM settings used by the domain check endpoint. |
 | `DomainCheckVerdict` | `value` | Allowed verdict values returned by domain configuration checks. |
-| `DomainChecks` | `class` | Module-level domain configuration check operations. |
 | `EmailAddress` | `Pydantic model` | Email address used for senders and recipients. |
 | `EmailHeaders` | `value` | Custom email header mapping accepted by send payloads. |
 | `EmailParams` | `Pydantic model` | Validated MailChannels email send payload. |
 | `Emails` | `class` | Module-level email operations using global SDK configuration. |
+| `EmptyResponse` | `Pydantic model` | Response model for endpoints that intentionally return no body. |
 | `ForbiddenError` | `exception` | Raised when an account cannot access a requested feature. |
 | `HTTPXClient` | `class` | Asynchronous HTTP client backed by httpx. |
 | `InvalidRequestError` | `exception` | Raised when MailChannels rejects request parameters or payload shape. |
@@ -323,8 +323,8 @@ Methods:
 | `list_async` | `list_async(domain: str, *, selector: str | None = None, status: DkimKeyStatus | None = None, offset: int | None = None, limit: int | None = None, include_dns_record: bool | None = None) -> DkimKeyList | MailChannelsResponse` | Retrieve MailChannels-hosted DKIM keys using async HTTP. |
 | `rotate` | `rotate(domain: str, selector: str, *, new_selector: str) -> DkimRotateResponse | MailChannelsResponse` | Rotate a MailChannels-hosted DKIM key pair. |
 | `rotate_async` | `rotate_async(domain: str, selector: str, *, new_selector: str) -> DkimRotateResponse | MailChannelsResponse` | Rotate a MailChannels-hosted DKIM key pair using async HTTP. |
-| `update_status` | `update_status(domain: str, selector: str, *, status: DkimUpdateStatus) -> dict[str, Any]` | Update the status of a MailChannels-hosted DKIM key pair. |
-| `update_status_async` | `update_status_async(domain: str, selector: str, *, status: DkimUpdateStatus) -> dict[str, Any]` | Update the status of a MailChannels-hosted DKIM key pair using async HTTP. |
+| `update_status` | `update_status(domain: str, selector: str, *, status: DkimUpdateStatus) -> EmptyResponse | MailChannelsResponse` | Update the status of a MailChannels-hosted DKIM key pair. |
+| `update_status_async` | `update_status_async(domain: str, selector: str, *, status: DkimUpdateStatus) -> EmptyResponse | MailChannelsResponse` | Update the status of a MailChannels-hosted DKIM key pair using async HTTP. |
 
 Example for `create`:
 
@@ -366,18 +366,6 @@ Fields:
 
 - Kind: `value`
 - Summary: Allowed verdict values returned by domain configuration checks.
-
-#### `mailchannels.DomainChecks`
-
-- Kind: `class`
-- Summary: Module-level domain configuration check operations.
-
-Methods:
-
-| Method | Signature | Summary |
-| --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
 
 #### `mailchannels.EmailAddress`
 
@@ -454,6 +442,18 @@ Example for `send`:
 mailchannels.Emails.send({"from": {"email": "sender@example.com"}, "to": "recipient@example.net", "subject": "Hello", "text": "Hello"})
 ```
 
+#### `mailchannels.EmptyResponse`
+
+- Kind: `Pydantic model`
+- Summary: Response model for endpoints that intentionally return no body.
+- Signature: `mailchannels.EmptyResponse(http_headers: dict[str, str])`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `http_headers` | `dict[str, str]` | no | `` |
+
 #### `mailchannels.ForbiddenError`
 
 - Kind: `exception`
@@ -515,8 +515,6 @@ Methods:
 | `engagement_async` | `engagement_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsEngagement | MailChannelsResponse` | Retrieve engagement metrics using async HTTP. |
 | `performance` | `performance(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsPerformance | MailChannelsResponse` | Retrieve performance metrics. |
 | `performance_async` | `performance_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsPerformance | MailChannelsResponse` | Retrieve performance metrics using async HTTP. |
-| `recipient_behavior` | `recipient_behavior(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics using US spelling. |
-| `recipient_behavior_async` | `recipient_behavior_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics using US spelling and async HTTP. |
 | `recipient_behaviour` | `recipient_behaviour(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics. |
 | `recipient_behaviour_async` | `recipient_behaviour_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics using async HTTP. |
 | `senders` | `senders(sender_type: MetricsSenderType, *, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, limit: int | None = None, offset: int | None = None, sort_order: MetricsSortOrder | None = None) -> MetricsSenderResponse | MailChannelsResponse` | Retrieve sender metrics grouped by campaigns or sub-accounts. |
@@ -724,18 +722,18 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `activate` | `activate(handle: str) -> dict[str, Any]` | Activate a suspended sub-account. |
-| `activate_async` | `activate_async(handle: str) -> dict[str, Any]` | Activate a suspended sub-account using async HTTP. |
+| `activate` | `activate(handle: str) -> EmptyResponse | MailChannelsResponse` | Activate a suspended sub-account. |
+| `activate_async` | `activate_async(handle: str) -> EmptyResponse | MailChannelsResponse` | Activate a suspended sub-account using async HTTP. |
 | `create` | `create(*, company_name: str | None = None, handle: str | None = None) -> SubAccount | MailChannelsResponse` | Create a sub-account under the parent account. |
 | `create_async` | `create_async(*, company_name: str | None = None, handle: str | None = None) -> SubAccount | MailChannelsResponse` | Create a sub-account under the parent account using async HTTP. |
-| `delete` | `delete(handle: str) -> dict[str, Any]` | Delete a sub-account. |
-| `delete_async` | `delete_async(handle: str) -> dict[str, Any]` | Delete a sub-account using async HTTP. |
-| `list` | `list(*, limit: int | None = None, offset: int | None = None) -> dict[str, Any]` | Retrieve sub-accounts for the parent account. |
-| `list_async` | `list_async(*, limit: int | None = None, offset: int | None = None) -> dict[str, Any]` | Retrieve sub-accounts for the parent account using async HTTP. |
+| `delete` | `delete(handle: str) -> EmptyResponse | MailChannelsResponse` | Delete a sub-account. |
+| `delete_async` | `delete_async(handle: str) -> EmptyResponse | MailChannelsResponse` | Delete a sub-account using async HTTP. |
+| `list` | `list(*, limit: int | None = None, offset: int | None = None) -> SubAccountList | MailChannelsResponse` | Retrieve sub-accounts for the parent account. |
+| `list_async` | `list_async(*, limit: int | None = None, offset: int | None = None) -> SubAccountList | MailChannelsResponse` | Retrieve sub-accounts for the parent account using async HTTP. |
 | `retrieve_usage` | `retrieve_usage(handle: str) -> UsageStats | MailChannelsResponse` | Retrieve usage statistics for a sub-account. |
 | `retrieve_usage_async` | `retrieve_usage_async(handle: str) -> UsageStats | MailChannelsResponse` | Retrieve usage statistics for a sub-account using async HTTP. |
-| `suspend` | `suspend(handle: str) -> dict[str, Any]` | Suspend a sub-account. |
-| `suspend_async` | `suspend_async(handle: str) -> dict[str, Any]` | Suspend a sub-account using async HTTP. |
+| `suspend` | `suspend(handle: str) -> EmptyResponse | MailChannelsResponse` | Suspend a sub-account. |
+| `suspend_async` | `suspend_async(handle: str) -> EmptyResponse | MailChannelsResponse` | Suspend a sub-account using async HTTP. |
 
 Example for `create`:
 
@@ -752,10 +750,10 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `create` | `create(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> dict[str, Any]` | Create suppression entries. |
-| `create_async` | `create_async(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> dict[str, Any]` | Create suppression entries using async HTTP. |
-| `delete` | `delete(recipient: str, *, source: SuppressionDeleteSource | None = None) -> dict[str, Any]` | Delete suppression entries for a recipient. |
-| `delete_async` | `delete_async(recipient: str, *, source: SuppressionDeleteSource | None = None) -> dict[str, Any]` | Delete suppression entries for a recipient using async HTTP. |
+| `create` | `create(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> EmptyResponse | MailChannelsResponse` | Create suppression entries. |
+| `create_async` | `create_async(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> EmptyResponse | MailChannelsResponse` | Create suppression entries using async HTTP. |
+| `delete` | `delete(recipient: str, *, source: SuppressionDeleteSource | None = None) -> EmptyResponse | MailChannelsResponse` | Delete suppression entries for a recipient. |
+| `delete_async` | `delete_async(recipient: str, *, source: SuppressionDeleteSource | None = None) -> EmptyResponse | MailChannelsResponse` | Delete suppression entries for a recipient using async HTTP. |
 | `list` | `list(**kwargs: Any) -> SuppressionListResponse | MailChannelsResponse` | Retrieve suppression entries. |
 | `list_async` | `list_async(**kwargs: Any) -> SuppressionListResponse | MailChannelsResponse` | Retrieve suppression entries using async HTTP. |
 
@@ -870,12 +868,12 @@ Methods:
 | --- | --- | --- |
 | `batches` | `batches(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches. |
 | `batches_async` | `batches_async(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches using async HTTP. |
-| `create` | `create(endpoint: str) -> dict[str, Any]` | Enroll a webhook endpoint for delivery events. |
-| `create_async` | `create_async(endpoint: str) -> dict[str, Any]` | Enroll a webhook endpoint for delivery events using async HTTP. |
-| `delete` | `delete() -> dict[str, Any]` | Delete all configured webhook endpoints. |
-| `delete_async` | `delete_async() -> dict[str, Any]` | Delete all configured webhook endpoints using async HTTP. |
-| `list` | `list() -> dict[str, Any]` | Retrieve configured webhook endpoints. |
-| `list_async` | `list_async() -> dict[str, Any]` | Retrieve configured webhook endpoints using async HTTP. |
+| `create` | `create(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events. |
+| `create_async` | `create_async(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events using async HTTP. |
+| `delete_all` | `delete_all() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint for the account. |
+| `delete_all_async` | `delete_all_async() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint using async HTTP. |
+| `list` | `list() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints. |
+| `list_async` | `list_async() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints using async HTTP. |
 | `parse_signature_input` | `parse_signature_input(value: str) -> SignatureParameters` | Parse a MailChannels RFC 9421 Signature-Input header value. |
 | `public_key` | `public_key(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID. |
 | `public_key_async` | `public_key_async(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID using async HTTP. |
@@ -1116,10 +1114,10 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `queue` | `queue(params: SendParamsType | EmailParams) -> QueuedSendResponse | MailChannelsResponse` | Queue an email through the MailChannels `/send-async` endpoint. |
-| `queue_async` | `queue_async(params: SendParamsType | EmailParams) -> QueuedSendResponse | MailChannelsResponse` | Queue an email through `/send-async` using async HTTP. |
-| `send` | `send(params: SendParamsType | EmailParams, *, dry_run: bool = False) -> SendResponse | MailChannelsResponse` | Send an email through the MailChannels `/send` endpoint. |
-| `send_async` | `send_async(params: SendParamsType | EmailParams, *, dry_run: bool = False) -> SendResponse | MailChannelsResponse` | Send an email through `/send` using async HTTP. |
+| `queue` | `queue(params: SendParamsType | EmailParams) -> QueuedSendResponse | MailChannelsResponse` | Queue an email through MailChannels' `/send-async` endpoint. |
+| `queue_async` | `queue_async(params: SendParamsType | EmailParams) -> QueuedSendResponse | MailChannelsResponse` | Queue an email through `/send-async` using Python asyncio (httpx). |
+| `send` | `send(params: SendParamsType | EmailParams, *, dry_run: bool = False) -> SendResponse | MailChannelsResponse` | Send an email through the synchronous `/send` endpoint. |
+| `send_async` | `send_async(params: SendParamsType | EmailParams, *, dry_run: bool = False) -> SendResponse | MailChannelsResponse` | Send an email through `/send` using Python asyncio (httpx). |
 
 #### `mailchannels.emails.Personalization`
 
@@ -1303,182 +1301,9 @@ Fields:
 - Summary: Normalize SDK email parameters into MailChannels API JSON.
 - Signature: `mailchannels.emails.normalize_email_params(params: SendParamsType | EmailParams) -> dict[str, Any]`
 
-### `mailchannels.domain_checks`
-
-Domain-check resource exports.
-
-#### `mailchannels.domain_checks.CheckDomain`
-
-- Kind: `class`
-- Summary: Module-level domain configuration check operations.
-
-Methods:
-
-| Method | Signature | Summary |
-| --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
-
-#### `mailchannels.domain_checks.CheckDomainParams`
-
-- Kind: `Pydantic model`
-- Summary: Request body for `/check-domain`.
-- Signature: `mailchannels.domain_checks.CheckDomainParams(domain: str, sender_id: str | None, dkim_settings: list[DkimSetting | dict[str, str]] | None)`
-
-Fields:
-
-| Field | Type | Required | Default |
-| --- | --- | --- | --- |
-| `domain` | `str` | yes | `` |
-| `sender_id` | `str \| None` | no | `None` |
-| `dkim_settings` | `list[DkimSetting \| dict[str, str]] \| None` | no | `None` |
-
-#### `mailchannels.domain_checks.CheckDomainResource`
-
-- Kind: `class`
-- Summary: Client-bound domain configuration check operations.
-- Signature: `mailchannels.domain_checks.CheckDomainResource(client: Any) -> None`
-
-Methods:
-
-| Method | Signature | Summary |
-| --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
-
-#### `mailchannels.domain_checks.CheckDomainResult`
-
-- Kind: `Pydantic model`
-- Summary: Domain configuration check response model.
-- Signature: `mailchannels.domain_checks.CheckDomainResult(check_results: CheckResults | None, references: list[str] | None)`
-
-Fields:
-
-| Field | Type | Required | Default |
-| --- | --- | --- | --- |
-| `check_results` | `CheckResults \| None` | no | `None` |
-| `references` | `list[str] \| None` | no | `None` |
-
-#### `mailchannels.domain_checks.CheckResults`
-
-- Kind: `Pydantic model`
-- Summary: Grouped check results returned by `/check-domain`.
-- Signature: `mailchannels.domain_checks.CheckResults(dkim: list[DkimResult] | None, domain_lockdown: LockdownResult | None, sender_domain: SenderDomainResult | None, spf: SpfResult | None)`
-
-Fields:
-
-| Field | Type | Required | Default |
-| --- | --- | --- | --- |
-| `dkim` | `list[DkimResult] \| None` | no | `None` |
-| `domain_lockdown` | `LockdownResult \| None` | no | `None` |
-| `sender_domain` | `SenderDomainResult \| None` | no | `None` |
-| `spf` | `SpfResult \| None` | no | `None` |
-
-#### `mailchannels.domain_checks.DkimResult`
-
-- Kind: `Pydantic model`
-- Summary: One DKIM result returned by the domain check endpoint.
-- Signature: `mailchannels.domain_checks.DkimResult(dkim_domain: str | None, dkim_selector: str | None, dkim_key_status: str | None, reason: str | None, verdict: DomainCheckVerdict | None)`
-
-Fields:
-
-| Field | Type | Required | Default |
-| --- | --- | --- | --- |
-| `dkim_domain` | `str \| None` | no | `None` |
-| `dkim_selector` | `str \| None` | no | `None` |
-| `dkim_key_status` | `str \| None` | no | `None` |
-| `reason` | `str \| None` | no | `None` |
-| `verdict` | `DomainCheckVerdict \| None` | no | `None` |
-
-#### `mailchannels.domain_checks.DkimSetting`
-
-- Kind: `Pydantic model`
-- Summary: DKIM settings used by the domain check endpoint.
-- Signature: `mailchannels.domain_checks.DkimSetting(dkim_domain: str | None, dkim_selector: str | None, dkim_private_key: str | None)`
-
-Fields:
-
-| Field | Type | Required | Default |
-| --- | --- | --- | --- |
-| `dkim_domain` | `str \| None` | no | `None` |
-| `dkim_selector` | `str \| None` | no | `None` |
-| `dkim_private_key` | `str \| None` | no | `None` |
-
-#### `mailchannels.domain_checks.DomainCheckVerdict`
-
-- Kind: `value`
-- Summary: Allowed verdict values returned by domain configuration checks.
-
-#### `mailchannels.domain_checks.DomainChecks`
-
-- Kind: `class`
-- Summary: Module-level domain configuration check operations.
-
-Methods:
-
-| Method | Signature | Summary |
-| --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
-
-#### `mailchannels.domain_checks.DomainChecksResource`
-
-- Kind: `class`
-- Summary: Client-bound domain configuration check operations.
-- Signature: `mailchannels.domain_checks.DomainChecksResource(client: Any) -> None`
-
-Methods:
-
-| Method | Signature | Summary |
-| --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
-
-#### `mailchannels.domain_checks.LockdownResult`
-
-- Kind: `Pydantic model`
-- Summary: Domain Lockdown check result.
-- Signature: `mailchannels.domain_checks.LockdownResult(reason: str | None, verdict: DomainCheckVerdict | None)`
-
-Fields:
-
-| Field | Type | Required | Default |
-| --- | --- | --- | --- |
-| `reason` | `str \| None` | no | `None` |
-| `verdict` | `DomainCheckVerdict \| None` | no | `None` |
-
-#### `mailchannels.domain_checks.SenderDomainResult`
-
-- Kind: `Pydantic model`
-- Summary: Sender-domain DNS check result.
-- Signature: `mailchannels.domain_checks.SenderDomainResult(a: SenderDomainRecordResult | None, mx: SenderDomainRecordResult | None, verdict: DomainCheckVerdict | None)`
-
-Fields:
-
-| Field | Type | Required | Default |
-| --- | --- | --- | --- |
-| `a` | `SenderDomainRecordResult \| None` | no | `None` |
-| `mx` | `SenderDomainRecordResult \| None` | no | `None` |
-| `verdict` | `DomainCheckVerdict \| None` | no | `None` |
-
-#### `mailchannels.domain_checks.SpfResult`
-
-- Kind: `Pydantic model`
-- Summary: SPF check result.
-- Signature: `mailchannels.domain_checks.SpfResult(reason: str | None, spfRecord: str | None, spfRecordError: str | None, verdict: DomainCheckVerdict | None)`
-
-Fields:
-
-| Field | Type | Required | Default |
-| --- | --- | --- | --- |
-| `reason` | `str \| None` | no | `None` |
-| `spfRecord` | `str \| None` | no | `None` |
-| `spfRecordError` | `str \| None` | no | `None` |
-| `verdict` | `DomainCheckVerdict \| None` | no | `None` |
-
 ### `mailchannels.check_domain`
 
-Compatibility exports for the documented `/check-domain` endpoint.
+Domain-check resource exports.
 
 #### `mailchannels.check_domain.CheckDomain`
 
@@ -1582,31 +1407,6 @@ Fields:
 - Kind: `value`
 - Summary: Allowed verdict values returned by domain configuration checks.
 
-#### `mailchannels.check_domain.DomainChecks`
-
-- Kind: `class`
-- Summary: Module-level domain configuration check operations.
-
-Methods:
-
-| Method | Signature | Summary |
-| --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
-
-#### `mailchannels.check_domain.DomainChecksResource`
-
-- Kind: `class`
-- Summary: Client-bound domain configuration check operations.
-- Signature: `mailchannels.check_domain.DomainChecksResource(client: Any) -> None`
-
-Methods:
-
-| Method | Signature | Summary |
-| --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
-
 #### `mailchannels.check_domain.LockdownResult`
 
 - Kind: `Pydantic model`
@@ -1668,8 +1468,8 @@ Methods:
 | `list_async` | `list_async(domain: str, *, selector: str | None = None, status: DkimKeyStatus | None = None, offset: int | None = None, limit: int | None = None, include_dns_record: bool | None = None) -> DkimKeyList | MailChannelsResponse` | Retrieve MailChannels-hosted DKIM keys using async HTTP. |
 | `rotate` | `rotate(domain: str, selector: str, *, new_selector: str) -> DkimRotateResponse | MailChannelsResponse` | Rotate a MailChannels-hosted DKIM key pair. |
 | `rotate_async` | `rotate_async(domain: str, selector: str, *, new_selector: str) -> DkimRotateResponse | MailChannelsResponse` | Rotate a MailChannels-hosted DKIM key pair using async HTTP. |
-| `update_status` | `update_status(domain: str, selector: str, *, status: DkimUpdateStatus) -> dict[str, Any]` | Update the status of a MailChannels-hosted DKIM key pair. |
-| `update_status_async` | `update_status_async(domain: str, selector: str, *, status: DkimUpdateStatus) -> dict[str, Any]` | Update the status of a MailChannels-hosted DKIM key pair using async HTTP. |
+| `update_status` | `update_status(domain: str, selector: str, *, status: DkimUpdateStatus) -> EmptyResponse | MailChannelsResponse` | Update the status of a MailChannels-hosted DKIM key pair. |
+| `update_status_async` | `update_status_async(domain: str, selector: str, *, status: DkimUpdateStatus) -> EmptyResponse | MailChannelsResponse` | Update the status of a MailChannels-hosted DKIM key pair using async HTTP. |
 
 #### `mailchannels.dkim.DkimAlgorithm`
 
@@ -1773,8 +1573,8 @@ Methods:
 | `list_async` | `list_async(domain: str, *, selector: str | None = None, status: DkimKeyStatus | None = None, offset: int | None = None, limit: int | None = None, include_dns_record: bool | None = None) -> DkimKeyList | MailChannelsResponse` | Retrieve MailChannels-hosted DKIM keys using async HTTP. |
 | `rotate` | `rotate(domain: str, selector: str, *, new_selector: str) -> DkimRotateResponse | MailChannelsResponse` | Rotate a MailChannels-hosted DKIM key pair. |
 | `rotate_async` | `rotate_async(domain: str, selector: str, *, new_selector: str) -> DkimRotateResponse | MailChannelsResponse` | Rotate a MailChannels-hosted DKIM key pair using async HTTP. |
-| `update_status` | `update_status(domain: str, selector: str, *, status: DkimUpdateStatus) -> dict[str, Any]` | Update the status of a MailChannels-hosted DKIM key pair. |
-| `update_status_async` | `update_status_async(domain: str, selector: str, *, status: DkimUpdateStatus) -> dict[str, Any]` | Update the status of a MailChannels-hosted DKIM key pair using async HTTP. |
+| `update_status` | `update_status(domain: str, selector: str, *, status: DkimUpdateStatus) -> EmptyResponse | MailChannelsResponse` | Update the status of a MailChannels-hosted DKIM key pair. |
+| `update_status_async` | `update_status_async(domain: str, selector: str, *, status: DkimUpdateStatus) -> EmptyResponse | MailChannelsResponse` | Update the status of a MailChannels-hosted DKIM key pair using async HTTP. |
 
 #### `mailchannels.dkim.DkimRotateResponse`
 
@@ -1811,8 +1611,6 @@ Methods:
 | `engagement_async` | `engagement_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsEngagement | MailChannelsResponse` | Retrieve engagement metrics using async HTTP. |
 | `performance` | `performance(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsPerformance | MailChannelsResponse` | Retrieve performance metrics. |
 | `performance_async` | `performance_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsPerformance | MailChannelsResponse` | Retrieve performance metrics using async HTTP. |
-| `recipient_behavior` | `recipient_behavior(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics using US spelling. |
-| `recipient_behavior_async` | `recipient_behavior_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics using US spelling and async HTTP. |
 | `recipient_behaviour` | `recipient_behaviour(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics. |
 | `recipient_behaviour_async` | `recipient_behaviour_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics using async HTTP. |
 | `senders` | `senders(sender_type: MetricsSenderType, *, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, limit: int | None = None, offset: int | None = None, sort_order: MetricsSortOrder | None = None) -> MetricsSenderResponse | MailChannelsResponse` | Retrieve sender metrics grouped by campaigns or sub-accounts. |
@@ -1911,8 +1709,6 @@ Methods:
 | `engagement_async` | `engagement_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsEngagement | MailChannelsResponse` | Retrieve engagement metrics using async HTTP. |
 | `performance` | `performance(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsPerformance | MailChannelsResponse` | Retrieve performance metrics. |
 | `performance_async` | `performance_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsPerformance | MailChannelsResponse` | Retrieve performance metrics using async HTTP. |
-| `recipient_behavior` | `recipient_behavior(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics using US spelling. |
-| `recipient_behavior_async` | `recipient_behavior_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics using US spelling and async HTTP. |
 | `recipient_behaviour` | `recipient_behaviour(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics. |
 | `recipient_behaviour_async` | `recipient_behaviour_async(*, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, campaign_id: str | None = None, interval: MetricsInterval | None = None) -> MetricsRecipientBehaviour | MailChannelsResponse` | Retrieve recipient behaviour metrics using async HTTP. |
 | `senders` | `senders(sender_type: MetricsSenderType, *, start_time: MetricsTime | None = None, end_time: MetricsTime | None = None, limit: int | None = None, offset: int | None = None, sort_order: MetricsSortOrder | None = None) -> MetricsSenderResponse | MailChannelsResponse` | Retrieve sender metrics grouped by campaigns or sub-accounts. |
@@ -2011,6 +1807,19 @@ Fields:
 | Field | Type | Required | Default |
 | --- | --- | --- | --- |
 
+#### `mailchannels.sub_accounts.ApiKeyList`
+
+- Kind: `Pydantic model`
+- Summary: Paged list of API keys for a sub-account.
+- Signature: `mailchannels.sub_accounts.ApiKeyList(data: list[ApiKey], http_headers: dict[str, str])`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `data` | `list[ApiKey]` | no | `` |
+| `http_headers` | `dict[str, str]` | no | `` |
+
 #### `mailchannels.sub_accounts.CreateSubAccountParams`
 
 - Kind: `TypedDict`
@@ -2045,6 +1854,19 @@ Fields:
 | Field | Type | Required | Default |
 | --- | --- | --- | --- |
 
+#### `mailchannels.sub_accounts.SmtpPasswordList`
+
+- Kind: `Pydantic model`
+- Summary: Paged list of SMTP passwords for a sub-account.
+- Signature: `mailchannels.sub_accounts.SmtpPasswordList(data: list[SmtpPassword], http_headers: dict[str, str])`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `data` | `list[SmtpPassword]` | no | `` |
+| `http_headers` | `dict[str, str]` | no | `` |
+
 #### `mailchannels.sub_accounts.SubAccount`
 
 - Kind: `Pydantic model`
@@ -2071,10 +1893,10 @@ Methods:
 | --- | --- | --- |
 | `create` | `create(handle: str) -> ApiKey | MailChannelsResponse` | Create an API key for a sub-account. |
 | `create_async` | `create_async(handle: str) -> ApiKey | MailChannelsResponse` | Create an API key for a sub-account using async HTTP. |
-| `delete` | `delete(handle: str, key_id: str) -> dict[str, Any]` | Delete an API key from a sub-account. |
-| `delete_async` | `delete_async(handle: str, key_id: str) -> dict[str, Any]` | Delete an API key from a sub-account using async HTTP. |
-| `list` | `list(handle: str) -> dict[str, Any]` | Retrieve API keys for a sub-account. |
-| `list_async` | `list_async(handle: str) -> dict[str, Any]` | Retrieve API keys for a sub-account using async HTTP. |
+| `delete` | `delete(handle: str, key_id: str) -> EmptyResponse | MailChannelsResponse` | Delete an API key from a sub-account. |
+| `delete_async` | `delete_async(handle: str, key_id: str) -> EmptyResponse | MailChannelsResponse` | Delete an API key from a sub-account using async HTTP. |
+| `list` | `list(handle: str) -> ApiKeyList | MailChannelsResponse` | Retrieve API keys for a sub-account. |
+| `list_async` | `list_async(handle: str) -> ApiKeyList | MailChannelsResponse` | Retrieve API keys for a sub-account using async HTTP. |
 
 #### `mailchannels.sub_accounts.SubAccountLimit`
 
@@ -2099,12 +1921,25 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `delete` | `delete(handle: str) -> dict[str, Any]` | Delete the sending limit for a sub-account. |
-| `delete_async` | `delete_async(handle: str) -> dict[str, Any]` | Delete the sending limit for a sub-account using async HTTP. |
+| `delete` | `delete(handle: str) -> EmptyResponse | MailChannelsResponse` | Delete the sending limit for a sub-account. |
+| `delete_async` | `delete_async(handle: str) -> EmptyResponse | MailChannelsResponse` | Delete the sending limit for a sub-account using async HTTP. |
 | `retrieve` | `retrieve(handle: str) -> SubAccountLimit | MailChannelsResponse` | Retrieve the sending limit for a sub-account. |
 | `retrieve_async` | `retrieve_async(handle: str) -> SubAccountLimit | MailChannelsResponse` | Retrieve the sending limit for a sub-account using async HTTP. |
 | `set` | `set(handle: str, *, sends: int | None = None, monthly_limit: int | None = None) -> SubAccountLimit | MailChannelsResponse` | Set the monthly sending limit for a sub-account. |
 | `set_async` | `set_async(handle: str, *, sends: int | None = None, monthly_limit: int | None = None) -> SubAccountLimit | MailChannelsResponse` | Set the monthly sending limit for a sub-account using async HTTP. |
+
+#### `mailchannels.sub_accounts.SubAccountList`
+
+- Kind: `Pydantic model`
+- Summary: Paged list of sub-accounts returned from `/sub-account`.
+- Signature: `mailchannels.sub_accounts.SubAccountList(data: list[SubAccount], http_headers: dict[str, str])`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `data` | `list[SubAccount]` | no | `` |
+| `http_headers` | `dict[str, str]` | no | `` |
 
 #### `mailchannels.sub_accounts.SubAccountSmtpPasswordsResource`
 
@@ -2118,10 +1953,10 @@ Methods:
 | --- | --- | --- |
 | `create` | `create(handle: str) -> SmtpPassword | MailChannelsResponse` | Create an SMTP password for a sub-account. |
 | `create_async` | `create_async(handle: str) -> SmtpPassword | MailChannelsResponse` | Create an SMTP password for a sub-account using async HTTP. |
-| `delete` | `delete(handle: str, password_id: str) -> dict[str, Any]` | Delete an SMTP password from a sub-account. |
-| `delete_async` | `delete_async(handle: str, password_id: str) -> dict[str, Any]` | Delete an SMTP password from a sub-account using async HTTP. |
-| `list` | `list(handle: str) -> dict[str, Any]` | Retrieve SMTP passwords for a sub-account. |
-| `list_async` | `list_async(handle: str) -> dict[str, Any]` | Retrieve SMTP passwords for a sub-account using async HTTP. |
+| `delete` | `delete(handle: str, password_id: str) -> EmptyResponse | MailChannelsResponse` | Delete an SMTP password from a sub-account. |
+| `delete_async` | `delete_async(handle: str, password_id: str) -> EmptyResponse | MailChannelsResponse` | Delete an SMTP password from a sub-account using async HTTP. |
+| `list` | `list(handle: str) -> SmtpPasswordList | MailChannelsResponse` | Retrieve SMTP passwords for a sub-account. |
+| `list_async` | `list_async(handle: str) -> SmtpPasswordList | MailChannelsResponse` | Retrieve SMTP passwords for a sub-account using async HTTP. |
 
 #### `mailchannels.sub_accounts.SubAccounts`
 
@@ -2132,18 +1967,18 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `activate` | `activate(handle: str) -> dict[str, Any]` | Activate a suspended sub-account. |
-| `activate_async` | `activate_async(handle: str) -> dict[str, Any]` | Activate a suspended sub-account using async HTTP. |
+| `activate` | `activate(handle: str) -> EmptyResponse | MailChannelsResponse` | Activate a suspended sub-account. |
+| `activate_async` | `activate_async(handle: str) -> EmptyResponse | MailChannelsResponse` | Activate a suspended sub-account using async HTTP. |
 | `create` | `create(*, company_name: str | None = None, handle: str | None = None) -> SubAccount | MailChannelsResponse` | Create a sub-account under the parent account. |
 | `create_async` | `create_async(*, company_name: str | None = None, handle: str | None = None) -> SubAccount | MailChannelsResponse` | Create a sub-account under the parent account using async HTTP. |
-| `delete` | `delete(handle: str) -> dict[str, Any]` | Delete a sub-account. |
-| `delete_async` | `delete_async(handle: str) -> dict[str, Any]` | Delete a sub-account using async HTTP. |
-| `list` | `list(*, limit: int | None = None, offset: int | None = None) -> dict[str, Any]` | Retrieve sub-accounts for the parent account. |
-| `list_async` | `list_async(*, limit: int | None = None, offset: int | None = None) -> dict[str, Any]` | Retrieve sub-accounts for the parent account using async HTTP. |
+| `delete` | `delete(handle: str) -> EmptyResponse | MailChannelsResponse` | Delete a sub-account. |
+| `delete_async` | `delete_async(handle: str) -> EmptyResponse | MailChannelsResponse` | Delete a sub-account using async HTTP. |
+| `list` | `list(*, limit: int | None = None, offset: int | None = None) -> SubAccountList | MailChannelsResponse` | Retrieve sub-accounts for the parent account. |
+| `list_async` | `list_async(*, limit: int | None = None, offset: int | None = None) -> SubAccountList | MailChannelsResponse` | Retrieve sub-accounts for the parent account using async HTTP. |
 | `retrieve_usage` | `retrieve_usage(handle: str) -> UsageStats | MailChannelsResponse` | Retrieve usage statistics for a sub-account. |
 | `retrieve_usage_async` | `retrieve_usage_async(handle: str) -> UsageStats | MailChannelsResponse` | Retrieve usage statistics for a sub-account using async HTTP. |
-| `suspend` | `suspend(handle: str) -> dict[str, Any]` | Suspend a sub-account. |
-| `suspend_async` | `suspend_async(handle: str) -> dict[str, Any]` | Suspend a sub-account using async HTTP. |
+| `suspend` | `suspend(handle: str) -> EmptyResponse | MailChannelsResponse` | Suspend a sub-account. |
+| `suspend_async` | `suspend_async(handle: str) -> EmptyResponse | MailChannelsResponse` | Suspend a sub-account using async HTTP. |
 
 #### `mailchannels.sub_accounts.SubAccountsResource`
 
@@ -2155,18 +1990,18 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `activate` | `activate(handle: str) -> dict[str, Any]` | Activate a suspended sub-account. |
-| `activate_async` | `activate_async(handle: str) -> dict[str, Any]` | Activate a suspended sub-account using async HTTP. |
+| `activate` | `activate(handle: str) -> EmptyResponse | MailChannelsResponse` | Activate a suspended sub-account. |
+| `activate_async` | `activate_async(handle: str) -> EmptyResponse | MailChannelsResponse` | Activate a suspended sub-account using async HTTP. |
 | `create` | `create(*, company_name: str | None = None, handle: str | None = None) -> SubAccount | MailChannelsResponse` | Create a sub-account under the parent account. |
 | `create_async` | `create_async(*, company_name: str | None = None, handle: str | None = None) -> SubAccount | MailChannelsResponse` | Create a sub-account under the parent account using async HTTP. |
-| `delete` | `delete(handle: str) -> dict[str, Any]` | Delete a sub-account. |
-| `delete_async` | `delete_async(handle: str) -> dict[str, Any]` | Delete a sub-account using async HTTP. |
-| `list` | `list(*, limit: int | None = None, offset: int | None = None) -> dict[str, Any]` | Retrieve sub-accounts for the parent account. |
-| `list_async` | `list_async(*, limit: int | None = None, offset: int | None = None) -> dict[str, Any]` | Retrieve sub-accounts for the parent account using async HTTP. |
+| `delete` | `delete(handle: str) -> EmptyResponse | MailChannelsResponse` | Delete a sub-account. |
+| `delete_async` | `delete_async(handle: str) -> EmptyResponse | MailChannelsResponse` | Delete a sub-account using async HTTP. |
+| `list` | `list(*, limit: int | None = None, offset: int | None = None) -> SubAccountList | MailChannelsResponse` | Retrieve sub-accounts for the parent account. |
+| `list_async` | `list_async(*, limit: int | None = None, offset: int | None = None) -> SubAccountList | MailChannelsResponse` | Retrieve sub-accounts for the parent account using async HTTP. |
 | `retrieve_usage` | `retrieve_usage(handle: str) -> UsageStats | MailChannelsResponse` | Retrieve usage statistics for a sub-account. |
 | `retrieve_usage_async` | `retrieve_usage_async(handle: str) -> UsageStats | MailChannelsResponse` | Retrieve usage statistics for a sub-account using async HTTP. |
-| `suspend` | `suspend(handle: str) -> dict[str, Any]` | Suspend a sub-account. |
-| `suspend_async` | `suspend_async(handle: str) -> dict[str, Any]` | Suspend a sub-account using async HTTP. |
+| `suspend` | `suspend(handle: str) -> EmptyResponse | MailChannelsResponse` | Suspend a sub-account. |
+| `suspend_async` | `suspend_async(handle: str) -> EmptyResponse | MailChannelsResponse` | Suspend a sub-account using async HTTP. |
 
 #### `mailchannels.sub_accounts.UsageStats`
 
@@ -2249,10 +2084,10 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `create` | `create(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> dict[str, Any]` | Create suppression entries. |
-| `create_async` | `create_async(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> dict[str, Any]` | Create suppression entries using async HTTP. |
-| `delete` | `delete(recipient: str, *, source: SuppressionDeleteSource | None = None) -> dict[str, Any]` | Delete suppression entries for a recipient. |
-| `delete_async` | `delete_async(recipient: str, *, source: SuppressionDeleteSource | None = None) -> dict[str, Any]` | Delete suppression entries for a recipient using async HTTP. |
+| `create` | `create(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> EmptyResponse | MailChannelsResponse` | Create suppression entries. |
+| `create_async` | `create_async(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> EmptyResponse | MailChannelsResponse` | Create suppression entries using async HTTP. |
+| `delete` | `delete(recipient: str, *, source: SuppressionDeleteSource | None = None) -> EmptyResponse | MailChannelsResponse` | Delete suppression entries for a recipient. |
+| `delete_async` | `delete_async(recipient: str, *, source: SuppressionDeleteSource | None = None) -> EmptyResponse | MailChannelsResponse` | Delete suppression entries for a recipient using async HTTP. |
 | `list` | `list(**kwargs: Any) -> SuppressionListResponse | MailChannelsResponse` | Retrieve suppression entries. |
 | `list_async` | `list_async(**kwargs: Any) -> SuppressionListResponse | MailChannelsResponse` | Retrieve suppression entries using async HTTP. |
 
@@ -2266,10 +2101,10 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `create` | `create(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> dict[str, Any]` | Create suppression entries. |
-| `create_async` | `create_async(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> dict[str, Any]` | Create suppression entries using async HTTP. |
-| `delete` | `delete(recipient: str, *, source: SuppressionDeleteSource | None = None) -> dict[str, Any]` | Delete suppression entries for a recipient. |
-| `delete_async` | `delete_async(recipient: str, *, source: SuppressionDeleteSource | None = None) -> dict[str, Any]` | Delete suppression entries for a recipient using async HTTP. |
+| `create` | `create(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> EmptyResponse | MailChannelsResponse` | Create suppression entries. |
+| `create_async` | `create_async(entries: list_type[SuppressionEntryParams], *, add_to_sub_accounts: bool | None = None) -> EmptyResponse | MailChannelsResponse` | Create suppression entries using async HTTP. |
+| `delete` | `delete(recipient: str, *, source: SuppressionDeleteSource | None = None) -> EmptyResponse | MailChannelsResponse` | Delete suppression entries for a recipient. |
+| `delete_async` | `delete_async(recipient: str, *, source: SuppressionDeleteSource | None = None) -> EmptyResponse | MailChannelsResponse` | Delete suppression entries for a recipient using async HTTP. |
 | `list` | `list(*, recipient: str | None = None, source: SuppressionSource | None = None, created_before: str | None = None, created_after: str | None = None, limit: int | None = None, offset: int | None = None) -> SuppressionListResponse | MailChannelsResponse` | Retrieve suppression entries. |
 | `list_async` | `list_async(*, recipient: str | None = None, source: SuppressionSource | None = None, created_before: str | None = None, created_after: str | None = None, limit: int | None = None, offset: int | None = None) -> SuppressionListResponse | MailChannelsResponse` | Retrieve suppression entries using async HTTP. |
 
@@ -2428,6 +2263,19 @@ Fields:
 - Kind: `value`
 - Summary: HTTP header mapping used by webhook verification helpers.
 
+#### `mailchannels.webhooks.WebhookList`
+
+- Kind: `Pydantic model`
+- Summary: List of configured webhook endpoints returned from `/webhook`.
+- Signature: `mailchannels.webhooks.WebhookList(data: list[Webhook], http_headers: dict[str, str])`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `data` | `list[Webhook]` | no | `` |
+| `http_headers` | `dict[str, str]` | no | `` |
+
 #### `mailchannels.webhooks.WebhookPayload`
 
 - Kind: `value`
@@ -2526,12 +2374,12 @@ Methods:
 | --- | --- | --- |
 | `batches` | `batches(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches. |
 | `batches_async` | `batches_async(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches using async HTTP. |
-| `create` | `create(endpoint: str) -> dict[str, Any]` | Enroll a webhook endpoint for delivery events. |
-| `create_async` | `create_async(endpoint: str) -> dict[str, Any]` | Enroll a webhook endpoint for delivery events using async HTTP. |
-| `delete` | `delete() -> dict[str, Any]` | Delete all configured webhook endpoints. |
-| `delete_async` | `delete_async() -> dict[str, Any]` | Delete all configured webhook endpoints using async HTTP. |
-| `list` | `list() -> dict[str, Any]` | Retrieve configured webhook endpoints. |
-| `list_async` | `list_async() -> dict[str, Any]` | Retrieve configured webhook endpoints using async HTTP. |
+| `create` | `create(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events. |
+| `create_async` | `create_async(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events using async HTTP. |
+| `delete_all` | `delete_all() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint for the account. |
+| `delete_all_async` | `delete_all_async() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint using async HTTP. |
+| `list` | `list() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints. |
+| `list_async` | `list_async() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints using async HTTP. |
 | `parse_signature_input` | `parse_signature_input(value: str) -> SignatureParameters` | Parse a MailChannels RFC 9421 Signature-Input header value. |
 | `public_key` | `public_key(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID. |
 | `public_key_async` | `public_key_async(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID using async HTTP. |
@@ -2556,12 +2404,12 @@ Methods:
 | --- | --- | --- |
 | `batches` | `batches(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches. |
 | `batches_async` | `batches_async(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches using async HTTP. |
-| `create` | `create(endpoint: str) -> dict[str, Any]` | Enroll a webhook endpoint for delivery events. |
-| `create_async` | `create_async(endpoint: str) -> dict[str, Any]` | Enroll a webhook endpoint for delivery events using async HTTP. |
-| `delete` | `delete() -> dict[str, Any]` | Delete all configured webhook endpoints. |
-| `delete_async` | `delete_async() -> dict[str, Any]` | Delete all configured webhook endpoints using async HTTP. |
-| `list` | `list() -> dict[str, Any]` | Retrieve configured webhook endpoints. |
-| `list_async` | `list_async() -> dict[str, Any]` | Retrieve configured webhook endpoints using async HTTP. |
+| `create` | `create(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events. |
+| `create_async` | `create_async(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events using async HTTP. |
+| `delete_all` | `delete_all() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint for the account. |
+| `delete_all_async` | `delete_all_async() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint using async HTTP. |
+| `list` | `list() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints. |
+| `list_async` | `list_async() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints using async HTTP. |
 | `public_key` | `public_key(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID. |
 | `public_key_async` | `public_key_async(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID using async HTTP. |
 | `resend_batch` | `resend_batch(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch. |

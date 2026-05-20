@@ -314,38 +314,6 @@ class MetricsResource(Generic[StrictResponses]):
             response_model=MetricsRecipientBehaviour,
         )
 
-    def recipient_behavior(
-        self,
-        *,
-        start_time: MetricsTime | None = None,
-        end_time: MetricsTime | None = None,
-        campaign_id: str | None = None,
-        interval: MetricsInterval | None = None,
-    ) -> MetricsRecipientBehaviour | MailChannelsResponse:
-        """Retrieve recipient behaviour metrics using US spelling."""
-        return self.recipient_behaviour(
-            start_time=start_time,
-            end_time=end_time,
-            campaign_id=campaign_id,
-            interval=interval,
-        )
-
-    async def recipient_behavior_async(
-        self,
-        *,
-        start_time: MetricsTime | None = None,
-        end_time: MetricsTime | None = None,
-        campaign_id: str | None = None,
-        interval: MetricsInterval | None = None,
-    ) -> MetricsRecipientBehaviour | MailChannelsResponse:
-        """Retrieve recipient behaviour metrics using US spelling and async HTTP."""
-        return await self.recipient_behaviour_async(
-            start_time=start_time,
-            end_time=end_time,
-            campaign_id=campaign_id,
-            interval=interval,
-        )
-
     @overload
     def volume(
         self: MetricsResource[Literal[True]],
@@ -683,40 +651,6 @@ class Metrics:
         from ..client import get_default_client
 
         return await get_default_client().metrics.recipient_behaviour_async(
-            start_time=start_time,
-            end_time=end_time,
-            campaign_id=campaign_id,
-            interval=interval,
-        )
-
-    @classmethod
-    def recipient_behavior(
-        cls,
-        *,
-        start_time: MetricsTime | None = None,
-        end_time: MetricsTime | None = None,
-        campaign_id: str | None = None,
-        interval: MetricsInterval | None = None,
-    ) -> MetricsRecipientBehaviour | MailChannelsResponse:
-        """Retrieve recipient behaviour metrics using US spelling."""
-        return cls.recipient_behaviour(
-            start_time=start_time,
-            end_time=end_time,
-            campaign_id=campaign_id,
-            interval=interval,
-        )
-
-    @classmethod
-    async def recipient_behavior_async(
-        cls,
-        *,
-        start_time: MetricsTime | None = None,
-        end_time: MetricsTime | None = None,
-        campaign_id: str | None = None,
-        interval: MetricsInterval | None = None,
-    ) -> MetricsRecipientBehaviour | MailChannelsResponse:
-        """Retrieve recipient behaviour metrics using US spelling and async HTTP."""
-        return await cls.recipient_behaviour_async(
             start_time=start_time,
             end_time=end_time,
             campaign_id=campaign_id,

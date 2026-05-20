@@ -10,9 +10,9 @@ import pytest
 from conftest import FakeRequestsClient
 
 import mailchannels
+from mailchannels.check_domain.types import CheckDomainResult
 from mailchannels.client import Client
 from mailchannels.dkim.types import DkimKeyInfo, DkimKeyList, DkimRotateResponse
-from mailchannels.domain_checks.types import CheckDomainResult
 from mailchannels.emails.types import QueuedSendResponse, SendResponse
 from mailchannels.metrics.types import (
     MetricsEngagement,
@@ -21,18 +21,22 @@ from mailchannels.metrics.types import (
     MetricsSenderResponse,
     MetricsVolume,
 )
-from mailchannels.response import SDKResponse
+from mailchannels.response import EmptyResponse, SDKResponse
 from mailchannels.sub_accounts.types import (
     ApiKey,
+    ApiKeyList,
     SmtpPassword,
+    SmtpPasswordList,
     SubAccount,
     SubAccountLimit,
+    SubAccountList,
 )
 from mailchannels.sub_accounts.types import UsageStats as SubAccountUsageStats
 from mailchannels.suppressions.types import SuppressionListResponse
 from mailchannels.usage import UsageStats
 from mailchannels.webhooks.types import (
     WebhookBatchResult,
+    WebhookList,
     WebhookPublicKey,
     WebhookValidationResults,
 )
@@ -45,7 +49,7 @@ class StrictResponseCase:
     name: str
     call: Callable[[Client], Any]
     model: type[Any]
-    valid: dict[str, Any]
+    valid: Any
     missing_required: dict[str, Any] | None = None
     invalid_type: dict[str, Any] | None = None
 
@@ -360,6 +364,102 @@ STRICT_RESPONSE_CASES = (
         missing_required={"all_passed": True},
         invalid_type={"all_passed": "yes", "results": [{"result": "unknown"}]},
     ),
+    StrictResponseCase(
+        "webhook-list",
+        lambda client: client.webhooks.list(),
+        WebhookList,
+        [{"webhook": "https://example.com/events"}],
+    ),
+    StrictResponseCase(
+        "webhook-create",
+        lambda client: client.webhooks.create("https://example.com/events"),
+        EmptyResponse,
+        None,
+    ),
+    StrictResponseCase(
+        "webhook-delete-all",
+        lambda client: client.webhooks.delete_all(),
+        EmptyResponse,
+        None,
+    ),
+    StrictResponseCase(
+        "sub-accounts-list",
+        lambda client: client.sub_accounts.list(),
+        SubAccountList,
+        [{"handle": "clienta", "company_name": "Client A"}],
+    ),
+    StrictResponseCase(
+        "sub-account-api-keys-list",
+        lambda client: client.sub_accounts.api_keys.list("clienta"),
+        ApiKeyList,
+        [{"id": "key_123"}],
+    ),
+    StrictResponseCase(
+        "sub-account-smtp-passwords-list",
+        lambda client: client.sub_accounts.smtp_passwords.list("clienta"),
+        SmtpPasswordList,
+        [{"id": "smtp_123"}],
+    ),
+    StrictResponseCase(
+        "sub-account-delete",
+        lambda client: client.sub_accounts.delete("clienta"),
+        EmptyResponse,
+        None,
+    ),
+    StrictResponseCase(
+        "sub-account-suspend",
+        lambda client: client.sub_accounts.suspend("clienta"),
+        EmptyResponse,
+        None,
+    ),
+    StrictResponseCase(
+        "sub-account-activate",
+        lambda client: client.sub_accounts.activate("clienta"),
+        EmptyResponse,
+        None,
+    ),
+    StrictResponseCase(
+        "sub-account-api-key-delete",
+        lambda client: client.sub_accounts.api_keys.delete("clienta", "key_123"),
+        EmptyResponse,
+        None,
+    ),
+    StrictResponseCase(
+        "sub-account-smtp-password-delete",
+        lambda client: client.sub_accounts.smtp_passwords.delete("clienta", "smtp_123"),
+        EmptyResponse,
+        None,
+    ),
+    StrictResponseCase(
+        "sub-account-limit-delete",
+        lambda client: client.sub_accounts.limits.delete("clienta"),
+        EmptyResponse,
+        None,
+    ),
+    StrictResponseCase(
+        "suppressions-create",
+        lambda client: client.suppressions.create(
+            [{"recipient": "recipient@example.net"}],
+        ),
+        EmptyResponse,
+        None,
+    ),
+    StrictResponseCase(
+        "suppressions-delete",
+        lambda client: client.suppressions.delete("recipient@example.net"),
+        EmptyResponse,
+        None,
+    ),
+    StrictResponseCase(
+        "dkim-update-status",
+        lambda client: client.dkim.update_status(
+            "example.com",
+            "mcdkim",
+            status="revoked",
+        ),
+        EmptyResponse,
+        None,
+    ),
 )
 
 
@@ -488,10 +588,14 @@ def test_strict_response_models_parse_valid_api_bodies(
     case: StrictResponseCase,
 ) -> None:
     """Every wired strict response model parses valid API bodies with headers."""
+    if isinstance(case.valid, dict):
+        body: Any = {**case.valid, "extra_field": "kept"}
+    else:
+        body = case.valid
     transport = FakeRequestsClient(
         SDKResponse(
             200,
-            {**case.valid, "extra_field": "kept"},
+            body,
             "{}",
             headers={"X-Request-ID": "req_strict"},
         )
@@ -506,7 +610,8 @@ def test_strict_response_models_parse_valid_api_bodies(
 
     assert isinstance(result, case.model)
     assert result.http_headers == {"X-Request-ID": "req_strict"}
-    assert result.extra_field == "kept"
+    if isinstance(case.valid, dict):
+        assert result.extra_field == "kept"
 
 
 @pytest.mark.parametrize(

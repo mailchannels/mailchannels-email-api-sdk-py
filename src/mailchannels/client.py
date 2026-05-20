@@ -78,8 +78,8 @@ class Client(Generic[StrictResponses]):
         self.async_http_client = async_http_client or HTTPXClient()
         self.strict_responses = strict_responses
 
+        from .check_domain import CheckDomainResource
         from .dkim import DkimResource
-        from .domain_checks import DomainChecksResource
         from .emails import EmailsResource
         from .metrics import MetricsResource
         from .sub_accounts import SubAccountsResource
@@ -88,10 +88,9 @@ class Client(Generic[StrictResponses]):
         from .webhooks import WebhooksResource
 
         self.dkim: DkimResource[StrictResponses] = DkimResource(self)
-        self.domain_checks: DomainChecksResource[StrictResponses] = (
-            DomainChecksResource(self)
+        self.check_domain: CheckDomainResource[StrictResponses] = (
+            CheckDomainResource(self)
         )
-        self.check_domain = self.domain_checks
         self.emails: EmailsResource[StrictResponses] = EmailsResource(self)
         self.metrics: MetricsResource[StrictResponses] = MetricsResource(self)
         self.suppressions: SuppressionsResource[StrictResponses] = (

@@ -61,12 +61,10 @@ def test_metrics_time_series_endpoints_use_documented_paths() -> None:
 
     client.metrics.performance(start_time="2026-04-01", interval="week")
     client.metrics.recipient_behaviour(campaign_id="newsletter")
-    client.metrics.recipient_behavior(campaign_id="newsletter-us")
     client.metrics.volume(end_time="2026-04-24T00:00:00Z")
 
     assert [call["url"] for call in transport.calls] == [
         "https://api.example.test/tx/v1/metrics/performance",
-        "https://api.example.test/tx/v1/metrics/recipient-behaviour",
         "https://api.example.test/tx/v1/metrics/recipient-behaviour",
         "https://api.example.test/tx/v1/metrics/volume",
     ]
@@ -75,8 +73,7 @@ def test_metrics_time_series_endpoints_use_documented_paths() -> None:
         "interval": "week",
     }
     assert transport.calls[1]["params"] == {"campaign_id": "newsletter"}
-    assert transport.calls[2]["params"] == {"campaign_id": "newsletter-us"}
-    assert transport.calls[3]["params"] == {"end_time": "2026-04-24T00:00:00Z"}
+    assert transport.calls[2]["params"] == {"end_time": "2026-04-24T00:00:00Z"}
 
 
 def test_sender_metrics_uses_sender_type_path_and_pagination_query() -> None:

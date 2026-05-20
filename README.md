@@ -6,6 +6,10 @@
 [![PyPI](https://img.shields.io/pypi/v/mailchannels)](https://pypi.org/project/mailchannels/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mailchannels)](https://pypi.org/project/mailchannels/)
 
+<!-- generated:api-version -->
+Built and tested against MailChannels Email API 0.21.1.
+<!-- /generated:api-version -->
+
 `mailchannels` is a typed Python SDK for the MailChannels Email API. It keeps
 the first send small, then opens up the production features that matter when
 email is part of a real product: queued delivery through `/send-async`,
@@ -116,6 +120,31 @@ queued = mailchannels.Emails.queue(
 
 This is usually the better default for high-throughput web applications, job
 workers, or any path where email should not slow down the user-facing request.
+
+### Send vs Queue, And The Two Meanings Of "Async"
+
+The SDK exposes four sending methods, and the names can be confusing because
+"async" means two different things:
+
+| Method | API endpoint | Python execution |
+| --- | --- | --- |
+| `Emails.send()` | `/send` | synchronous (blocks the calling thread) |
+| `Emails.send_async()` | `/send` | asyncio (`await`-able) |
+| `Emails.queue()` | `/send-async` | synchronous (blocks the calling thread) |
+| `Emails.queue_async()` | `/send-async` | asyncio (`await`-able) |
+
+`send` vs `queue` is a **server-side** distinction: both endpoints run the
+same request validation and have the same delivery semantics, but
+`/send-async` defers some per-recipient processing into the background so the
+request returns faster. The `_async` suffix is a separate, **client-side**
+Python asyncio distinction — it's the same suffix used on every other resource
+(e.g. `client.webhooks.list_async()`).
+
+Rule of thumb: prefer `queue` when request latency matters, and especially
+for sends with a large number of recipients — the per-recipient work on
+the `/send` path can be slow enough that the request times out. Pick `send`
+only when you specifically need the regular (non-deferred) path. Add `_async`
+if you're calling from asyncio code.
 
 ## Core Concepts
 
@@ -529,7 +558,8 @@ senders = mailchannels.Metrics.senders(
 ```
 
 Available metrics methods are `engagement()`, `performance()`,
-`recipient_behaviour()`, `recipient_behavior()`, `volume()`, and `senders()`.
+`recipient_behaviour()`, `volume()`, and `senders()`. The British spelling
+matches the underlying `/metrics/recipient-behaviour` endpoint.
 
 ### Suppression Lists
 

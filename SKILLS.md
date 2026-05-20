@@ -282,7 +282,6 @@ Setting a limit must send `PUT` with a `sends` payload. The SDK still accepts
 ## Domain Checks
 
 Use `mailchannels.CheckDomain` or `client.check_domain` for `/check-domain`.
-`mailchannels.DomainChecks` and `client.domain_checks` remain supported aliases.
 This endpoint checks DKIM, SPF, sender-domain DNS, and Domain Lockdown status:
 
 ```python
@@ -316,7 +315,8 @@ mailchannels.Metrics.engagement(
 ```
 
 Available methods are `engagement()`, `performance()`,
-`recipient_behaviour()`, `recipient_behavior()`, `volume()`, and `senders()`.
+`recipient_behaviour()`, `volume()`, and `senders()`. The British spelling
+mirrors the underlying `/metrics/recipient-behaviour` endpoint.
 Use `senders("campaigns")` or `senders("sub-accounts")` for grouped sender
 metrics.
 

@@ -6,7 +6,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, TypeVar
 
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from .exceptions import (
     ApiError,
@@ -46,6 +46,20 @@ class MailChannelsResponse(dict[str, Any]):
             raise AttributeError(
                 f"'{type(self).__name__}' object has no attribute '{name}'"
             ) from error
+
+
+class EmptyResponse(BaseModel):
+    """Response model for endpoints that intentionally return no body.
+
+    The MailChannels API returns 201/204 with no payload for several mutations
+    (delete, suspend, activate, status updates). This model preserves the
+    response headers for diagnostics — request IDs, rate-limit hints — without
+    inventing fake content.
+    """
+
+    model_config = ConfigDict(extra="allow")
+
+    http_headers: dict[str, str] = Field(default_factory=dict)
 
 
 def response_data(response: SDKResponse) -> MailChannelsResponse:

@@ -512,8 +512,8 @@ ROUTE_CONTRACTS: tuple[OperationContract, ...] = (
     OperationContract(
         "DELETE",
         "/webhook",
-        lambda client: client.webhooks.delete(),
-        lambda client: client.webhooks.delete_async(),
+        lambda client: client.webhooks.delete_all(),
+        lambda client: client.webhooks.delete_all_async(),
     ),
     OperationContract(
         "GET",

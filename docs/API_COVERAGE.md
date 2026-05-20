@@ -6,7 +6,7 @@ This report is generated from the MailChannels OpenAPI document and the SDK rout
 - OpenAPI source: `https://docs.mailchannels.net/email-api.yaml`
 - OpenAPI version: `0.21.1`
 - OpenAPI SHA-256: `4e3f511e41a095792194626e35552e08602fd1257073758fdcb030b120c5ec33`
-- Generated at: `2026-05-19T22:12:05+00:00`
+- Generated at: `2026-05-20T19:05:02+00:00`
 
 ## Summary
 
@@ -50,7 +50,7 @@ This report is generated from the MailChannels OpenAPI document and the SDK rout
 | `POST` | `/suppression-list` | Create Suppression Entries | `mailchannels.Suppressions.create()` | yes | yes | yes | destructive | supported |
 | `DELETE` | `/suppression-list/recipients/{recipient}` | Delete Suppression Entry | `mailchannels.Suppressions.delete()` | yes | yes | yes | destructive | supported |
 | `GET` | `/usage` | Retrieve Usage Stats | `mailchannels.Usage.retrieve()` | yes | yes | yes | routine | supported |
-| `DELETE` | `/webhook` | Delete Customer Webhooks | `mailchannels.Webhooks.delete()` | yes | yes | yes | destructive | supported |
+| `DELETE` | `/webhook` | Delete Customer Webhooks | `mailchannels.Webhooks.delete_all()` | yes | yes | yes | destructive | supported |
 | `GET` | `/webhook` | Retrieve Customer Webhooks | `mailchannels.Webhooks.list()` | yes | yes | yes | routine, destructive | supported |
 | `POST` | `/webhook` | Enroll for Webhook Notifications | `mailchannels.Webhooks.create()` | yes | yes | yes | destructive | supported |
 | `GET` | `/webhook-batch` | Retrieve Webhook Batches | `mailchannels.Webhooks.batches()` | yes | yes | yes | none | supported |
