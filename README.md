@@ -1,7 +1,7 @@
 # MailChannels Python SDK
 
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-46aef7.svg)](https://github.com/astral-sh/ruff)
-[![CI](https://github.com/ttulttul/mailchannels-python-sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/ttulttul/mailchannels-python-sdk/actions/workflows/ci.yml)
+[![Build Status](https://img.shields.io/bitbucket/pipelines/mailchannels/mailchannels-email-api-sdk-py/main.svg)](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/pipelines)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![PyPI](https://img.shields.io/pypi/v/mailchannels)](https://pypi.org/project/mailchannels/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mailchannels)](https://pypi.org/project/mailchannels/)
@@ -167,10 +167,10 @@ most often:
 
 Generated reports provide the deeper detail:
 
-- [API coverage report](docs/API_COVERAGE.md) summarizes endpoint coverage,
+- [API coverage report](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/API_COVERAGE.md) summarizes endpoint coverage,
   contract-test coverage, online-test coverage, the OpenAPI spec hash, and the
   SDK version used for the report.
-- [API reference](docs/API_REFERENCE.md) lists public exports, classes, methods,
+- [API reference](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/API_REFERENCE.md) lists public exports, classes, methods,
   parameters, return types, model fields, and compact examples from the SDK
   source.
 
@@ -200,7 +200,7 @@ print(queued.http_headers)
 ```
 
 Set `strict_responses=True` when you want modeled endpoints to return Pydantic
-response objects instead. See [Advanced Usage](docs/ADVANCED.md) for strict
+response objects instead. See [Advanced Usage](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/ADVANCED.md) for strict
 response models, custom transports, API compatibility metadata, and client
 lifecycle details.
 
@@ -359,7 +359,7 @@ mailchannels.Emails.queue(
 )
 ```
 
-See [DKIM And DNS](docs/DKIM.md) for key rotation, customer-managed private
+See [DKIM And DNS](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/DKIM.md) for key rotation, customer-managed private
 keys, and a Cloudflare DNS publication example.
 
 ### Add Unsubscribe Support
@@ -659,15 +659,15 @@ to send consistent error metadata to your logger.
 
 ## API Reference And Further Reading
 
-- [API reference](docs/API_REFERENCE.md) is the generated public surface
+- [API reference](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/API_REFERENCE.md) is the generated public surface
   reference.
-- [API coverage](docs/API_COVERAGE.md) shows endpoint, contract-test, and online
+- [API coverage](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/API_COVERAGE.md) shows endpoint, contract-test, and online
   test coverage against the MailChannels OpenAPI document.
-- [Advanced usage](docs/ADVANCED.md) covers strict responses, custom transports,
+- [Advanced usage](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/ADVANCED.md) covers strict responses, custom transports,
   API compatibility metadata, client lifecycle, and low-level webhook helpers.
-- [DKIM and DNS](docs/DKIM.md) covers hosted DKIM keys, rotation, customer-managed
+- [DKIM and DNS](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/DKIM.md) covers hosted DKIM keys, rotation, customer-managed
   keys, and Cloudflare DNS publication.
-- [Development](docs/DEVELOPMENT.md) covers local checks, online tests, SmolVM,
+- [Development](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/DEVELOPMENT.md) covers local checks, online tests, SmolVM,
   CI, and publishing.
 - `examples/` contains tested examples for async sending, attachments,
   templates, unsubscribe, custom headers, DKIM, Cloudflare DKIM publication,
@@ -676,4 +676,4 @@ to send consistent error metadata to your logger.
 
 ## License
 
-MIT License. See [LICENSE](LICENSE).
+MIT License. See [LICENSE](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/LICENSE).

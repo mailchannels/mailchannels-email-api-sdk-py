@@ -15,6 +15,7 @@ uv run python scripts/smoke_wheel_install.py
 uv run python scripts/check_openapi_drift.py
 uv run python scripts/generate_api_coverage.py
 uv run python scripts/generate_api_reference.py
+uv run python scripts/regen_readme_version.py
 ```
 
 Current uv releases do not expose `uv pytest` as a native subcommand; use
@@ -22,31 +23,121 @@ Current uv releases do not expose `uv pytest` as a native subcommand; use
 
 ## CI
 
-The GitHub Actions CI workflow runs checks on pushes to `main`, pull requests,
-and manual dispatches. It runs pytest across Python 3.9 through 3.13 and
-enforces an 85% branch coverage threshold on Python 3.13. It also compares the
-SDK's declared routes with the official MailChannels OpenAPI spec so documented
-endpoint changes are caught early.
+Bitbucket Pipelines is configured in
+[bitbucket-pipelines.yml](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/bitbucket-pipelines.yml).
+On every push it runs ruff, mypy, pytest with coverage (85% branch threshold),
+the OpenAPI drift check, the external consumer type check, and a clean wheel
+install smoke test. The 3.9–3.13 Python matrix runs on every merge to `main`
+and can also be triggered ad-hoc as the `multi-python` custom pipeline. A
+separate `online-tests` custom pipeline runs the live API tests on demand and
+expects `MAILCHANNELS_API_KEY` (and optionally `MAILCHANNELS_API_URL`,
+`MAILCHANNELS_ONLINE_FROM`, `MAILCHANNELS_ONLINE_TO`) configured as repository
+or deployment variables in Bitbucket.
 
-The unit test suite includes direct transport-wrapper tests, explicit API error
-mapping tests, strict response model validation, negative email payload tests,
-README snippet smoke tests, external-consumer type checks, and clean wheel
-install checks with and without the `[async]` extra.
+The unit test suite includes direct transport-wrapper tests, explicit API
+error mapping tests, strict response model validation, negative email payload
+tests, README snippet smoke tests, external-consumer type checks, and clean
+wheel install checks with and without the `[async]` extra. It also verifies
+that the README API-version line
+([tests/test_readme_version.py](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/tests/test_readme_version.py))
+stays in sync with `API_SPEC_COMPATIBILITY`.
 
-The separate online API workflow is manual-only and expects
-`MAILCHANNELS_API_KEY` as a GitHub secret plus optional repository or
-environment variables for sender, recipient, DKIM domain, and API URL.
+## Publishing to PyPI
 
-## Publishing
+Publishing is driven by Bitbucket Pipelines. PyPI does not have a native
+Bitbucket integration for trusted publishing, so the pipeline authenticates
+with an API token.
 
-The PyPI publishing workflow builds, tests, type-checks, validates OpenAPI
-drift, runs `twine check`, and publishes the verified `dist/` artifact through
-PyPI trusted publishing.
+- **TestPyPI publish** (<https://test.pypi.org/>) runs automatically on every
+  merge to `main`, after the full check suite and the 3.9–3.13 Python
+  matrix all pass. It uses `twine upload --skip-existing`, so a merge that
+  doesn't change the version in `pyproject.toml` succeeds silently without
+  republishing the same artifact. The `custom: publish-testpypi` trigger
+  still exists for ad-hoc dry runs on feature branches.
+- **Real PyPI publish** (<https://pypi.org/>) runs only when you manually
+  trigger the `custom: publish-pypi` pipeline from the Bitbucket UI. We'll
+  move this onto a tag trigger (`pipelines.tags: 'v*'`) once the release
+  cadence settles down.
 
-Configure PyPI with a trusted publisher for `.github/workflows/publish.yml` and
-the GitHub environment `pypi`. Push a version tag such as `v0.1.0`, matching
-`pyproject.toml`, to publish automatically, or run the workflow manually with
-`publish=true`.
+Both pipelines run the full check suite (`*checks`) first; the publish step
+only fires if checks pass.
+
+### One-time setup
+
+1. Create a PyPI account at <https://pypi.org/> and a TestPyPI account at
+   <https://test.pypi.org/>. The two are separate accounts with separate
+   tokens.
+2. Generate an API token scoped to the `mailchannels` project on each. The
+   tokens look like `pypi-AgEIc...`.
+3. In Bitbucket, open **Repository settings → Repository variables** and add
+   two **secured** variables:
+   - `PYPI_API_TOKEN` — the real PyPI token.
+   - `PYPI_TEST_API_TOKEN` — the TestPyPI token.
+
+   Marking them secured prevents them from appearing in pipeline logs.
+
+### Release procedure
+
+1. Update `version` in `pyproject.toml`, commit the bump, and merge the
+   commit into `main` through your normal workflow.
+2. Wait for the `branches.main` pipeline to complete. The matrix runs,
+   then the TestPyPI publish step automatically uploads the new artifact
+   (it skips silently if the version hasn't changed).
+3. Verify the install from TestPyPI in a clean venv on your machine:
+
+   ```bash
+   python -m venv /tmp/testpypi-check && source /tmp/testpypi-check/bin/activate
+   pip install --index-url https://test.pypi.org/simple/ \
+               --extra-index-url https://pypi.org/simple/ \
+               mailchannels
+   python -c "import mailchannels; print(mailchannels.__version__)"
+   deactivate
+   ```
+
+4. If the dry run looks right, trigger **Pipelines → Run pipeline → Custom →
+   `publish-pypi`** on the release commit from the Bitbucket UI to push to
+   real PyPI.
+5. Tag the release commit and push the tag:
+
+   ```bash
+   git tag -s v$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])') -m "Release vX.Y.Z"
+   git push origin tag
+   ```
+
+A given version on PyPI is immutable — if you upload a broken artifact, you
+must bump the patch version and republish. The TestPyPI step exists exactly
+to catch that before it can happen on real PyPI.
+
+### Publishing from a local machine (fallback)
+
+If you ever need to publish without Bitbucket (e.g., the pipeline is down),
+the same flow works locally. Store both tokens in `~/.pypirc`:
+
+```ini
+[distutils]
+index-servers =
+    pypi
+    testpypi
+
+[pypi]
+username = __token__
+password = pypi-...your-pypi-token...
+
+[testpypi]
+repository = https://test.pypi.org/legacy/
+username = __token__
+password = pypi-...your-testpypi-token...
+```
+
+`chmod 600 ~/.pypirc` so the tokens are not world-readable. Then run:
+
+```bash
+rm -rf dist/
+uv build
+uv run twine check dist/*
+uv run twine upload --repository testpypi dist/*  # dry run
+uv run twine upload dist/*                        # real publish
+```
 
 ## Online API Tests
 

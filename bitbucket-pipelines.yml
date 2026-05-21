@@ -59,14 +59,51 @@ definitions:
           - uv sync --python 3.13 --extra async --extra dev
           - uv run pytest -q
 
+    - step: &publish-testpypi-step
+        name: Publish to TestPyPI
+        caches:
+          - uv
+        script:
+          - uv sync --extra dev
+          - rm -rf dist/
+          - uv build
+          - uv run twine check dist/*
+          # --skip-existing lets repeated main-branch merges succeed without
+          # bumping the version: TestPyPI/PyPI artifacts are immutable, so we
+          # only republish when the version in pyproject.toml has actually
+          # changed.
+          - uv run twine upload
+              --skip-existing
+              --repository-url https://test.pypi.org/legacy/
+              --username __token__
+              --password "$PYPI_TEST_API_TOKEN"
+              dist/*
+
+    - step: &publish-pypi-step
+        name: Publish to PyPI
+        caches:
+          - uv
+        script:
+          - uv sync --extra dev
+          - rm -rf dist/
+          - uv build
+          - uv run twine check dist/*
+          - uv run twine upload
+              --username __token__
+              --password "$PYPI_API_TOKEN"
+              dist/*
+
 pipelines:
   default:
     - step: *checks
 
   branches:
     main:
-      # On merge to main: run the full checks once, then validate that the
-      # offline test suite still passes on every supported Python version.
+      # On merge to main: run the full checks once, validate the offline
+      # test suite on every supported Python version, and (if all of that
+      # passed) publish the build to TestPyPI. TestPyPI uploads use
+      # `--skip-existing` so we only push a new artifact when the version
+      # in pyproject.toml has changed.
       - step: *checks
       - parallel:
           - step: *py39
@@ -74,6 +111,7 @@ pipelines:
           - step: *py311
           - step: *py312
           - step: *py313
+      - step: *publish-testpypi-step
 
   custom:
     multi-python:
@@ -98,3 +136,34 @@ pipelines:
           script:
             - uv sync --extra async --extra dev
             - uv run pytest -m online --online
+
+    publish-testpypi:
+      # Manual TestPyPI publish. The same step also runs automatically on
+      # every merge to `main` (see `branches.main` above); this trigger
+      # exists for ad-hoc dry runs on feature branches. Requires
+      # PYPI_TEST_API_TOKEN configured as a secured repository variable in
+      # Bitbucket.
+      - step: *checks
+      - step: *publish-testpypi-step
+
+    publish-pypi:
+      # Publish to real PyPI (https://pypi.org/). Runs the full check suite,
+      # then builds the wheel + sdist and uploads them. Requires
+      # PYPI_API_TOKEN configured as a secured repository variable in
+      # Bitbucket. A given version on PyPI is immutable, so bump the version
+      # in pyproject.toml before triggering, and tag the release commit
+      # with `v<version>` so the source tree records what was published.
+      #
+      # When we're ready, this trigger should move out of `custom:` and into
+      # a tag-driven block:
+      #
+      #     pipelines:
+      #       tags:
+      #         'v*':
+      #           - step: *checks
+      #           - step: *publish-pypi-step
+      #
+      # That way pushing a `v1.0.0` tag is the release action, and ordinary
+      # merges to main do not republish.
+      - step: *checks
+      - step: *publish-pypi-step

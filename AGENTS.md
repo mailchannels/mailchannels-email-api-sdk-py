@@ -4,7 +4,6 @@
 - This is a MacOS environment.
 - The git server we use is GitHub; the `gh` command is available on this system.
 - We're using a "monorepo" approach and avoiding PRs. Push to main upstream. There is only one developer on this project.
-- When you make a big discovery or change, note this in docs/LEARNINGS.md, even if user does not ask you to.
 - Update README.md with each major commit.
 - Don't use README.md as a change log. It's user documentation; they don't go there to look for changes.
 - Update SKILLS.md with each change to this repo so future LLMs know how to use the MailChannels Python API correctly.
