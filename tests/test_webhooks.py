@@ -12,6 +12,7 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 from mailchannels.client import Client
+from mailchannels.exceptions import NotFoundError
 from mailchannels.response import SDKResponse
 from mailchannels.version import user_agent
 from mailchannels.webhooks import (
@@ -81,6 +82,20 @@ def test_webhook_batches_public_key_and_resend() -> None:
         "User-Agent": user_agent(),
         "X-API-Key": "test-key",
     }
+
+
+def test_webhook_resend_batch_unknown_id_raises_not_found() -> None:
+    """It surfaces a missing webhook batch as NotFoundError, not InvalidRequestError."""
+    transport = FakeRequestsClient(
+        SDKResponse(404, {"message": "Batch not found"}, "Batch not found"),
+    )
+    client = Client(api_key="test-key", http_client=transport)
+
+    with pytest.raises(NotFoundError) as error:
+        client.webhooks.resend_batch(999)
+
+    assert error.value.status_code == 404
+    assert error.value.error_type == "not_found"
 
 
 def test_webhook_destructive_operations_log_at_info(

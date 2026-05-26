@@ -15,6 +15,7 @@ from .exceptions import (
     ConflictError,
     ForbiddenError,
     InvalidRequestError,
+    NotFoundError,
     PayloadTooLargeError,
     RateLimitError,
     ResponseValidationError,
@@ -123,6 +124,13 @@ def raise_for_status(response: SDKResponse) -> None:
                 headers=response.headers,
             )
         raise ForbiddenError(
+            message,
+            status_code=response.status_code,
+            response=response.data,
+            headers=response.headers,
+        )
+    if response.status_code == 404:
+        raise NotFoundError(
             message,
             status_code=response.status_code,
             response=response.data,

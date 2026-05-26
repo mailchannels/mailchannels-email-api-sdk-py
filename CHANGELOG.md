@@ -10,6 +10,25 @@ onward, breaking changes will require a major version bump.
 
 Reserved for in-progress work targeting the next release.
 
+## [0.1.2] - 2026-05-26
+
+### Added
+
+- `NotFoundError` exception class for 404 responses. Carries
+  `error_type = "not_found"` and a suggested-action hint pointing the caller
+  at the resource identifier. Exported from `mailchannels` and surfaced in
+  the API reference.
+
+### Changed
+
+- **Breaking:** 404 responses now raise `NotFoundError` instead of
+  `InvalidRequestError`. Callers that previously caught `InvalidRequestError`
+  to handle missing-resource cases — for example, `webhooks.resend_batch`
+  against an unknown `batch_id` — must add `except NotFoundError` (or catch
+  the shared `ApiError` parent). The previous mapping treated a missing
+  resource as a malformed request, which prevented callers from
+  distinguishing the two.
+
 ## [0.1.1] - 2026-05-21
 
 Initial public release on PyPI. Built and tested against MailChannels Email
@@ -68,5 +87,6 @@ API `0.21.1`.
   Python asyncio distinction. See the README "Send vs Queue, And The Two
   Meanings of Async" section for guidance.
 
-[Unreleased]: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/branches/compare/main..v0.1.1
+[Unreleased]: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/branches/compare/main..v0.1.2
+[0.1.2]: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/v0.1.2
 [0.1.1]: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/v0.1.1

@@ -672,7 +672,7 @@ def test_user_agent_uses_exported_version() -> None:
         }
     )
 
-    assert mailchannels.__version__ == "0.1.1"
+    assert mailchannels.__version__ == "0.1.2"
     assert mailchannels.get_version() == mailchannels.__version__
     assert transport.calls[0]["headers"]["User-Agent"] == (
         f"mailchannels-python/{mailchannels.__version__}"

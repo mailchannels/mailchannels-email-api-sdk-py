@@ -4,9 +4,9 @@ This reference is generated from public SDK exports, type hints, Pydantic models
 
 For task-oriented examples, start with the README. This file is the formal public surface reference.
 
-- SDK version: `0.1.1`
-- Top-level exports: `68`
-- Documented public module exports: `177`
+- SDK version: `0.1.2`
+- Top-level exports: `69`
+- Documented public module exports: `178`
 
 ## Top-Level Exports
 
@@ -44,6 +44,7 @@ For task-oriented examples, start with the README. This file is the formal publi
 | `LockdownResult` | `Pydantic model` | Domain Lockdown check result. |
 | `MailChannelsError` | `exception` | Base class for MailChannels SDK errors. |
 | `Metrics` | `class` | Module-level metrics operations using global SDK configuration. |
+| `NotFoundError` | `exception` | Raised when MailChannels reports the requested resource does not exist. |
 | `PayloadTooLargeError` | `exception` | Raised when a request payload exceeds MailChannels limits. |
 | `Personalization` | `Pydantic model` | Recipient-specific message customization. |
 | `QueuedSendResponse` | `Pydantic model` | Response returned when MailChannels queues an email for async processing. |
@@ -527,6 +528,11 @@ Example for `volume`:
 ```python
 mailchannels.Metrics.volume(start_time="2026-04-01", interval="day")
 ```
+
+#### `mailchannels.NotFoundError`
+
+- Kind: `exception`
+- Summary: Raised when MailChannels reports the requested resource does not exist.
 
 #### `mailchannels.PayloadTooLargeError`
 

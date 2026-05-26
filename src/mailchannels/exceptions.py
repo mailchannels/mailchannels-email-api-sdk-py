@@ -79,6 +79,10 @@ class ConflictError(ApiError):
     """Raised when MailChannels reports a resource conflict."""
 
 
+class NotFoundError(ApiError):
+    """Raised when MailChannels reports the requested resource does not exist."""
+
+
 class PayloadTooLargeError(ApiError):
     """Raised when a request payload exceeds MailChannels limits."""
 
@@ -136,6 +140,8 @@ def _error_type(code: str | None, status_code: int | None) -> str | None:
         return "authentication_error"
     if status_code == 403:
         return "permission_error"
+    if status_code == 404:
+        return "not_found"
     if status_code == 409:
         return "conflict_error"
     if status_code == 413:
@@ -157,6 +163,8 @@ def _suggested_action(code: str | None, status_code: int | None) -> str | None:
         return "Check that the MailChannels API key is valid."
     if status_code == 403:
         return "Confirm the API key has access to this MailChannels resource."
+    if status_code == 404:
+        return "Confirm the resource identifier exists for this account."
     if status_code == 409:
         return "Use the existing resource or retry with a unique identifier."
     if status_code == 413:

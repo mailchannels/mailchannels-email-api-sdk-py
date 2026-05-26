@@ -14,6 +14,7 @@ from mailchannels.exceptions import (
     ForbiddenError,
     InvalidRequestError,
     MailChannelsError,
+    NotFoundError,
     PayloadTooLargeError,
     RateLimitError,
     ServerError,
@@ -123,7 +124,7 @@ def test_null_error_body_uses_status_fallback_message() -> None:
     [
         (400, InvalidRequestError, "invalid_request_error"),
         (401, AuthenticationError, "authentication_error"),
-        (404, InvalidRequestError, "invalid_request_error"),
+        (404, NotFoundError, "not_found"),
         (422, InvalidRequestError, "invalid_request_error"),
         (429, RateLimitError, "rate_limit_error"),
         (500, ServerError, "server_error"),

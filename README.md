@@ -634,8 +634,8 @@ def receive_webhook(headers: dict[str, str], body: bytes) -> None:
 
 The SDK maps common MailChannels API failures to typed exceptions. Catch the
 specific error when your application can respond differently to authentication,
-authorization, invalid requests, rate limits, conflicts, payload size problems,
-or server-side failures.
+authorization, invalid requests, missing resources, rate limits, conflicts,
+payload size problems, or server-side failures.
 
 ```python
 try:
@@ -645,6 +645,8 @@ except mailchannels.PayloadTooLargeError:
 except mailchannels.ForbiddenError:
     raise
 except mailchannels.RateLimitError:
+    raise
+except mailchannels.NotFoundError:
     raise
 except mailchannels.InvalidRequestError:
     raise
