@@ -6,7 +6,8 @@
 - We're using a "monorepo" approach and avoiding PRs. Push to main upstream. There is only one developer on this project.
 - Update README.md with each major commit.
 - Don't use README.md as a change log. It's user documentation; they don't go there to look for changes.
-- Update SKILLS.md with each change to this repo so future LLMs know how to use the MailChannels Python API correctly.
+- Update the agent-facing skill under `.agents/skills/mailchannels-python/` with each change to this repo so future LLMs know how to use the MailChannels Python SDK correctly. `SKILL.md` is the entry point with the decision tree; per-topic recipes live in `resources/`.
+- After updating any file under `.agents/skills/mailchannels-python/`, run `uv run python scripts/check_skill_snippets.py` to confirm every Python snippet still type-checks against the current SDK source. The script auto-injects standard dummy names (`message`, `payload`, `result`, `logger`, `some_coroutine`); when a fragment intentionally won't type-check (bare `except`, partial method body, etc.) mark its first non-blank line with `# type-check: skip`.
 
 ## Dev rules
 - Use Python logging liberally to insert judicious debug, info, warning, and error messages in the code.
