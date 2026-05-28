@@ -5,6 +5,8 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
+from .version import __version__
+
 logger = logging.getLogger(__name__)
 
 
@@ -38,5 +40,5 @@ API_SPEC_COMPATIBILITY = ApiSpecCompatibility(
     openapi_version="0.21.1",
     sha256="55150d6ed81654a7135843c3bd70b1e661bc75a5fc7b2d1f1f44fbd607e90bff",
     checked_at="2026-05-14T00:00:00+00:00",
-    sdk_version="0.1.2",
+    sdk_version=__version__,
 )

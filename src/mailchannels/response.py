@@ -22,6 +22,26 @@ from .exceptions import (
     ServerError,
 )
 
+# Status-code-specific subclasses. Adding a new exception means dropping
+# the class onto this list — _STATUS_DISPATCH derives its mapping from
+# each class's `status_code` ClassVar. Order is informational; the dict
+# resolves uniquely on status_code.
+_API_ERROR_CLASSES: tuple[type[ApiError], ...] = (
+    AuthenticationError,
+    ForbiddenError,
+    NotFoundError,
+    ConflictError,
+    PayloadTooLargeError,
+    RateLimitError,
+    BadGatewayError,
+)
+
+_STATUS_DISPATCH: dict[int, type[ApiError]] = {
+    cls.default_status_code: cls
+    for cls in _API_ERROR_CLASSES
+    if cls.default_status_code is not None
+}
+
 logger = logging.getLogger(__name__)
 ResponseModel = TypeVar("ResponseModel", bound=BaseModel)
 
@@ -115,71 +135,16 @@ def raise_for_status(response: SDKResponse) -> None:
         message,
     )
 
-    if response.status_code in {401, 403}:
-        if response.status_code == 401:
-            raise AuthenticationError(
-                message,
-                status_code=response.status_code,
-                response=response.data,
-                headers=response.headers,
-            )
-        raise ForbiddenError(
-            message,
-            status_code=response.status_code,
-            response=response.data,
-            headers=response.headers,
-        )
-    if response.status_code == 404:
-        raise NotFoundError(
-            message,
-            status_code=response.status_code,
-            response=response.data,
-            headers=response.headers,
-        )
-    if response.status_code == 409:
-        raise ConflictError(
-            message,
-            status_code=response.status_code,
-            response=response.data,
-            headers=response.headers,
-        )
-    if response.status_code == 413:
-        raise PayloadTooLargeError(
-            message,
-            status_code=response.status_code,
-            response=response.data,
-            headers=response.headers,
-        )
-    if response.status_code == 429:
-        raise RateLimitError(
-            message,
-            status_code=response.status_code,
-            response=response.data,
-            headers=response.headers,
-        )
-    if response.status_code == 502:
-        raise BadGatewayError(
-            message,
-            status_code=response.status_code,
-            response=response.data,
-            headers=response.headers,
-        )
-    if 500 <= response.status_code:
-        raise ServerError(
-            message,
-            status_code=response.status_code,
-            response=response.data,
-            headers=response.headers,
-        )
-    if 400 <= response.status_code:
-        raise InvalidRequestError(
-            message,
-            status_code=response.status_code,
-            response=response.data,
-            headers=response.headers,
-        )
+    error_class = _STATUS_DISPATCH.get(response.status_code)
+    if error_class is None:
+        if 500 <= response.status_code:
+            error_class = ServerError
+        elif 400 <= response.status_code:
+            error_class = InvalidRequestError
+        else:
+            error_class = ApiError
 
-    raise ApiError(
+    raise error_class(
         message,
         status_code=response.status_code,
         response=response.data,

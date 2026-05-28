@@ -1,6 +1,6 @@
 [project]
 name = "mailchannels"
-version = "0.1.2"
+dynamic = ["version"]
 description = "Python SDK for the MailChannels Email API."
 readme = "README.md"
 requires-python = ">=3.9"
@@ -67,6 +67,9 @@ dev = [
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/mailchannels/version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/mailchannels"]
