@@ -11,7 +11,14 @@ from typing import Any, Literal, TypedDict
 from urllib.parse import urlparse
 
 import requests
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    field_validator,
+    model_validator,
+)
 from typing_extensions import NotRequired
 
 from ..exceptions import MailChannelsError
@@ -290,7 +297,11 @@ class Personalization(BaseModel):
     cc: list[EmailAddress] | None = None
     bcc: list[EmailAddress] | None = None
     subject: str | None = None
-    from_: EmailAddress | None = Field(default=None, alias="from")
+    from_: EmailAddress | None = Field(
+        default=None,        
+        validation_alias=AliasChoices("from", "from_"),
+        serialization_alias="from"
+        )
     reply_to: EmailAddress | None = Field(default=None, alias="reply_to")
     envelope_from: EmailAddress | None = None
     headers: EmailHeaders | None = None
@@ -313,7 +324,10 @@ class EmailParams(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     personalizations: list[Personalization] = Field(min_length=1)
-    from_: EmailAddress = Field(alias="from")
+    from_: EmailAddress = Field(
+        validation_alias=AliasChoices("from", "from_"),
+        serialization_alias="from"
+        )
     subject: str = Field(min_length=1)
     content: list[Content] = Field(min_length=1)
     reply_to: EmailAddress | None = Field(default=None, alias="reply_to")

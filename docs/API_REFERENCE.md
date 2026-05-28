@@ -389,7 +389,7 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Validated MailChannels email send payload.
-- Signature: `mailchannels.EmailParams(personalizations: list[Personalization], from: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None, campaign_id: str | None, tracking_settings: TrackingSettings | None)`
+- Signature: `mailchannels.EmailParams(personalizations: list[Personalization], from_: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None, campaign_id: str | None, tracking_settings: TrackingSettings | None)`
 
 Fields:
 
@@ -537,7 +537,7 @@ mailchannels.Metrics.volume(start_time="2026-04-01", interval="day")
 
 - Kind: `Pydantic model`
 - Summary: Recipient-specific message customization.
-- Signature: `mailchannels.Personalization(to: list[EmailAddress], cc: list[EmailAddress] | None, bcc: list[EmailAddress] | None, subject: str | None, from: EmailAddress | None, reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, substitutions: dict[str, str] | None, dynamic_template_data: dict[str, Any] | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None)`
+- Signature: `mailchannels.Personalization(to: list[EmailAddress], cc: list[EmailAddress] | None, bcc: list[EmailAddress] | None, subject: str | None, from_: EmailAddress | None, reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, substitutions: dict[str, str] | None, dynamic_template_data: dict[str, Any] | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None)`
 
 Fields:
 
@@ -1063,7 +1063,7 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Validated MailChannels email send payload.
-- Signature: `mailchannels.emails.EmailParams(personalizations: list[Personalization], from: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None, campaign_id: str | None, tracking_settings: TrackingSettings | None)`
+- Signature: `mailchannels.emails.EmailParams(personalizations: list[Personalization], from_: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None, campaign_id: str | None, tracking_settings: TrackingSettings | None)`
 
 Fields:
 
@@ -1123,7 +1123,7 @@ Methods:
 
 - Kind: `Pydantic model`
 - Summary: Recipient-specific message customization.
-- Signature: `mailchannels.emails.Personalization(to: list[EmailAddress], cc: list[EmailAddress] | None, bcc: list[EmailAddress] | None, subject: str | None, from: EmailAddress | None, reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, substitutions: dict[str, str] | None, dynamic_template_data: dict[str, Any] | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None)`
+- Signature: `mailchannels.emails.Personalization(to: list[EmailAddress], cc: list[EmailAddress] | None, bcc: list[EmailAddress] | None, subject: str | None, from_: EmailAddress | None, reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, substitutions: dict[str, str] | None, dynamic_template_data: dict[str, Any] | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None)`
 
 Fields:
 

@@ -10,15 +10,17 @@ from mailchannels.emails import Content, EmailAddress, EmailParams, Personalizat
 
 client = Client(api_key="test-key")
 strict_client = Client(api_key="test-key", strict_responses=True)
-params = EmailParams.model_validate(
-    {
-        "from": EmailAddress(email="sender@example.com"),
-        "personalizations": [
-            Personalization(to=[EmailAddress(email="recipient@example.net")])
+params = EmailParams(
+    from_=EmailAddress(email="sender@example.com"),
+    personalizations=[
+        Personalization(
+            to=[EmailAddress(email="recipient@example.net")]),
+        Personalization(
+            from_=EmailAddress(email="sender2@example.com"),
+            to=[EmailAddress(email="recipient2@example.net")])
         ],
-        "subject": "Hello",
-        "content": [Content(type="text/plain", value="Hi")],
-    }
+    subject="Hello",
+    content=[Content(type="text/plain", value="Hi")]
 )
 
 queued = client.emails.queue(params)
