@@ -88,6 +88,12 @@ You're about to write Python SDK code. What does it need to do?
 ├── Receive or manage delivery-event webhooks (enroll, validate,
 │   inspect batches, verify signatures)
 │   → resources/webhooks.md
+│
+├── Catch / log / retry SDK or API errors
+│   → resources/error-handling.md
+│
+└── Get strict Pydantic response models instead of dict-like responses
+    → resources/responses.md
 ```
 
 ## Style Conventions In The Resources
