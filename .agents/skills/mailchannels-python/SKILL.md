@@ -55,6 +55,19 @@ You're about to write Python SDK code. What does it need to do?
 ├── Set up the client (API keys, base URL, multi-tenant, lifecycle,
 │   custom HTTP transports)
 │   → resources/clients-and-transport.md
+│
+├── Send email
+│   → resources/sending.md
+│   ├── …with file / bytes / URL / inline-image attachments?
+│   │   → resources/attachments.md
+│   ├── …with a mustache template + per-recipient data?
+│   │   → resources/templates.md
+│   ├── …with an unsubscribe link or List-Unsubscribe header?
+│   │   → resources/unsubscribe.md
+│   ├── …with custom X-… headers?
+│   │   → resources/custom-headers.md
+│   └── …from asyncio code (FastAPI, Starlette, aiohttp, …)?
+│       → resources/async.md
 ```
 
 ## Style Conventions In The Resources
