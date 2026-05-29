@@ -77,6 +77,17 @@ You're about to write Python SDK code. What does it need to do?
 │
 ├── Multi-tenant work — sub-accounts, their credentials, limits, usage
 │   → resources/sub-accounts.md
+|
+├── Query analytics (volume, engagement, performance, senders) or
+│   current-period usage
+│   → resources/metrics-and-usage.md
+│
+├── Manage the suppression list (list, create, delete)
+│   → resources/suppressions.md
+│
+├── Receive or manage delivery-event webhooks (enroll, validate,
+│   inspect batches, verify signatures)
+│   → resources/webhooks.md
 ```
 
 ## Style Conventions In The Resources
