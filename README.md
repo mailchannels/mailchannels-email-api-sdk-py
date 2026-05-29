@@ -33,6 +33,7 @@ credentials.
 - Building a sending workflow: use [Common Sending Recipes](#common-sending-recipes).
 - Building a multi-tenant product: read [Account And Domain Operations](#account-and-domain-operations).
 - Operating at scale: jump to [Production Operations](#production-operations).
+- Using an AI coding agent: see [Using This SDK With An AI Agent](#using-this-sdk-with-an-ai-agent).
 - Looking for details: see [API Reference And Further Reading](#api-reference-and-further-reading).
 
 ## Five-Minute Quickstart
@@ -675,6 +676,85 @@ to send consistent error metadata to your logger.
   templates, unsubscribe, custom headers, DKIM, Cloudflare DKIM publication,
   sub-accounts, metrics, domain checks, suppressions, webhooks, usage, custom
   HTTP clients, and structured error handling.
+
+## Using This SDK With An AI Agent
+
+This repository ships a complete agent skill at
+[`.agents/skills/mailchannels-python/`](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/.agents/skills/mailchannels-python/).
+It teaches an AI coding agent how to use the `mailchannels` package
+correctly — the same recipes documented in this README, broken into
+focused per-topic files and prefixed with a decision tree so the agent
+loads only the parts the task actually needs.
+
+Layout:
+
+```
+.agents/skills/mailchannels-python/
+├── SKILL.md              # entry point: scope, decision tree, conventions
+└── resources/            # focused recipes (sending, dkim, webhooks, …)
+```
+
+Every file is plain Markdown. The skill works with any agent that can be
+pointed at a directory of context files — Claude Code, Cursor, Codex CLI,
+Aider, Continue, and similar tools all consume it without modification.
+
+### Install
+
+The skill ships inside the `mailchannels` PyPI source distribution. Use
+`pip download` to fetch the sdist, extract it, and copy the skill
+directory wherever your agent looks for skills, rules, or context files:
+
+```bash
+# Pin the version to match the SDK you have installed — omit the pin to
+# grab the latest release:
+pip download --no-deps --no-binary :all: --dest /tmp/mc-python-sdk mailchannels
+
+tar -xzf /tmp/mc-python-sdk/mailchannels-*.tar.gz -C /tmp/mc-python-sdk
+
+# Get the name of the extracted directory, which includes the version number: (e.g. `mailchannels-0.1.1`):
+sdk_dir=$(ls /tmp/mc-python-sdk/ -I *.tar.gz)
+
+# Replace the destination with your agent's path:
+mkdir -p <your-agent's-skills-dir>
+cp -r /tmp/mc-python-sdk/${sdk_dir}/.agents/skills/mailchannels-python <your-agent's-skills-dir>/
+
+rm -rf /tmp/mc-python-sdk
+```
+
+`--no-binary :all:` forces pip to download the source distribution
+(`.tar.gz`) rather than the wheel; the wheel only contains the importable
+Python package and doesn't carry the agent skill. `--no-deps` skips
+dependency downloads since you only need the SDK's own sdist.
+
+Re-run the same commands when you upgrade the SDK so the skill stays in
+step with the installed version.
+
+Common destinations:
+
+| Agent | Where to put it |
+| --- | --- |
+| Claude Code | `.claude/skills/` (project) or `~/.claude/skills/` (user) |
+| Cursor | `.cursor/rules/` (or attach files inline with `@`) |
+| Codex CLI | referenced from the project's `AGENTS.md` |
+| Aider | referenced from the conventions file in `.aider.conf.yml` |
+| Continue | registered as a custom context provider |
+
+If your tool isn't listed, look for the equivalent of "skill", "rule",
+"context bundle", or "conventions file" — any mechanism that lets the
+agent read a directory of Markdown will work.
+
+### Workflow
+
+The flow is the same regardless of agent:
+
+1. The agent loads `SKILL.md` for the scope statement and decision tree.
+2. The decision tree routes to the relevant `resources/*.md` file(s).
+3. The agent reads only those files; no need to preload everything.
+
+Ask the agent to "send an email with MailChannels", "verify a webhook
+signature", "rotate a DKIM key", or any similar task in the SDK's
+domain. The skill's frontmatter `description` tells the agent when to
+engage, and the body tells it what to do.
 
 ## License
 
