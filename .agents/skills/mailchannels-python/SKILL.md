@@ -49,6 +49,12 @@ read each leaf.
 ```
 You're about to write Python SDK code. What does it need to do?
 
+├── Get oriented — what is the SDK, what are the entry points?
+│   → resources/overview.md
+│
+├── Set up the client (API keys, base URL, multi-tenant, lifecycle,
+│   custom HTTP transports)
+│   → resources/clients-and-transport.md
 ```
 
 ## Style Conventions In The Resources
