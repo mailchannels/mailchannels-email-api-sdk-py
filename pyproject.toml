@@ -86,6 +86,8 @@ exclude = [
     "AGENTS.md",
     "dist/",
     "typing_tests/",
+     "bitbucket-pipelines.yml",
+    "scripts/",
 ]
 
 [tool.pytest.ini_options]
