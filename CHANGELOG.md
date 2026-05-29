@@ -10,6 +10,18 @@ onward, breaking changes will require a major version bump.
 
 Reserved for in-progress work targeting the next release.
 
+## [0.1.3] - 2026-05-29
+
+### Added
+
+- AI Agent Skill in .agents directory. Can be installed by customers to help
+  their AI agents interact with the MailChannels Email API.
+
+### Changed
+
+- When using pydantic types, `EmailParams` and `Personalizations` models now
+  properly accept the `from_` field without having to pass args via `.model_validate()`
+
 ## [0.1.2] - 2026-05-26
 
 ### Added
