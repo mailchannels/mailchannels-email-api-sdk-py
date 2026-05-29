@@ -68,6 +68,15 @@ You're about to write Python SDK code. What does it need to do?
 │   │   → resources/custom-headers.md
 │   └── …from asyncio code (FastAPI, Starlette, aiohttp, …)?
 │       → resources/async.md
+│
+├── Manage hosted DKIM keys (create / list / rotate / revoke)
+│   → resources/dkim.md
+│
+├── Validate a sender domain's auth posture (DKIM/SPF/Lockdown/DNS)
+│   → resources/domain-checks.md
+│
+├── Multi-tenant work — sub-accounts, their credentials, limits, usage
+│   → resources/sub-accounts.md
 ```
 
 ## Style Conventions In The Resources
