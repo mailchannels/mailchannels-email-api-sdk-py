@@ -105,13 +105,13 @@ preview = mailchannels.Emails.send(
 
 ## When To Pick Which
 
-| Situation | Method |
-| --- | --- |
-| Web request handler, background worker, high throughput | `Emails.queue()` |
-| Sending to many recipients in one call | `Emails.queue()` |
-| You need the rendered message back for inspection | `Emails.send(dry_run=True)` |
-| You specifically need the non-deferred path | `Emails.send()` |
-| Called from `async def` code | append `_async` to either |
+| Situation                                                                                       | Method |
+|-------------------------------------------------------------------------------------------------| --- |
+| Web request handler, background worker, high throughput                                         | `Emails.queue()` |
+| Sending to many recipients in one call                                                          | `Emails.queue()` |
+| You need the rendered message back for inspection                                               | `Emails.send(dry_run=True)` |
+| You need immediate feedback on the message status to proceed, and the number of emails is small | `Emails.send()` |
+| Called from `async def` code                                                                    | append `_async` to either |
 
 ## Common Pitfalls
 
