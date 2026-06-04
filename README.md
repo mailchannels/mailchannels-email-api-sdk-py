@@ -1,10 +1,11 @@
 # MailChannels Python SDK
 
-[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-46aef7.svg)](https://github.com/astral-sh/ruff)
 [![Build Status](https://img.shields.io/bitbucket/pipelines/mailchannels/mailchannels-email-api-sdk-py/main.svg)](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/pipelines)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![PyPI](https://img.shields.io/pypi/v/mailchannels)](https://pypi.org/project/mailchannels/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/mailchannels)](https://pypi.org/project/mailchannels/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-46aef7.svg)](https://github.com/astral-sh/ruff)
+[![PyPI - Wheel](https://img.shields.io/pypi/wheel/mailchannels)](https://pypi.org/project/mailchannels/)
 
 <!-- generated:api-version -->
 Built and tested against MailChannels Email API 0.21.1.
