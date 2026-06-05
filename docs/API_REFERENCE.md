@@ -4,7 +4,7 @@ This reference is generated from public SDK exports, type hints, Pydantic models
 
 For task-oriented examples, start with the README. This file is the formal public surface reference.
 
-- SDK version: `0.1.3`
+- SDK version: `1.0.0`
 - Top-level exports: `69`
 - Documented public module exports: `178`
 
@@ -1806,12 +1806,14 @@ Sub-account resource exports.
 
 - Kind: `Pydantic model`
 - Summary: MailChannels sub-account API key response model.
-- Signature: `mailchannels.sub_accounts.ApiKey()`
+- Signature: `mailchannels.sub_accounts.ApiKey(id: int | None, key: str | None)`
 
 Fields:
 
 | Field | Type | Required | Default |
 | --- | --- | --- | --- |
+| `id` | `int \| None` | no | `None` |
+| `key` | `str \| None` | no | `None` |
 
 #### `mailchannels.sub_accounts.ApiKeyList`
 
@@ -1853,12 +1855,15 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: MailChannels sub-account SMTP password response model.
-- Signature: `mailchannels.sub_accounts.SmtpPassword()`
+- Signature: `mailchannels.sub_accounts.SmtpPassword(id: int | None, enabled: bool | None, smtp_password: str | None)`
 
 Fields:
 
 | Field | Type | Required | Default |
 | --- | --- | --- | --- |
+| `id` | `int \| None` | no | `None` |
+| `enabled` | `bool \| None` | no | `None` |
+| `smtp_password` | `str \| None` | no | `None` |
 
 #### `mailchannels.sub_accounts.SmtpPasswordList`
 
@@ -1877,15 +1882,15 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: MailChannels sub-account response model.
-- Signature: `mailchannels.sub_accounts.SubAccount(handle: str | None, company_name: str | None, enabled: bool | None)`
+- Signature: `mailchannels.sub_accounts.SubAccount(handle: str, company_name: str | None, enabled: bool)`
 
 Fields:
 
 | Field | Type | Required | Default |
 | --- | --- | --- | --- |
-| `handle` | `str \| None` | no | `None` |
+| `handle` | `str` | yes | `` |
 | `company_name` | `str \| None` | no | `None` |
-| `enabled` | `bool \| None` | no | `None` |
+| `enabled` | `bool` | yes | `` |
 
 #### `mailchannels.sub_accounts.SubAccountApiKeysResource`
 
@@ -2012,13 +2017,16 @@ Methods:
 #### `mailchannels.sub_accounts.UsageStats`
 
 - Kind: `Pydantic model`
-- Summary: MailChannels usage response model.
-- Signature: `mailchannels.sub_accounts.UsageStats()`
+- Summary: MailChannels usage statistics for the current billing period.
+- Signature: `mailchannels.sub_accounts.UsageStats(total_usage: int, period_start_date: str | None, period_end_date: str | None)`
 
 Fields:
 
 | Field | Type | Required | Default |
 | --- | --- | --- | --- |
+| `total_usage` | `int` | yes | `` |
+| `period_start_date` | `str \| None` | no | `None` |
+| `period_end_date` | `str \| None` | no | `None` |
 
 ### `mailchannels.suppressions`
 
@@ -2304,17 +2312,17 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Result of a webhook batch resend attempt.
-- Signature: `mailchannels.webhooks.WebhookResendResponse(batch_id: int, webhook: str, created_at: str, event_count: int, customer_handle: str | None, status_code: int | None, duration_in_ms: int | None)`
+- Signature: `mailchannels.webhooks.WebhookResendResponse(batch_id: int, customer_handle: str, webhook: str, created_at: str, event_count: int, status_code: int | None, duration_in_ms: int | None)`
 
 Fields:
 
 | Field | Type | Required | Default |
 | --- | --- | --- | --- |
 | `batch_id` | `int` | yes | `` |
+| `customer_handle` | `str` | yes | `` |
 | `webhook` | `str` | yes | `` |
 | `created_at` | `str` | yes | `` |
 | `event_count` | `int` | yes | `` |
-| `customer_handle` | `str \| None` | no | `None` |
 | `status_code` | `int \| None` | no | `None` |
 | `duration_in_ms` | `int \| None` | no | `None` |
 
@@ -2354,7 +2362,7 @@ Fields:
 | --- | --- | --- | --- |
 | `webhook` | `str` | yes | `` |
 | `result` | `Literal['passed', 'failed']` | yes | `` |
-| `response` | `WebhookValidationResponse \| None` | no | `None` |
+| `response` | `WebhookValidationResponse \| None` | yes | `` |
 
 #### `mailchannels.webhooks.WebhookValidationResults`
 

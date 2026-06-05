@@ -10,6 +10,42 @@ onward, breaking changes will require a major version bump.
 
 Reserved for in-progress work targeting the next release.
 
+## [1.0.0] - 2026-06-05
+
+First stable release. From this point forward, breaking changes to the
+public API require a major version bump per semantic versioning. The
+public surface — clients, resources, response models, exceptions, helpers,
+and the strict-response opt-in — is now considered stable.
+
+### Changed
+
+- **Breaking:** Aligned response models with the public OpenAPI contract
+  (`public.yaml`). Several fields were previously typed as `X | None = None`
+  even though the contract marks them required, and three response classes
+  were declared with no typed fields at all (relying on `extra="allow"`).
+  Callers can now drop defensive `None` checks on guaranteed fields, but
+  code that destructured these models with `None` fallbacks will need to
+  adjust.
+  - `SubAccount.handle` is now `str` (was `str | None`). Required in
+    `SubAccountDetails`.
+  - `SubAccount.enabled` is now `bool` (was `bool | None`). Required in
+    `SubAccountDetails`.
+  - `WebhookResendResponse.customer_handle` is now `str` (was `str | None`).
+    Required in `WebhookResendResponse`.
+  - `WebhookValidationResult.response` is now `WebhookValidationResponse |
+    None` with no default — the field is required to be present but may be
+    `null` when the webhook endpoint did not respond.
+  - `ApiKey` now exposes typed `id: int | None` and `key: str | None`
+    fields (previously had no declared fields).
+  - `SmtpPassword` now exposes typed `id: int | None`, `enabled: bool |
+    None`, and `smtp_password: str | None` fields (previously had no
+    declared fields).
+  - `mailchannels.sub_accounts.UsageStats` is now an alias for the existing
+    `mailchannels.usage.UsageStats` — both endpoints return the same shape
+    per the contract, so the SDK now exposes one shared model with
+    `total_usage: int` (required), `period_start_date: str | None`, and
+    `period_end_date: str | None`.
+
 ## [0.1.3] - 2026-05-29
 
 ### Added
@@ -86,10 +122,6 @@ API `0.21.1`.
 
 ### Notes
 
-- **Development status: Beta.** The public API is feature-complete and
-  stable in practice, but `1.0.0` will be the formal stability
-  commitment. Minor releases between now and `1.0.0` may still adjust
-  ergonomics in response to early-adopter feedback.
 - `Webhooks.delete_all()` is intentionally explicit about its bulk-delete
   semantic. The underlying `DELETE /webhook` removes every configured
   endpoint for the account — there is no per-endpoint delete in the API.
@@ -99,6 +131,8 @@ API `0.21.1`.
   Python asyncio distinction. See the README "Send vs Queue, And The Two
   Meanings of Async" section for guidance.
 
-[Unreleased]: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/branches/compare/main..v0.1.2
+[Unreleased]: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/branches/compare/main..v1.0.0
+[1.0.0]: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/v1.0.0
+[0.1.3]: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/v0.1.3
 [0.1.2]: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/v0.1.2
 [0.1.1]: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/v0.1.1

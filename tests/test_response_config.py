@@ -269,7 +269,9 @@ STRICT_RESPONSE_CASES = (
         "sub-account-create",
         lambda client: client.sub_accounts.create(handle="clienta"),
         SubAccount,
-        {"handle": "clienta", "company_name": "Client A"},
+        {"handle": "clienta", "company_name": "Client A", "enabled": True},
+        missing_required={"handle": "clienta"},
+        invalid_type={"handle": "clienta", "enabled": ["not", "a", "bool"]},
     ),
     StrictResponseCase(
         "sub-account-limit-set",
@@ -290,18 +292,22 @@ STRICT_RESPONSE_CASES = (
         lambda client: client.sub_accounts.retrieve_usage("clienta"),
         SubAccountUsageStats,
         {"total_usage": 10},
+        missing_required={"period_start_date": "2026-04-01"},
+        invalid_type={"total_usage": "not-an-int"},
     ),
     StrictResponseCase(
         "sub-account-api-key",
         lambda client: client.sub_accounts.api_keys.create("clienta"),
         ApiKey,
-        {"id": "key_123", "api_key": "secret"},
+        {"id": 1, "key": "secret"},
+        invalid_type={"id": "not-an-int"},
     ),
     StrictResponseCase(
         "sub-account-smtp-password",
         lambda client: client.sub_accounts.smtp_passwords.create("clienta"),
         SmtpPassword,
-        {"id": "smtp_123", "password": "secret"},
+        {"id": 1, "enabled": True, "smtp_password": "secret"},
+        invalid_type={"id": "not-an-int"},
     ),
     StrictResponseCase(
         "suppressions-list",
@@ -386,19 +392,19 @@ STRICT_RESPONSE_CASES = (
         "sub-accounts-list",
         lambda client: client.sub_accounts.list(),
         SubAccountList,
-        [{"handle": "clienta", "company_name": "Client A"}],
+        [{"handle": "clienta", "company_name": "Client A", "enabled": True}],
     ),
     StrictResponseCase(
         "sub-account-api-keys-list",
         lambda client: client.sub_accounts.api_keys.list("clienta"),
         ApiKeyList,
-        [{"id": "key_123"}],
+        [{"id": 1, "key": "secret"}],
     ),
     StrictResponseCase(
         "sub-account-smtp-passwords-list",
         lambda client: client.sub_accounts.smtp_passwords.list("clienta"),
         SmtpPasswordList,
-        [{"id": "smtp_123"}],
+        [{"id": 1, "enabled": True, "smtp_password": "secret"}],
     ),
     StrictResponseCase(
         "sub-account-delete",
@@ -672,7 +678,7 @@ def test_user_agent_uses_exported_version() -> None:
         }
     )
 
-    assert mailchannels.__version__ == "0.1.3"
+    assert mailchannels.__version__ == "1.0.0"
     assert mailchannels.get_version() == mailchannels.__version__
     assert transport.calls[0]["headers"]["User-Agent"] == (
         f"mailchannels-python/{mailchannels.__version__}"

@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from typing_extensions import NotRequired
 
 from ..exceptions import MailChannelsError
+from ..usage.types import UsageStats as UsageStats  # noqa: F401  (re-exported)
 
 
 class CreateSubAccountParams(TypedDict, total=False):
@@ -28,9 +29,9 @@ class SubAccount(BaseModel):
 
     model_config = ConfigDict(extra="allow")
 
-    handle: str | None = None
+    handle: str
     company_name: str | None = None
-    enabled: bool | None = None
+    enabled: bool
 
 
 class SubAccountLimit(BaseModel):
@@ -42,22 +43,23 @@ class SubAccountLimit(BaseModel):
     monthly_limit: int | None = None
 
 
-class UsageStats(BaseModel):
-    """MailChannels usage response model."""
-
-    model_config = ConfigDict(extra="allow")
-
-
 class ApiKey(BaseModel):
     """MailChannels sub-account API key response model."""
 
     model_config = ConfigDict(extra="allow")
+
+    id: int | None = None
+    key: str | None = None
 
 
 class SmtpPassword(BaseModel):
     """MailChannels sub-account SMTP password response model."""
 
     model_config = ConfigDict(extra="allow")
+
+    id: int | None = None
+    enabled: bool | None = None
+    smtp_password: str | None = None
 
 
 class SubAccountList(BaseModel):

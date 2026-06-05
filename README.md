@@ -712,7 +712,7 @@ pip download --no-deps --no-binary :all: --dest /tmp/mc-python-sdk mailchannels
 
 tar -xzf /tmp/mc-python-sdk/mailchannels-*.tar.gz -C /tmp/mc-python-sdk
 
-# Get the name of the extracted directory, which includes the version number: (e.g. `mailchannels-0.1.1`):
+# Get the name of the extracted directory, which includes the version number: (e.g. `mailchannels-1.0.0`):
 sdk_dir=$(ls /tmp/mc-python-sdk/ -I *.tar.gz)
 
 # Replace the destination with your agent's path:

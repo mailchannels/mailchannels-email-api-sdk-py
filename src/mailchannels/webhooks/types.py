@@ -76,10 +76,10 @@ class WebhookResendResponse(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     batch_id: int
+    customer_handle: str
     webhook: str
     created_at: str
     event_count: int
-    customer_handle: str | None = None
     status_code: int | None = None
     duration_in_ms: int | None = None
 
@@ -106,7 +106,7 @@ class WebhookValidationResult(BaseModel):
 
     webhook: str
     result: Literal["passed", "failed"]
-    response: WebhookValidationResponse | None = None
+    response: WebhookValidationResponse | None
 
 
 class WebhookValidationResults(BaseModel):
