@@ -238,12 +238,18 @@ want validation errors to appear close to the code that builds the payload.
 ### Add Attachments
 
 MailChannels expects attachment content to be Base64 encoded. The SDK's
-`Attachment` helper handles that encoding for local files or bytes, infers a
-MIME type from the filename, and preserves the MailChannels fields in the final
-send payload.
+`Attachment.from_bytes()` helper handles that encoding, infers a MIME type
+from the filename, and preserves the MailChannels fields in the final send
+payload. Read the file or fetch the URL yourself and pass the bytes in — the
+SDK does not read files or make outbound HTTP requests on your behalf.
 
 ```python
-invoice = mailchannels.Attachment.from_file("invoice.pdf")
+from pathlib import Path
+
+invoice = mailchannels.Attachment.from_bytes(
+    Path("invoice.pdf").read_bytes(),
+    filename="invoice.pdf",
+)
 
 mailchannels.Emails.queue(
     {
@@ -255,30 +261,6 @@ mailchannels.Emails.queue(
     }
 )
 ```
-
-Inline attachments use the same encoded payload but set `disposition` to
-`inline` and provide a `content_id`. Reference that content ID from your HTML
-with a `cid:` URL.
-
-```python
-logo = mailchannels.Attachment.inline_file(
-    "logo.png",
-    content_id="company-logo",
-)
-
-mailchannels.Emails.queue(
-    {
-        "from": {"email": "sender@example.com"},
-        "to": [{"email": "recipient@example.net"}],
-        "subject": "Inline image",
-        "html": "<img src='cid:company-logo' alt='Company logo'>",
-        "attachments": [logo],
-    }
-)
-```
-
-Use `Attachment.from_bytes()` when the file is generated in memory and
-`Attachment.from_url()` when the attachment already lives behind an HTTP URL.
 
 ### Preview With Dry Run
 

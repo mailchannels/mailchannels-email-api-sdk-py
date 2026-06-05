@@ -14,26 +14,18 @@ logger = logging.getLogger(__name__)
 
 def build_attachment_message(path: str | Path) -> dict[str, Any]:
     """Build an email payload with a local file attachment."""
-    logger.info("Building attachment example message path=%s", path)
+    file_path = Path(path)
+    logger.info("Building attachment example message path=%s", file_path)
     return {
         "from": {"email": "sender@example.com"},
         "to": [{"email": "recipient@example.net"}],
         "subject": "Attachment example",
         "text": "The requested file is attached.",
-        "attachments": [mailchannels.Attachment.from_file(path)],
-    }
-
-
-def build_inline_image_message(path: str | Path) -> dict[str, Any]:
-    """Build an email payload with an inline image attachment."""
-    logger.info("Building inline image example message path=%s", path)
-    return {
-        "from": {"email": "sender@example.com"},
-        "to": [{"email": "recipient@example.net"}],
-        "subject": "Inline image example",
-        "html": "<img src='cid:example-image' alt='Example image'>",
         "attachments": [
-            mailchannels.Attachment.inline_file(path, content_id="example-image")
+            mailchannels.Attachment.from_bytes(
+                file_path.read_bytes(),
+                filename=file_path.name,
+            ),
         ],
     }
 

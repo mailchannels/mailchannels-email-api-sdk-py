@@ -17,6 +17,23 @@ public API require a major version bump per semantic versioning. The
 public surface — clients, resources, response models, exceptions, helpers,
 and the strict-response opt-in — is now considered stable.
 
+### Removed
+
+- **Breaking:** `Attachment.from_file()`, `Attachment.from_url()`, and
+  `Attachment.inline_file()` have been removed. A generic file-reader and
+  URL-fetcher cannot make safe trust-boundary decisions on the caller's
+  behalf — `from_file` is exposed to arbitrary local-file disclosure when
+  the path comes from untrusted input, and `from_url` is a ready-made SSRF
+  primitive. The corresponding `MailChannelsError` codes
+  `AttachmentReadError` and `AttachmentFetchError` are gone as well. The
+  remaining `Attachment.from_bytes()` factory covers every prior use case
+  once the caller has loaded the bytes themselves with whatever validation
+  their context requires. `Attachment.inline_file()` also relied on
+  upstream API support for `disposition: inline` and `content_id` that
+  the public Email API does not actually honour today, so removing it
+  also fixes a silent no-op. These factories may return in a future
+  release once a safe loading contract has been designed.
+
 ### Changed
 
 - **Breaking:** Aligned response models with the public OpenAPI contract

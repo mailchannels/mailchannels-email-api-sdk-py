@@ -61,7 +61,7 @@ Every `ApiError` exposes:
 | Attribute | Meaning |
 | --- | --- |
 | `status_code` | HTTP status as `int` (or `None` for transport errors). |
-| `code` | Stable error code string, e.g. `AttachmentReadError`, `InvalidPayload`. |
+| `code` | Stable error code string, e.g. `InvalidPayload`, `ResponseValidationError`. |
 | `error_type` | Coarse classification, e.g. `validation`, `authorization`. |
 | `headers` | Response headers dict (lower-cased keys). |
 | `request_id` | Server-assigned ID — include in support tickets. |
@@ -86,16 +86,6 @@ These raise `InvalidRequestError` before any HTTP call:
 - Wrong types in `headers` values (non-strings).
 
 Failing early gives the caller a precise error rather than a vague 400.
-
-## Attachment-Specific Errors
-
-Constructing attachments can fail with `MailChannelsError` and:
-
-- `code="AttachmentReadError"` — local file not found / unreadable.
-- `code="AttachmentFetchError"` — `Attachment.from_url()` couldn't fetch.
-
-These are not API errors — they originate inside the helper and won't have
-`status_code`.
 
 ## Retrying And Idempotency
 

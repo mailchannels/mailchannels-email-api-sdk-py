@@ -1,15 +1,35 @@
 # Attachments
 
 MailChannels expects every attachment to be Base64-encoded with a `filename`
-and ideally a MIME `type`. Use the `Attachment` helpers — they encode for you
-and infer the MIME type.
+and ideally a MIME `type`. Use `Attachment.from_bytes` — it encodes for you
+and infers the MIME type from the filename.
 
-## From A Local File
+The SDK intentionally does **not** read local files or fetch remote URLs on
+your behalf. Load the bytes yourself (with the appropriate validation for
+your trust boundary) and pass them in.
+
+## From In-Memory Bytes
 
 ```python
 import mailchannels
 
-invoice = mailchannels.Attachment.from_file("invoice.pdf")
+report = mailchannels.Attachment.from_bytes(
+    b"<csv content>",
+    filename="report.csv",
+    content_type="text/csv",   # optional; inferred from filename when omitted
+)
+```
+
+## From A Local File
+
+```python
+from pathlib import Path
+import mailchannels
+
+invoice = mailchannels.Attachment.from_bytes(
+    Path("invoice.pdf").read_bytes(),
+    filename="invoice.pdf",
+)
 
 mailchannels.Emails.queue(
     mailchannels.EmailParams(
@@ -28,57 +48,27 @@ mailchannels.Emails.queue(
 )
 ```
 
-Missing files raise `MailChannelsError` with `code="AttachmentReadError"`.
-
-## From In-Memory Bytes
-
-```python
-report = mailchannels.Attachment.from_bytes(
-    b"<csv content>",
-    filename="report.csv",
-    content_type="text/csv",   # optional; inferred from filename when omitted
-)
-```
+Validate the path against your application's trust rules before reading —
+the SDK no longer offers `Attachment.from_file()` precisely because a
+generic helper cannot make that decision safely.
 
 ## From A Remote URL
 
 ```python
-banner = mailchannels.Attachment.from_url("https://cdn.example.com/banner.png")
-```
+import requests
+import mailchannels
 
-The SDK fetches and Base64-encodes the body. Failures raise `MailChannelsError`
-with `code="AttachmentFetchError"`.
-
-## Inline Images (CID References)
-
-For images that should render inside the HTML body rather than as
-downloadable attachments:
-
-```python
-logo = mailchannels.Attachment.inline_file("logo.png", content_id="company-logo")
-
-mailchannels.Emails.queue(
-    mailchannels.EmailParams(
-        from_=mailchannels.EmailAddress(email="sender@example.com"),
-        personalizations=[
-            mailchannels.Personalization(
-                to=[mailchannels.EmailAddress(email="recipient@example.net")],
-            ),
-        ],
-        subject="Inline image",
-        content=[
-            mailchannels.Content(
-                type="text/html",
-                value="<img src='cid:company-logo' alt='Company logo'>",
-            ),
-        ],
-        attachments=[logo],
-    )
+response = requests.get("https://cdn.example.com/banner.png", timeout=30)
+response.raise_for_status()
+banner = mailchannels.Attachment.from_bytes(
+    response.content,
+    filename="banner.png",
 )
 ```
 
-`inline_file` sets `disposition: inline` and assigns the `content_id` that
-the `cid:` URL references.
+Restrict the URL allowlist before fetching — the SDK no longer offers
+`Attachment.from_url()` precisely because the unrestricted version is
+vulnerable to SSRF and credential exfiltration.
 
 ## Limits
 

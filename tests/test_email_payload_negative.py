@@ -13,7 +13,7 @@ from conftest import FakeRequestsClient
 
 import mailchannels
 from mailchannels.client import Client
-from mailchannels.emails import Attachment, normalize_email_params
+from mailchannels.emails import normalize_email_params
 from mailchannels.response import SDKResponse
 
 
@@ -32,17 +32,6 @@ class RawApiRejectionCase:
 
     name: str
     build_payload: Callable[[str, str], dict[str, Any]]
-
-
-class _Http404AttachmentResponse:
-    """Fake response that fails like a remote attachment 404."""
-
-    content = b"not found"
-    headers = {"Content-Type": "text/plain"}
-
-    def raise_for_status(self) -> None:
-        """Raise the same request exception family as requests."""
-        raise requests.HTTPError("404 Client Error: Not Found")
 
 
 INVALID_EMAIL_CASES = (
@@ -198,66 +187,6 @@ def test_empty_attachments_list_is_preserved_cleanly() -> None:
     )
 
     assert payload["attachments"] == []
-
-
-def test_missing_attachment_file_raises_clear_sdk_error(tmp_path) -> None:
-    """Missing local attachment files raise a specific SDK error."""
-    missing_file = tmp_path / "missing.pdf"
-
-    with pytest.raises(mailchannels.MailChannelsError) as error:
-        Attachment.from_file(missing_file)
-
-    assert error.value.code == "AttachmentReadError"
-    assert "Unable to read attachment file" in str(error.value)
-
-
-def test_remote_attachment_404_raises_clear_sdk_error(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Remote attachment fetch failures are wrapped with a stable SDK code."""
-
-    def fake_get(url: str, *, timeout: float) -> _Http404AttachmentResponse:
-        """Return a response object that raises during status validation."""
-        assert url == "https://example.com/missing.pdf"
-        assert timeout == 30.0
-        return _Http404AttachmentResponse()
-
-    monkeypatch.setattr(requests, "get", fake_get)
-
-    with pytest.raises(mailchannels.MailChannelsError) as error:
-        Attachment.from_url("https://example.com/missing.pdf")
-
-    assert error.value.code == "AttachmentFetchError"
-    assert "Unable to fetch attachment URL" in str(error.value)
-
-
-def test_url_attachment_without_filename_uses_fallback(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    """Remote attachment URLs without path names use a deterministic fallback."""
-
-    class FakeAttachmentResponse:
-        """Successful remote attachment response."""
-
-        content = b"remote-data"
-        headers = {"Content-Type": "application/pdf"}
-
-        def raise_for_status(self) -> None:
-            """Simulate a successful HTTP response."""
-
-    def fake_get(url: str, *, timeout: float) -> FakeAttachmentResponse:
-        """Return a successful fake attachment response."""
-        assert url == "https://example.com"
-        assert timeout == 30.0
-        return FakeAttachmentResponse()
-
-    monkeypatch.setattr(requests, "get", fake_get)
-
-    attachment = Attachment.from_url("https://example.com")
-
-    assert attachment.filename == "attachment"
-    assert attachment.type == "application/pdf"
-    assert attachment.content == "cmVtb3RlLWRhdGE="
 
 
 def test_native_content_and_personalizations_win_over_shortcuts() -> None:

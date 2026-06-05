@@ -102,11 +102,9 @@ def test_attachment_example_builds_and_queues_payload(tmp_path: Path) -> None:
     client = Client(api_key="test-key", http_client=transport)
 
     message = attachments.build_attachment_message(attachment_path)
-    inline = attachments.build_inline_image_message(attachment_path)
     result = attachments.queue_attachment(client, attachment_path)
 
     assert message["attachments"][0].content == "aGVsbG8="
-    assert inline["attachments"][0].disposition == "inline"
     assert result.id == "queued"
     assert transport.calls[0]["json"]["attachments"][0]["filename"] == "report.txt"
 

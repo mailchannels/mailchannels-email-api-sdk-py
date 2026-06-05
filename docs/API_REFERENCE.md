@@ -183,9 +183,6 @@ Methods:
 | Method | Signature | Summary |
 | --- | --- | --- |
 | `from_bytes` | `from_bytes(data: bytes, *, filename: str, content_type: str | None = None, disposition: str = 'attachment', content_id: str | None = None) -> Attachment` | Build an attachment from bytes. |
-| `from_file` | `from_file(path: str | Path, *, filename: str | None = None, content_type: str | None = None, disposition: str = 'attachment', content_id: str | None = None) -> Attachment` | Build an attachment from a local file. |
-| `from_url` | `from_url(url: str, *, filename: str | None = None, content_type: str | None = None, disposition: str = 'attachment', content_id: str | None = None, timeout: float = 30.0) -> Attachment` | Fetch a remote URL and build an attachment from its bytes. |
-| `inline_file` | `inline_file(path: str | Path, *, content_id: str, filename: str | None = None, content_type: str | None = None) -> Attachment` | Build an inline attachment from a local file. |
 
 #### `mailchannels.AuthenticationError`
 
@@ -989,9 +986,6 @@ Methods:
 | Method | Signature | Summary |
 | --- | --- | --- |
 | `from_bytes` | `from_bytes(data: bytes, *, filename: str, content_type: str | None = None, disposition: str = 'attachment', content_id: str | None = None) -> Attachment` | Build an attachment from bytes. |
-| `from_file` | `from_file(path: str | Path, *, filename: str | None = None, content_type: str | None = None, disposition: str = 'attachment', content_id: str | None = None) -> Attachment` | Build an attachment from a local file. |
-| `from_url` | `from_url(url: str, *, filename: str | None = None, content_type: str | None = None, disposition: str = 'attachment', content_id: str | None = None, timeout: float = 30.0) -> Attachment` | Fetch a remote URL and build an attachment from its bytes. |
-| `inline_file` | `inline_file(path: str | Path, *, content_id: str, filename: str | None = None, content_type: str | None = None) -> Attachment` | Build an inline attachment from a local file. |
 
 #### `mailchannels.emails.AttachmentDict`
 
