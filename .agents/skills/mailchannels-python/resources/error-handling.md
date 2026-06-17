@@ -16,6 +16,7 @@ MailChannelsError
     ├── AuthenticationError         401 — invalid / missing API key
     ├── ForbiddenError              403 — feature not enabled, sub-account limits
     ├── InvalidRequestError         400 — bad payload, validation errors
+    ├── NotFoundError               404 — resource does not exist
     ├── ConflictError               409 — duplicate webhook, duplicate suppression, etc.
     ├── PayloadTooLargeError        413 — over the 30 MB limit
     ├── RateLimitError              429 — slow down; check retry_after

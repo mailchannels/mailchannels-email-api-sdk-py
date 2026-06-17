@@ -3,23 +3,20 @@
 For each Markdown file under `.agents/skills/mailchannels-python/`:
 
 1. Extract every fenced Python code block (```python … ```).
-2. Drop blocks whose first non-blank line carries the magic skip marker
-   `# type-check: skip` — for fragments that aren't standalone Python on
-   purpose (e.g. bare `except` clauses, partial method bodies).
-3. Substitute the documentation placeholder `{...}` (a set containing a
+2. Substitute the documentation placeholder `{...}` (a set containing a
    single `Ellipsis` literal) with `{}` so payloads written as
    `Emails.queue({...})` round-trip through the type-checker. This is the
    only textual rewrite the script performs.
-4. Concatenate the surviving blocks for that file into a single Python
+3. Concatenate the surviving blocks for that file into a single Python
    source so cross-block references resolve (e.g. `MySyncTransport`
    defined in one block and used in the next).
-5. Prepend a fixed preamble that defines standard "dummy" names so
+4. Prepend a fixed preamble that defines standard "dummy" names so
    documentation can use them without writing the boilerplate inline.
    See "Documentation Dummies" below.
-6. If the resulting body uses `await` / `async with` / `async for` at top
+5. If the resulting body uses `await` / `async with` / `async for` at top
    level — illegal at module scope — wrap just the body in
    `async def _runner(): …` (the preamble stays at module scope).
-7. Hand the assembled source to mypy with the project's `pyproject.toml`
+6. Hand the assembled source to mypy with the project's `pyproject.toml`
    config and report failures, attributing errors back to the source
    Markdown file.
 
@@ -95,7 +92,7 @@ import mailchannels
 
 logger = logging.getLogger(__name__)
 message = cast("mailchannels.SendParams", {})
-payload: list[dict[str, Any]] = []
+payload: list[dict[str, Any]] = [{"url": "foo"}]
 result: Any = None
 
 
@@ -278,6 +275,15 @@ def parse_args(argv: list[str] | None) -> argparse.Namespace:
         )
     )
     parser.add_argument(
+        "resource",
+        nargs="?",
+        metavar="RESOURCE",
+        help=(
+            "Optional resource file name to check (e.g. 'emails' or 'emails.md'). "
+            "Also matches 'SKILL' for SKILL.md. If omitted, all files are checked."
+        ),
+    )
+    parser.add_argument(
         "--show-source",
         action="store_true",
         help="Print the assembled Python source for each file before checking.",
@@ -307,6 +313,14 @@ def main(argv: list[str] | None = None) -> int:
     if not md_files:
         logger.error("No Markdown files found under %s", SKILL_DIR)
         return 2
+
+    if args.resource:
+        target = Path(args.resource).with_suffix(".md").name
+        md_files = [f for f in md_files if f.name == target]
+        if not md_files:
+            logger.error("Resource not found: %s (expected a file named %s)",
+                         args.resource, target)
+            return 2
 
     total_blocks = 0
     failed: list[str] = []

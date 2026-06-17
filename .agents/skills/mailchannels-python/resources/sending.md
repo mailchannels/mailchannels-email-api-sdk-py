@@ -136,6 +136,34 @@ preview = mailchannels.Emails.send(
   unique `campaign_id` + recipient-set check) when at-most-once delivery
   matters.
 
+## Tracking
+
+```python
+mailchannels.Emails.queue(
+    mailchannels.EmailParams(
+        from_=mailchannels.EmailAddress(email="sender@example.com"),
+        personalizations=[
+            mailchannels.Personalization(
+                to=[mailchannels.EmailAddress(email="recipient@example.net")],
+            ),
+        ],
+        subject="Tracked",
+        content=[
+            mailchannels.Content(
+                type="text/html",
+                value="<p>Hello <a href='https://example.com'>click here</a></p>",
+            ),
+        ],
+        tracking_settings=mailchannels.TrackingSettings(
+            open_tracking=mailchannels.TrackingToggle(enable=True),
+            click_tracking=mailchannels.TrackingToggle(enable=True),
+        ),
+    )
+)
+```
+
+Open and click tracking require a subscription that supports them.
+
 ## Reading The Response
 
 Both methods return a `MailChannelsResponse` (a `dict` subclass with

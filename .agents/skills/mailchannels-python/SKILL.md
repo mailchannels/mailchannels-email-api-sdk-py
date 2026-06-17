@@ -17,23 +17,6 @@ for other languages and their APIs differ.
 > language, this skill does not apply — use the MailChannels skill for
 > that language's SDK, or fall back to the raw HTTP API.
 
-### Quick Sanity Check Before Using This Skill
-
-If any of these are true, you're in the right place:
-
-- The file you're editing ends in `.py`, `.pyi`, or `.ipynb`.
-- The user said "Python", "pip", "uv", "poetry", `requirements.txt`,
-  `pyproject.toml`, FastAPI, Flask, Django, Starlette, Celery, or
-  asyncio.
-- The codebase already imports `mailchannels` or has `mailchannels` in
-  its dependencies.
-
-If the user is in a JavaScript / TypeScript / Node, Go, Ruby, PHP, Rust,
-or shell context, stop and pick the correct MailChannels skill for that
-language (or use the HTTP API directly). The Python SDK's class names,
-method casing, and dict-shaped payloads are Python conventions and don't
-carry over.
-
 ## How To Use This Skill
 
 The body of each topic lives in [`resources/`](resources/). Read this file
