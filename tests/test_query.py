@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, timezone
 
-from mailchannels.query import compact_query, pagination_query
+from mailchannels.query import compact_query, encode_path_segment, pagination_query
 
 
 def test_compact_query_serializes_dates_and_lists() -> None:
@@ -30,3 +30,8 @@ def test_pagination_query_adds_limit_and_offset() -> None:
     query = pagination_query(limit=100, offset=10, source="api")
 
     assert query == {"source": "api", "limit": 100, "offset": 10}
+
+
+def test_encode_path_segment_escapes_reserved_characters() -> None:
+    """It encodes user-supplied values as a single URL path segment."""
+    assert encode_path_segment("a/b?c=d#e f%g") == "a%2Fb%3Fc%3Dd%23e%20f%25g"

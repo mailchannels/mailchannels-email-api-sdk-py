@@ -67,9 +67,22 @@ def test_create_and_delete_suppression_entries() -> None:
     }
     assert transport.calls[1]["method"] == "DELETE"
     assert transport.calls[1]["url"] == (
-        "https://api.example.test/tx/v1/suppression-list/recipients/a@example.net"
+        "https://api.example.test/tx/v1/suppression-list/recipients/a%40example.net"
     )
     assert transport.calls[1]["params"] == {"source": "all"}
+
+
+def test_suppression_delete_path_variable_is_url_encoded() -> None:
+    """It encodes recipients used as suppression delete path variables."""
+    transport = FakeRequestsClient(SDKResponse(204, None, ""))
+    client = Client(api_key="test-key", http_client=transport)
+
+    client.suppressions.delete("a+b@example.net/unsafe?x=1", source="all")
+
+    assert transport.calls[0]["url"] == (
+        "https://api.example.test/tx/v1/suppression-list/recipients/"
+        "a%2Bb%40example.net%2Funsafe%3Fx%3D1"
+    )
 
 
 def test_suppression_delete_logs_at_info(caplog: pytest.LogCaptureFixture) -> None:
@@ -94,6 +107,11 @@ async def test_suppression_async_methods_use_async_transport() -> None:
     client = Client(api_key="test-key", async_http_client=transport)
 
     await client.suppressions.list_async(limit=5)
+    await client.suppressions.delete_async("a+b@example.net/unsafe?x=1")
 
     assert transport.calls[0]["method"] == "GET"
     assert transport.calls[0]["params"] == {"limit": 5}
+    assert transport.calls[1]["url"] == (
+        "https://api.example.test/tx/v1/suppression-list/recipients/"
+        "a%2Bb%40example.net%2Funsafe%3Fx%3D1"
+    )

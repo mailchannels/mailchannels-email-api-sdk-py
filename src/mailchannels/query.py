@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from datetime import date, datetime
 from typing import Any
+from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +19,16 @@ def compact_query(values: dict[str, Any]) -> dict[str, Any]:
     }
     logger.debug("Built MailChannels query params keys=%s", sorted(query))
     return query
+
+
+def encode_path_segment(value: str | int) -> str:
+    """Encode one user-supplied URL path segment.
+
+    Prefer a resource-local path helper when several methods share the same
+    base path or combine multiple variables. Inline this helper when a route has
+    just one variable and the path remains obvious.
+    """
+    return quote(str(value), safe="")
 
 
 def pagination_query(

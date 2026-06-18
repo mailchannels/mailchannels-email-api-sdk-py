@@ -16,7 +16,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
-from ..query import compact_query, pagination_query
+from ..query import compact_query, encode_path_segment, pagination_query
 from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
     SignatureParameters,
@@ -293,7 +293,7 @@ class WebhooksResource(Generic[StrictResponses]):
         )
         return self._client.request(
             "POST",
-            f"/webhook-batch/{batch_id}/resend",
+            f"/webhook-batch/{encode_path_segment(batch_id)}/resend",
             response_model=WebhookResendResponse,
         )
 
@@ -326,7 +326,7 @@ class WebhooksResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "POST",
-            f"/webhook-batch/{batch_id}/resend",
+            f"/webhook-batch/{encode_path_segment(batch_id)}/resend",
             response_model=WebhookResendResponse,
         )
 

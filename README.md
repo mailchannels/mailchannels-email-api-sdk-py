@@ -187,6 +187,13 @@ Generated reports provide the deeper detail:
 | `mailchannels.SubAccounts` | You send for multiple tenants and need isolation, credentials, usage, or limits per tenant. |
 | Explicit `mailchannels.Client(...)` | You need different API keys, base URLs, or HTTP transports in the same process. |
 
+### Path Variables
+
+Pass raw identifiers to SDK methods. The SDK URL-encodes path variables such as
+sub-account handles, DKIM domains/selectors, suppression recipients, metric
+sender groups, and webhook batch IDs before building request URLs. Do not
+pre-encode those values yourself; a literal `%` is encoded as `%25`.
+
 ### Read Responses
 
 SDK responses behave like ordinary dictionaries, but they also support

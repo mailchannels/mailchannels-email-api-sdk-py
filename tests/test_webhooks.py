@@ -84,6 +84,19 @@ def test_webhook_batches_public_key_and_resend() -> None:
     }
 
 
+def test_webhook_resend_batch_path_variable_is_url_encoded() -> None:
+    """It encodes webhook batch IDs in resend paths."""
+    transport = FakeRequestsClient(SDKResponse(200, {"ok": True}, "{}"))
+    client = Client(api_key="test-key", http_client=transport)
+
+    client.webhooks.resend_batch("123/456?x=1")
+
+    assert transport.calls[0]["url"] == (
+        "https://api.example.test/tx/v1/webhook-batch/"
+        "123%2F456%3Fx%3D1/resend"
+    )
+
+
 def test_webhook_resend_batch_unknown_id_raises_not_found() -> None:
     """It surfaces a missing webhook batch as NotFoundError, not InvalidRequestError."""
     transport = FakeRequestsClient(
@@ -123,9 +136,14 @@ async def test_webhook_async_methods_use_async_transport() -> None:
     client = Client(api_key="test-key", async_http_client=transport)
 
     await client.webhooks.batches_async(statuses=["no_response"])
+    await client.webhooks.resend_batch_async("123/456?x=1")
 
     assert transport.calls[0]["method"] == "GET"
     assert transport.calls[0]["params"] == {"statuses": "no_response"}
+    assert transport.calls[1]["url"] == (
+        "https://api.example.test/tx/v1/webhook-batch/"
+        "123%2F456%3Fx%3D1/resend"
+    )
 
 
 def test_webhook_signature_helpers() -> None:
