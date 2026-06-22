@@ -22,13 +22,13 @@ def compact_query(values: dict[str, Any]) -> dict[str, Any]:
 
 
 def encode_path_segment(value: str | int) -> str:
-    """Encode one user-supplied URL path segment.
-
-    Prefer a resource-local path helper when several methods share the same
-    base path or combine multiple variables. Inline this helper when a route has
-    just one variable and the path remains obvious.
-    """
+    """Encode one URL path segment."""
     return quote(str(value), safe="")
+
+
+def encode_path_segments(*segments: str | int) -> str:
+    """Build an absolute URL path from encoded path segments."""
+    return "/" + "/".join(encode_path_segment(segment) for segment in segments)
 
 
 def pagination_query(
