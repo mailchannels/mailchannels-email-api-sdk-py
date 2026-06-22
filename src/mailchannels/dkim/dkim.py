@@ -5,7 +5,8 @@ from __future__ import annotations
 import logging
 from typing import Any, Generic, Literal, TypeVar, overload
 
-from ..query import encode_path_segments, pagination_query
+from ..paths import encode_path_segments
+from ..query import pagination_query
 from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
     DkimAlgorithm,

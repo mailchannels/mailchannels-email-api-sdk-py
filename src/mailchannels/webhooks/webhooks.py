@@ -16,7 +16,8 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 
-from ..query import compact_query, encode_path_segments, pagination_query
+from ..paths import encode_path_segments
+from ..query import compact_query, pagination_query
 from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
     SignatureParameters,

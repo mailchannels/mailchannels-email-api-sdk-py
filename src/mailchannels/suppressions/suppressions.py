@@ -6,7 +6,8 @@ import logging
 from builtins import list as list_type
 from typing import Any, Generic, Literal, TypeVar, overload
 
-from ..query import compact_query, encode_path_segments, pagination_query
+from ..paths import encode_path_segments
+from ..query import compact_query, pagination_query
 from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
     SuppressionDeleteSource,
