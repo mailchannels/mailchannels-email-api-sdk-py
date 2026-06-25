@@ -65,6 +65,13 @@ shape (templates, unsubscribe, custom headers, sub-account sends, etc.).
 | `Suppressions` | List, create, delete suppression entries. |
 | `Webhooks` | Enroll, validate, inspect batches, fetch public keys, verify signatures. |
 
+## Path Variables
+
+Pass raw identifiers to SDK methods. The SDK URL-encodes path variables such
+as sub-account handles, DKIM domains/selectors, suppression recipients,
+metric sender groups, and webhook batch IDs before building request URLs. Do
+not pre-encode those values yourself; a literal `%` is encoded as `%25`.
+
 ## `send` vs `queue` And The Two Meanings Of "Async"
 
 Four methods exist on `Emails`. The names are intentionally orthogonal:

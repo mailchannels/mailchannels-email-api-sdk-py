@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Generic, Literal, TypeVar, overload
 
+from ..paths import encode_path_segments
 from ..query import pagination_query
 from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
@@ -51,7 +52,7 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
         logger.info("Creating MailChannels sub-account API key handle=%s", handle)
         return self._client.request(
             "POST",
-            f"/sub-account/{handle}/api-key",
+            encode_path_segments("sub-account", handle, "api-key"),
             response_model=ApiKey,
         )
 
@@ -78,7 +79,7 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "POST",
-            f"/sub-account/{handle}/api-key",
+            encode_path_segments("sub-account", handle, "api-key"),
             response_model=ApiKey,
         )
 
@@ -87,7 +88,7 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
         logger.info("Listing MailChannels sub-account API keys handle=%s", handle)
         return self._client.request(
             "GET",
-            f"/sub-account/{handle}/api-key",
+            encode_path_segments("sub-account", handle, "api-key"),
             response_model=ApiKeyList,
         )
 
@@ -99,7 +100,7 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "GET",
-            f"/sub-account/{handle}/api-key",
+            encode_path_segments("sub-account", handle, "api-key"),
             response_model=ApiKeyList,
         )
 
@@ -112,7 +113,7 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
         )
         return self._client.request(
             "DELETE",
-            f"/sub-account/{handle}/api-key/{key_id}",
+            encode_path_segments("sub-account", handle, "api-key", key_id),
             response_model=EmptyResponse,
         )
 
@@ -130,7 +131,7 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "DELETE",
-            f"/sub-account/{handle}/api-key/{key_id}",
+            encode_path_segments("sub-account", handle, "api-key", key_id),
             response_model=EmptyResponse,
         )
 
@@ -162,7 +163,7 @@ class SubAccountSmtpPasswordsResource(Generic[StrictResponses]):
         logger.info("Creating MailChannels sub-account SMTP password handle=%s", handle)
         return self._client.request(
             "POST",
-            f"/sub-account/{handle}/smtp-password",
+            encode_path_segments("sub-account", handle, "smtp-password"),
             response_model=SmtpPassword,
         )
 
@@ -193,7 +194,7 @@ class SubAccountSmtpPasswordsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "POST",
-            f"/sub-account/{handle}/smtp-password",
+            encode_path_segments("sub-account", handle, "smtp-password"),
             response_model=SmtpPassword,
         )
 
@@ -202,7 +203,7 @@ class SubAccountSmtpPasswordsResource(Generic[StrictResponses]):
         logger.info("Listing MailChannels sub-account SMTP passwords handle=%s", handle)
         return self._client.request(
             "GET",
-            f"/sub-account/{handle}/smtp-password",
+            encode_path_segments("sub-account", handle, "smtp-password"),
             response_model=SmtpPasswordList,
         )
 
@@ -218,7 +219,7 @@ class SubAccountSmtpPasswordsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "GET",
-            f"/sub-account/{handle}/smtp-password",
+            encode_path_segments("sub-account", handle, "smtp-password"),
             response_model=SmtpPasswordList,
         )
 
@@ -235,7 +236,7 @@ class SubAccountSmtpPasswordsResource(Generic[StrictResponses]):
         )
         return self._client.request(
             "DELETE",
-            f"/sub-account/{handle}/smtp-password/{password_id}",
+            encode_path_segments("sub-account", handle, "smtp-password", password_id),
             response_model=EmptyResponse,
         )
 
@@ -253,7 +254,7 @@ class SubAccountSmtpPasswordsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "DELETE",
-            f"/sub-account/{handle}/smtp-password/{password_id}",
+            encode_path_segments("sub-account", handle, "smtp-password", password_id),
             response_model=EmptyResponse,
         )
 
@@ -308,7 +309,7 @@ class SubAccountLimitsResource(Generic[StrictResponses]):
         )
         return self._client.request(
             "PUT",
-            f"/sub-account/{handle}/limit",
+            encode_path_segments("sub-account", handle, "limit"),
             json=payload,
             response_model=SubAccountLimit,
         )
@@ -357,7 +358,7 @@ class SubAccountLimitsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "PUT",
-            f"/sub-account/{handle}/limit",
+            encode_path_segments("sub-account", handle, "limit"),
             json=payload,
             response_model=SubAccountLimit,
         )
@@ -382,7 +383,7 @@ class SubAccountLimitsResource(Generic[StrictResponses]):
         logger.info("Retrieving MailChannels sub-account limit handle=%s", handle)
         return self._client.request(
             "GET",
-            f"/sub-account/{handle}/limit",
+            encode_path_segments("sub-account", handle, "limit"),
             response_model=SubAccountLimit,
         )
 
@@ -415,7 +416,7 @@ class SubAccountLimitsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "GET",
-            f"/sub-account/{handle}/limit",
+            encode_path_segments("sub-account", handle, "limit"),
             response_model=SubAccountLimit,
         )
 
@@ -424,7 +425,7 @@ class SubAccountLimitsResource(Generic[StrictResponses]):
         logger.info("Deleting MailChannels sub-account limit handle=%s", handle)
         return self._client.request(
             "DELETE",
-            f"/sub-account/{handle}/limit",
+            encode_path_segments("sub-account", handle, "limit"),
             response_model=EmptyResponse,
         )
 
@@ -439,7 +440,7 @@ class SubAccountLimitsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "DELETE",
-            f"/sub-account/{handle}/limit",
+            encode_path_segments("sub-account", handle, "limit"),
             response_model=EmptyResponse,
         )
 
@@ -593,7 +594,7 @@ class SubAccountsResource(Generic[StrictResponses]):
         logger.info("Retrieving MailChannels sub-account usage handle=%s", handle)
         return self._client.request(
             "GET",
-            f"/sub-account/{handle}/usage",
+            encode_path_segments("sub-account", handle, "usage"),
             response_model=UsageStats,
         )
 
@@ -626,7 +627,7 @@ class SubAccountsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "GET",
-            f"/sub-account/{handle}/usage",
+            encode_path_segments("sub-account", handle, "usage"),
             response_model=UsageStats,
         )
 
@@ -639,7 +640,7 @@ class SubAccountsResource(Generic[StrictResponses]):
         logger.info("Suspending MailChannels sub-account handle=%s", handle)
         return self._client.request(
             "POST",
-            f"/sub-account/{handle}/suspend",
+            encode_path_segments("sub-account", handle, "suspend"),
             response_model=EmptyResponse,
         )
 
@@ -658,7 +659,7 @@ class SubAccountsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "POST",
-            f"/sub-account/{handle}/suspend",
+            encode_path_segments("sub-account", handle, "suspend"),
             response_model=EmptyResponse,
         )
 
@@ -667,7 +668,7 @@ class SubAccountsResource(Generic[StrictResponses]):
         logger.info("Activating MailChannels sub-account handle=%s", handle)
         return self._client.request(
             "POST",
-            f"/sub-account/{handle}/activate",
+            encode_path_segments("sub-account", handle, "activate"),
             response_model=EmptyResponse,
         )
 
@@ -682,7 +683,7 @@ class SubAccountsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "POST",
-            f"/sub-account/{handle}/activate",
+            encode_path_segments("sub-account", handle, "activate"),
             response_model=EmptyResponse,
         )
 
@@ -694,7 +695,7 @@ class SubAccountsResource(Generic[StrictResponses]):
         logger.info("Deleting MailChannels sub-account handle=%s", handle)
         return self._client.request(
             "DELETE",
-            f"/sub-account/{handle}",
+            encode_path_segments("sub-account", handle),
             response_model=EmptyResponse,
         )
 
@@ -712,7 +713,7 @@ class SubAccountsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "DELETE",
-            f"/sub-account/{handle}",
+            encode_path_segments("sub-account", handle),
             response_model=EmptyResponse,
         )
 

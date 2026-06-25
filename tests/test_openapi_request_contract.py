@@ -483,7 +483,7 @@ ROUTE_CONTRACTS: tuple[OperationContract, ...] = (
             "recipient@example.net",
             source="api",
         ),
-        path="/suppression-list/recipients/recipient@example.net",
+        path="/suppression-list/recipients/recipient%40example.net",
         query_required=frozenset({"source"}),
         query_allowed=frozenset({"source"}),
     ),

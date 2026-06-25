@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 from datetime import date, datetime, timezone
+from typing import cast
 
 import pytest
 from conftest import FakeHTTPXClient, FakeRequestsClient
 
 import mailchannels
 from mailchannels.client import Client
+from mailchannels.metrics.types import MetricsSenderType
 from mailchannels.response import SDKResponse
 
 
@@ -122,6 +124,20 @@ def test_sender_metrics_uses_sender_type_path_and_pagination_query() -> None:
     }
 
 
+def test_sender_metrics_path_variable_is_url_encoded() -> None:
+    """It hardens sender metric paths for untyped runtime callers."""
+    transport = FakeRequestsClient(SDKResponse(200, {"senders": []}, "{}"))
+    client = Client(api_key="test-key", http_client=transport)
+    sender_type = cast(MetricsSenderType, "campaigns/latest?x=1")
+
+    client.metrics.senders(sender_type)
+
+    assert transport.calls[0]["url"] == (
+        "https://api.example.test/tx/v1/metrics/senders/"
+        "campaigns%2Flatest%3Fx%3D1"
+    )
+
+
 def test_module_level_metrics_api_uses_global_configuration(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -145,9 +161,27 @@ async def test_metrics_async_methods_use_async_transport() -> None:
     client = Client(api_key="test-key", async_http_client=transport)
 
     await client.metrics.volume_async(campaign_id="newsletter")
+    await client.metrics.senders_async("sub-accounts")
 
     assert transport.calls[0]["method"] == "GET"
     assert transport.calls[0]["url"] == (
         "https://api.example.test/tx/v1/metrics/volume"
     )
     assert transport.calls[0]["params"] == {"campaign_id": "newsletter"}
+    assert transport.calls[1]["url"] == (
+        "https://api.example.test/tx/v1/metrics/senders/sub-accounts"
+    )
+
+
+async def test_sender_metrics_async_path_variable_is_url_encoded() -> None:
+    """It hardens async sender metric paths for untyped runtime callers."""
+    transport = FakeHTTPXClient(SDKResponse(200, {"senders": []}, "{}"))
+    client = Client(api_key="test-key", async_http_client=transport)
+    sender_type = cast(MetricsSenderType, "sub-accounts/latest?x=1")
+
+    await client.metrics.senders_async(sender_type)
+
+    assert transport.calls[0]["url"] == (
+        "https://api.example.test/tx/v1/metrics/senders/"
+        "sub-accounts%2Flatest%3Fx%3D1"
+    )

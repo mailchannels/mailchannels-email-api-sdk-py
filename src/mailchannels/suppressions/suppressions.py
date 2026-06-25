@@ -6,6 +6,7 @@ import logging
 from builtins import list as list_type
 from typing import Any, Generic, Literal, TypeVar, overload
 
+from ..paths import encode_path_segments
 from ..query import compact_query, pagination_query
 from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
@@ -209,7 +210,7 @@ class SuppressionsResource(Generic[StrictResponses]):
         logger.info("Deleting MailChannels suppression recipient=%s", recipient)
         return self._client.request(
             "DELETE",
-            f"/suppression-list/recipients/{recipient}",
+            encode_path_segments("suppression-list", "recipients", recipient),
             params=compact_query({"source": source}) or None,
             response_model=EmptyResponse,
         )
@@ -231,7 +232,7 @@ class SuppressionsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "DELETE",
-            f"/suppression-list/recipients/{recipient}",
+            encode_path_segments("suppression-list", "recipients", recipient),
             params=compact_query({"source": source}) or None,
             response_model=EmptyResponse,
         )

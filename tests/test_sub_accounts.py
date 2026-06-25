@@ -58,6 +58,32 @@ def test_sub_account_nested_resources_use_expected_paths() -> None:
     assert transport.calls[3]["json"] == {"sends": 100_000}
 
 
+def test_sub_account_path_variables_are_url_encoded() -> None:
+    """It encodes sub-account handles and nested resource IDs in paths."""
+    transport = FakeRequestsClient(SDKResponse(204, None, ""))
+    client = Client(api_key="test-key", http_client=transport)
+
+    client.sub_accounts.smtp_passwords.delete(
+        handle="robintest5?foo=",
+        password_id="any/id #1",
+    )
+    client.sub_accounts.api_keys.delete(
+        handle="client/a?x=1",
+        key_id="key%2F1",
+    )
+
+    assert [call["url"] for call in transport.calls] == [
+        (
+            "https://api.example.test/tx/v1/sub-account/"
+            "robintest5%3Ffoo%3D/smtp-password/any%2Fid%20%231"
+        ),
+        (
+            "https://api.example.test/tx/v1/sub-account/"
+            "client%2Fa%3Fx%3D1/api-key/key%252F1"
+        ),
+    ]
+
+
 def test_sub_account_limit_keeps_monthly_limit_alias() -> None:
     """It maps the old monthly_limit argument to the documented sends payload."""
     transport = FakeRequestsClient()
@@ -112,9 +138,11 @@ async def test_sub_account_async_methods_use_async_transport() -> None:
 
     await client.sub_accounts.list_async(limit=25, offset=5)
     await client.sub_accounts.limits.retrieve_async("clienta")
+    await client.sub_accounts.retrieve_usage_async("client/a?x=1")
 
     assert [call["url"] for call in transport.calls] == [
         "https://api.example.test/tx/v1/sub-account",
         "https://api.example.test/tx/v1/sub-account/clienta/limit",
+        "https://api.example.test/tx/v1/sub-account/client%2Fa%3Fx%3D1/usage",
     ]
     assert transport.calls[0]["params"] == {"limit": 25, "offset": 5}

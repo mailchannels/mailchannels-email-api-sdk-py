@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Generic, Literal, TypeVar, overload
 
+from ..paths import encode_path_segments
 from ..query import pagination_query
 from ..response import EmptyResponse, MailChannelsResponse
 from .types import (
@@ -80,7 +81,7 @@ class DkimResource(Generic[StrictResponses]):
         )
         return self._client.request(
             "POST",
-            f"/domains/{domain}/dkim-keys",
+            encode_path_segments("domains", domain, "dkim-keys"),
             json=payload,
             response_model=DkimKeyInfo,
         )
@@ -139,7 +140,7 @@ class DkimResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "POST",
-            f"/domains/{domain}/dkim-keys",
+            encode_path_segments("domains", domain, "dkim-keys"),
             json=payload,
             response_model=DkimKeyInfo,
         )
@@ -201,7 +202,7 @@ class DkimResource(Generic[StrictResponses]):
         )
         return self._client.request(
             "GET",
-            f"/domains/{domain}/dkim-keys",
+            encode_path_segments("domains", domain, "dkim-keys"),
             params=params or None,
             response_model=DkimKeyList,
         )
@@ -263,7 +264,7 @@ class DkimResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "GET",
-            f"/domains/{domain}/dkim-keys",
+            encode_path_segments("domains", domain, "dkim-keys"),
             params=params or None,
             response_model=DkimKeyList,
         )
@@ -284,7 +285,7 @@ class DkimResource(Generic[StrictResponses]):
         )
         return self._client.request(
             "PATCH",
-            f"/domains/{domain}/dkim-keys/{selector}",
+            encode_path_segments("domains", domain, "dkim-keys", selector),
             json={"status": status},
             response_model=EmptyResponse,
         )
@@ -306,7 +307,7 @@ class DkimResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "PATCH",
-            f"/domains/{domain}/dkim-keys/{selector}",
+            encode_path_segments("domains", domain, "dkim-keys", selector),
             json={"status": status},
             response_model=EmptyResponse,
         )
@@ -354,7 +355,7 @@ class DkimResource(Generic[StrictResponses]):
         )
         return self._client.request(
             "POST",
-            f"/domains/{domain}/dkim-keys/{selector}/rotate",
+            encode_path_segments("domains", domain, "dkim-keys", selector, "rotate"),
             json={"new_key": {"selector": new_selector}},
             response_model=DkimRotateResponse,
         )
@@ -403,7 +404,7 @@ class DkimResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "POST",
-            f"/domains/{domain}/dkim-keys/{selector}/rotate",
+            encode_path_segments("domains", domain, "dkim-keys", selector, "rotate"),
             json={"new_key": {"selector": new_selector}},
             response_model=DkimRotateResponse,
         )

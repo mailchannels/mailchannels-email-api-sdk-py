@@ -103,6 +103,23 @@ def test_update_and_rotate_dkim_keys_use_documented_paths() -> None:
     assert transport.calls[1]["json"] == {"new_key": {"selector": "mcdkim2"}}
 
 
+def test_dkim_path_variables_are_url_encoded() -> None:
+    """It encodes domain and selector values in DKIM paths."""
+    transport = FakeRequestsClient(SDKResponse(204, None, ""))
+    client = Client(api_key="test-key", http_client=transport)
+
+    client.dkim.update_status(
+        "example.com/path?x=1",
+        "selector #1",
+        status="active",
+    )
+
+    assert transport.calls[0]["url"] == (
+        "https://api.example.test/tx/v1/domains/"
+        "example.com%2Fpath%3Fx%3D1/dkim-keys/selector%20%231"
+    )
+
+
 def test_dkim_destructive_operations_log_at_info(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
@@ -142,6 +159,15 @@ async def test_dkim_async_methods_use_async_transport() -> None:
     client = Client(api_key="test-key", async_http_client=transport)
 
     await client.dkim.list_async("example.com", limit=1)
+    await client.dkim.rotate_async(
+        "example.com/path",
+        "selector?x=1",
+        new_selector="s2",
+    )
 
     assert transport.calls[0]["method"] == "GET"
     assert transport.calls[0]["params"] == {"limit": 1}
+    assert transport.calls[1]["url"] == (
+        "https://api.example.test/tx/v1/domains/"
+        "example.com%2Fpath/dkim-keys/selector%3Fx%3D1/rotate"
+    )

@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Generic, Literal, TypeVar, overload
 
+from ..paths import encode_path_segments
 from ..query import compact_query
 from ..response import MailChannelsResponse
 from .types import (
@@ -467,7 +468,7 @@ class MetricsResource(Generic[StrictResponses]):
         )
         return self._client.request(
             "GET",
-            f"/metrics/senders/{sender_type}",
+            encode_path_segments("metrics", "senders", sender_type),
             params=params or None,
             response_model=MetricsSenderResponse,
         )
@@ -534,7 +535,7 @@ class MetricsResource(Generic[StrictResponses]):
         )
         return await self._client.request_async(
             "GET",
-            f"/metrics/senders/{sender_type}",
+            encode_path_segments("metrics", "senders", sender_type),
             params=params or None,
             response_model=MetricsSenderResponse,
         )
