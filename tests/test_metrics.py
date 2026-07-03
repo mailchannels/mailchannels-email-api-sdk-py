@@ -24,11 +24,19 @@ def test_engagement_metrics_uses_expected_path_and_query() -> None:
                 "open_tracking_delivered": 2,
                 "click": 3,
                 "click_tracking_delivered": 4,
+                "unique_open": 5,
+                "unique_click": 6,
+                "unique_open_tracking_delivered": 7,
+                "unique_click_tracking_delivered": 8,
                 "buckets": {
                     "open": [],
                     "open_tracking_delivered": [],
                     "click": [],
                     "click_tracking_delivered": [],
+                    "unique_open": [],
+                    "unique_open_tracking_delivered": [],
+                    "unique_click": [],
+                    "unique_click_tracking_delivered": [],
                 },
             },
             "{}",
@@ -44,6 +52,10 @@ def test_engagement_metrics_uses_expected_path_and_query() -> None:
     )
 
     assert result["open"] == 1
+    assert result["unique_open"] == 5
+    assert result["unique_click"] == 6
+    assert result["unique_open_tracking_delivered"] == 7
+    assert result["unique_click_tracking_delivered"] == 8
     assert transport.calls[0]["method"] == "GET"
     assert transport.calls[0]["url"] == (
         "https://api.example.test/tx/v1/metrics/engagement"

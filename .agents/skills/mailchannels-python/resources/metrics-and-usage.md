@@ -21,12 +21,29 @@ mailchannels.Metrics.volume(
 
 # Same parameter shape — pass the same kwargs to any of these:
 mailchannels.Metrics.engagement(interval="day")          # open / click counts
-mailchannels.Metrics.performance(interval="day")         # delivered / bounced / processed
+mailchannels.Metrics.performance(interval="day")         # delivered / bounced / complained / processed
 mailchannels.Metrics.recipient_behaviour(interval="day") # unsubscribes — British spelling matches the endpoint
 ```
 
 Time formats accepted: `YYYY-MM-DD` or `YYYY-MM-DDTHH:MM:SSZ`. Defaults:
 `start_time` is one month ago, `end_time` is now.
+
+### Unique open/click counts
+
+`engagement()` also returns `unique_open`, `unique_click`,
+`unique_open_tracking_delivered`, and `unique_click_tracking_delivered`.
+These count each message at most once regardless of how many times it was
+opened or clicked, so they're the correct numerator/denominator for open and
+click rates — `open`/`click` can overcount and produce rates above 100%.
+
+```python
+engagement = mailchannels.Metrics.engagement(interval="day")
+unique_opened = engagement.unique_open
+unique_delivered = engagement.unique_open_tracking_delivered
+
+if unique_opened is not None and unique_delivered:
+    unique_open_rate = unique_opened / unique_delivered
+```
 
 ### Buckets
 

@@ -536,6 +536,21 @@ engagement = mailchannels.Metrics.engagement(
 )
 ```
 
+`engagement()` also reports `unique_open`/`unique_click` and their matching
+`unique_open_tracking_delivered`/`unique_click_tracking_delivered`
+denominators. Unlike `open`/`click`, these count each message at most once
+regardless of how many times it was opened or clicked, so divide them to get
+open/click rates that cannot exceed 100%:
+
+```python
+engagement = mailchannels.Metrics.engagement(interval="day")
+
+if engagement["unique_open_tracking_delivered"]:
+    unique_open_rate = (
+        engagement["unique_open"] / engagement["unique_open_tracking_delivered"]
+    )
+```
+
 Sender metrics group results by campaigns or sub-accounts and support ordinary
 pagination controls.
 

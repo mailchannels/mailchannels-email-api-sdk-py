@@ -202,6 +202,10 @@ STRICT_RESPONSE_CASES = (
                 "open_tracking_delivered": 2,
                 "click": 3,
                 "click_tracking_delivered": 4,
+                "unique_open": 5,
+                "unique_click": 6,
+                "unique_open_tracking_delivered": 7,
+                "unique_click_tracking_delivered": 8,
             }
         ),
         missing_required={"open": 1},
@@ -218,10 +222,17 @@ STRICT_RESPONSE_CASES = (
         "metrics-performance",
         lambda client: client.metrics.performance(),
         MetricsPerformance,
-        _bucket_metrics(extra={"processed": 1, "delivered": 2, "bounced": 3}),
+        _bucket_metrics(
+            extra={"processed": 1, "delivered": 2, "bounced": 3, "complained": 4}
+        ),
         missing_required={"processed": 1},
         invalid_type=_bucket_metrics(
-            extra={"processed": "bad", "delivered": 2, "bounced": 3}
+            extra={
+                "processed": "bad",
+                "delivered": 2,
+                "bounced": 3,
+                "complained": 4,
+            }
         ),
     ),
     StrictResponseCase(
@@ -678,7 +689,7 @@ def test_user_agent_uses_exported_version() -> None:
         }
     )
 
-    assert mailchannels.__version__ == "1.0.0"
+    assert mailchannels.__version__ == "1.1.0"
     assert mailchannels.get_version() == mailchannels.__version__
     assert transport.calls[0]["headers"]["User-Agent"] == (
         f"mailchannels-python/{mailchannels.__version__}"

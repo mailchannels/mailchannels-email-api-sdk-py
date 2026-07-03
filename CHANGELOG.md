@@ -10,6 +10,23 @@ onward, breaking changes will require a major version bump.
 
 Reserved for in-progress work targeting the next release.
 
+## [1.1.0] - 2026-07-03
+
+### Added
+
+- `MetricsEngagement` now includes `unique_open`, `unique_click`,
+  `unique_open_tracking_delivered`, and `unique_click_tracking_delivered` —
+  message-level distinct counts returned by `GET /metrics/engagement`. Unlike
+  `open`/`click`, each message is counted at most once regardless of how many
+  times it was opened or clicked, so these are the correct numerator and
+  denominator for computing open/click rates that cannot exceed 100%. These
+  fields are optional and additive; existing code is unaffected.
+- `MetricsPerformance` now includes `complained` — a count of messages that
+  triggered a spam complaint, returned by `GET /metrics/performance`. Typed
+  as `int | None = None` even though the current API contract marks it
+  required, to keep this addition non-breaking for any caller mocking
+  `MetricsPerformance` responses under `strict_responses=True`.
+
 ## [1.0.0] - 2026-06-05
 
 First stable release. From this point forward, breaking changes to the

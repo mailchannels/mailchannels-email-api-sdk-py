@@ -51,6 +51,10 @@ class MetricsEngagement(BaseModel):
     open_tracking_delivered: int
     click: int
     click_tracking_delivered: int
+    unique_open: int | None = None
+    unique_click: int | None = None
+    unique_open_tracking_delivered: int | None = None
+    unique_click_tracking_delivered: int | None = None
     buckets: dict[str, list[MetricsBucket]]
 
 
@@ -62,6 +66,7 @@ class MetricsPerformance(BaseModel):
     processed: int
     delivered: int
     bounced: int
+    complained: int | None = None
     buckets: dict[str, list[MetricsBucket]]
 
 

@@ -4,7 +4,7 @@ This reference is generated from public SDK exports, type hints, Pydantic models
 
 For task-oriented examples, start with the README. This file is the formal public surface reference.
 
-- SDK version: `1.0.0`
+- SDK version: `1.1.0`
 - Top-level exports: `69`
 - Documented public module exports: `178`
 
@@ -1635,7 +1635,7 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Engagement metrics response model.
-- Signature: `mailchannels.metrics.MetricsEngagement(open: int, open_tracking_delivered: int, click: int, click_tracking_delivered: int, buckets: dict[str, list[MetricsBucket]])`
+- Signature: `mailchannels.metrics.MetricsEngagement(open: int, open_tracking_delivered: int, click: int, click_tracking_delivered: int, unique_open: int | None, unique_click: int | None, unique_open_tracking_delivered: int | None, unique_click_tracking_delivered: int | None, buckets: dict[str, list[MetricsBucket]])`
 
 Fields:
 
@@ -1645,6 +1645,10 @@ Fields:
 | `open_tracking_delivered` | `int` | yes | `` |
 | `click` | `int` | yes | `` |
 | `click_tracking_delivered` | `int` | yes | `` |
+| `unique_open` | `int \| None` | no | `None` |
+| `unique_click` | `int \| None` | no | `None` |
+| `unique_open_tracking_delivered` | `int \| None` | no | `None` |
+| `unique_click_tracking_delivered` | `int \| None` | no | `None` |
 | `buckets` | `dict[str, list[MetricsBucket]]` | yes | `` |
 
 #### `mailchannels.metrics.MetricsInterval`
@@ -1656,7 +1660,7 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Performance metrics response model.
-- Signature: `mailchannels.metrics.MetricsPerformance(processed: int, delivered: int, bounced: int, buckets: dict[str, list[MetricsBucket]])`
+- Signature: `mailchannels.metrics.MetricsPerformance(processed: int, delivered: int, bounced: int, complained: int | None, buckets: dict[str, list[MetricsBucket]])`
 
 Fields:
 
@@ -1665,6 +1669,7 @@ Fields:
 | `processed` | `int` | yes | `` |
 | `delivered` | `int` | yes | `` |
 | `bounced` | `int` | yes | `` |
+| `complained` | `int \| None` | no | `None` |
 | `buckets` | `dict[str, list[MetricsBucket]]` | yes | `` |
 
 #### `mailchannels.metrics.MetricsQueryParams`

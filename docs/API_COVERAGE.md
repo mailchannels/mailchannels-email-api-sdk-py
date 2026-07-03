@@ -2,17 +2,17 @@
 
 This report is generated from the MailChannels OpenAPI document and the SDK route registry.
 
-- SDK version: `1.0.0`
+- SDK version: `1.1.0`
 - OpenAPI source: `https://docs.mailchannels.net/email-api.yaml`
-- OpenAPI version: `0.21.1`
-- OpenAPI SHA-256: `4e3f511e41a095792194626e35552e08602fd1257073758fdcb030b120c5ec33`
-- Generated at: `2026-06-05T17:21:25+00:00`
+- OpenAPI version: `1.3.0`
+- OpenAPI SHA-256: `7cae0bb39ce25ec90e3e5858a014bf6fa00f3d62924c7822568a98f62ba349c2`
+- Generated at: `2026-07-03T15:48:13+00:00`
 
 ## Summary
 
-- OpenAPI operations: `38`
+- OpenAPI operations: `42`
 - SDK-supported operations: `38`
-- Pending OpenAPI operations: `0`
+- Pending OpenAPI operations: `4`
 - SDK routes absent from OpenAPI: `0`
 
 ## Coverage Matrix
@@ -20,6 +20,10 @@ This report is generated from the MailChannels OpenAPI document and the SDK rout
 | Method | Path | Summary | SDK surface | Sync | Async | Contract test | Online test | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `POST` | `/check-domain` | DKIM, SPF & Domain Lockdown Check | `mailchannels.CheckDomain.check()` | yes | yes | yes | routine | supported |
+| `GET` | `/custom-tracking-domains` | Retrieve Custom Tracking Domains | pending | no | no | no | none | pending |
+| `POST` | `/custom-tracking-domains` | Register Custom Tracking Domain | pending | no | no | no | none | pending |
+| `DELETE` | `/custom-tracking-domains/{hostname}/{scope}` | Delete Custom Tracking Domain | pending | no | no | no | none | pending |
+| `PATCH` | `/custom-tracking-domains/{hostname}/{scope}` | Update Custom Tracking Domain | pending | no | no | no | none | pending |
 | `GET` | `/domains/{domain}/dkim-keys` | Retrieve DKIM Keys | `mailchannels.Dkim.list()` | yes | yes | yes | routine | supported |
 | `POST` | `/domains/{domain}/dkim-keys` | Create DKIM Key Pair | `mailchannels.Dkim.create()` | yes | yes | yes | none | supported |
 | `PATCH` | `/domains/{domain}/dkim-keys/{selector}` | Update DKIM Key Status | `mailchannels.Dkim.update_status()` | yes | yes | yes | none | supported |
