@@ -34,6 +34,7 @@ attachments = _load_example("attachments")
 cloudflare_dkim = _load_example("cloudflare_dkim")
 custom_headers = _load_example("custom_headers")
 custom_http_client = _load_example("custom_http_client")
+custom_tracking_domains = _load_example("custom_tracking_domains")
 dkim = _load_example("dkim")
 check_domain = _load_example("check_domain")
 error_handling = _load_example("error_handling")
@@ -270,6 +271,59 @@ def test_dkim_example_uses_hosted_dkim_endpoints() -> None:
         "/domains/example.com/dkim-keys/mcdkim/rotate"
     )
     assert transport.calls[2]["json"] == {"new_key": {"selector": "mcdkim2"}}
+
+
+def test_custom_tracking_domains_example_uses_documented_endpoints() -> None:
+    """It exercises the custom tracking domains example."""
+    transport = FakeRequestsClient(
+        SDKResponse(
+            201,
+            {
+                "name": "example-clicks",
+                "hostname": "click.example.com",
+                "scope": "click",
+                "status": "active",
+                "created_at": "2026-07-01T00:00:00Z",
+            },
+            "{}",
+        )
+    )
+    client = Client(api_key="test-key", http_client=transport)
+
+    custom_tracking_domains.register_custom_tracking_domain(
+        client,
+        "example-clicks",
+        "click.example.com",
+    )
+    custom_tracking_domains.list_active_custom_tracking_domains(client)
+    custom_tracking_domains.disable_custom_tracking_domain(
+        client,
+        "click.example.com",
+    )
+    custom_tracking_domains.delete_custom_tracking_domain(
+        client,
+        "click.example.com",
+    )
+
+    assert [call["method"] for call in transport.calls] == [
+        "POST",
+        "GET",
+        "PATCH",
+        "DELETE",
+    ]
+    assert transport.calls[0]["json"] == {
+        "name": "example-clicks",
+        "hostname": "click.example.com",
+        "scope": "click",
+    }
+    assert transport.calls[1]["params"] == {"status": "active"}
+    assert transport.calls[2]["url"].endswith(
+        "/custom-tracking-domains/click.example.com/click"
+    )
+    assert transport.calls[2]["json"] == {"status": "disabled"}
+    assert transport.calls[3]["url"].endswith(
+        "/custom-tracking-domains/click.example.com/click"
+    )
 
 
 def test_cloudflare_dkim_example_creates_or_updates_txt_record() -> None:

@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 import mailchannels
 import mailchannels.check_domain
+import mailchannels.custom_tracking_domains
 import mailchannels.dkim
 import mailchannels.emails
 import mailchannels.metrics
@@ -28,6 +29,7 @@ PUBLIC_MODULES = (
     mailchannels,
     mailchannels.emails,
     mailchannels.check_domain,
+    mailchannels.custom_tracking_domains,
     mailchannels.dkim,
     mailchannels.metrics,
     mailchannels.sub_accounts,
@@ -66,6 +68,12 @@ SUMMARY_OVERRIDES = {
     "mailchannels.API_SPEC_COMPATIBILITY": (
         "MailChannels OpenAPI document metadata targeted by this SDK release."
     ),
+    "mailchannels.CustomTrackingScope": (
+        "Allowed event types a custom tracking domain can handle."
+    ),
+    "mailchannels.CustomTrackingStatus": (
+        "Allowed status values for a custom tracking domain."
+    ),
     "mailchannels.DomainCheckVerdict": (
         "Allowed verdict values returned by domain configuration checks."
     ),
@@ -93,6 +101,12 @@ SUMMARY_OVERRIDES = {
     ),
     "mailchannels.check_domain.DomainCheckVerdict": (
         "Allowed verdict values returned by domain configuration checks."
+    ),
+    "mailchannels.custom_tracking_domains.CustomTrackingScope": (
+        "Allowed event types a custom tracking domain can handle."
+    ),
+    "mailchannels.custom_tracking_domains.CustomTrackingStatus": (
+        "Allowed status values for a custom tracking domain."
     ),
     "mailchannels.emails.EmailHeaders": (
         "Custom email header mapping accepted by send payloads."

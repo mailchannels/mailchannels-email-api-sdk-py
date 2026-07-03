@@ -164,6 +164,42 @@ mailchannels.Emails.queue(
 
 Open and click tracking require a subscription that supports them.
 
+### Custom Tracking Domains
+
+Pass `custom_domain_name` on a `TrackingToggle` (or on `unsubscribe_settings`)
+to route those links through a domain you registered instead of the shared
+MailChannels domain. The name must match an **active**
+`CustomTrackingDomain` registered for that scope — see
+[custom-tracking-domains](custom-tracking-domains.md) for registration and
+DNS verification.
+
+```python
+mailchannels.EmailParams(
+    from_=mailchannels.EmailAddress(email="sender@example.com"),
+    personalizations=[
+        mailchannels.Personalization(
+            to=[mailchannels.EmailAddress(email="recipient@example.net")],
+        ),
+    ],
+    subject="Tracked with a custom domain",
+    content=[
+        mailchannels.Content(
+            type="text/html",
+            value="<p>Hello <a href='https://example.com'>click here</a></p>",
+        ),
+    ],
+    tracking_settings=mailchannels.TrackingSettings(
+        click_tracking=mailchannels.TrackingToggle(
+            enable=True,
+            custom_domain_name="newsletter-clicks",
+        ),
+    ),
+    unsubscribe_settings=mailchannels.UnsubscribeSettings(
+        custom_domain_name="newsletter-unsubscribe",
+    ),
+)
+```
+
 ## Reading The Response
 
 Both methods return a `MailChannelsResponse` (a `dict` subclass with

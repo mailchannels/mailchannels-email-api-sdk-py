@@ -19,6 +19,14 @@ from .check_domain import (
 )
 from .client import DEFAULT_BASE_URL, Client
 from .compatibility import API_SPEC_COMPATIBILITY, ApiSpecCompatibility
+from .custom_tracking_domains import (
+    CustomTrackingDomain,
+    CustomTrackingDomainListResponse,
+    CustomTrackingDomainResult,
+    CustomTrackingDomains,
+    CustomTrackingScope,
+    CustomTrackingStatus,
+)
 from .dkim import Dkim
 from .emails import (
     UNSUBSCRIBE_URL_PLACEHOLDER,
@@ -35,6 +43,7 @@ from .emails import (
     SendResult,
     TrackingSettings,
     TrackingToggle,
+    UnsubscribeSettings,
 )
 from .exceptions import (
     ApiError,
@@ -95,6 +104,12 @@ __all__ = [
     "CheckDomainResult",
     "CheckDomainResource",
     "CheckResults",
+    "CustomTrackingDomain",
+    "CustomTrackingDomainListResponse",
+    "CustomTrackingDomainResult",
+    "CustomTrackingDomains",
+    "CustomTrackingScope",
+    "CustomTrackingStatus",
     "Dkim",
     "DkimResult",
     "DkimSetting",
@@ -131,6 +146,7 @@ __all__ = [
     "TrackingSettings",
     "TrackingToggle",
     "UNSUBSCRIBE_URL_PLACEHOLDER",
+    "UnsubscribeSettings",
     "Usage",
     "UsageStats",
     "WebhookEventPayload",

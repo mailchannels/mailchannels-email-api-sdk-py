@@ -8,7 +8,7 @@
 [![PyPI - Wheel](https://img.shields.io/pypi/wheel/mailchannels)](https://pypi.org/project/mailchannels/)
 
 <!-- generated:api-version -->
-Built and tested against MailChannels Email API 0.21.1.
+Built and tested against MailChannels Email API 1.3.0.
 <!-- /generated:api-version -->
 
 `mailchannels` is a typed Python SDK for the MailChannels Email API. It keeps
@@ -352,6 +352,51 @@ mailchannels.Emails.queue(
 
 See [DKIM And DNS](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/DKIM.md) for key rotation, customer-managed private
 keys, and a Cloudflare DNS publication example.
+
+### Custom Tracking Domains
+
+By default, MailChannels rewrites click/open tracking links and unsubscribe
+URLs to use shared MailChannels domains. Register your own hostname instead
+to keep those links on your brand.
+
+The hostname needs a CNAME record pointing to `links.mailchannels.net`
+before registration can complete. If DNS ownership hasn't been verified
+yet, `create()` returns TXT record instructions instead of an active
+domain — add the TXT and CNAME records, then call `create()` again:
+
+```python
+domain = mailchannels.CustomTrackingDomains.create(
+    name="newsletter-clicks",
+    hostname="click.example.com",
+    scope="click",  # "click" | "open" | "unsubscribe"
+)
+
+if domain.get("status") != "active":
+    print(domain.get("instructions"))
+    print(domain.get("txt_record_name"), domain.get("txt_record_value"))
+```
+
+Once a domain is active, select it by `name` at send time:
+
+```python
+mailchannels.Emails.queue(
+    {
+        "from": {"email": "sender@example.com"},
+        "to": "recipient@example.net",
+        "subject": "Newsletter",
+        "text": "Hello",
+        "tracking_settings": {
+            "click_tracking": {"enable": True, "custom_domain_name": "newsletter-clicks"},
+        },
+        "unsubscribe_settings": {"custom_domain_name": "newsletter-unsubscribe"},
+    }
+)
+```
+
+`CustomTrackingDomains.list()`, `update()` (rename or toggle `active`/
+`disabled`), and `delete()` round out the resource. See
+[Custom Tracking Domains](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/CUSTOM_TRACKING.md)
+for the full DNS verification flow.
 
 ### Add Unsubscribe Support
 

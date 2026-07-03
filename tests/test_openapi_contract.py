@@ -5,12 +5,14 @@ from __future__ import annotations
 from mailchannels.routes import sdk_route_keys
 
 OPENAPI_ROUTE_SNAPSHOT: set[tuple[str, str]] = {
+    ("DELETE", "/custom-tracking-domains/{hostname}/{scope}"),
     ("DELETE", "/sub-account/{handle}"),
     ("DELETE", "/sub-account/{handle}/api-key/{id}"),
     ("DELETE", "/sub-account/{handle}/limit"),
     ("DELETE", "/sub-account/{handle}/smtp-password/{id}"),
     ("DELETE", "/suppression-list/recipients/{recipient}"),
     ("DELETE", "/webhook"),
+    ("GET", "/custom-tracking-domains"),
     ("GET", "/domains/{domain}/dkim-keys"),
     ("GET", "/metrics/engagement"),
     ("GET", "/metrics/performance"),
@@ -27,8 +29,10 @@ OPENAPI_ROUTE_SNAPSHOT: set[tuple[str, str]] = {
     ("GET", "/webhook"),
     ("GET", "/webhook-batch"),
     ("GET", "/webhook/public-key"),
+    ("PATCH", "/custom-tracking-domains/{hostname}/{scope}"),
     ("PATCH", "/domains/{domain}/dkim-keys/{selector}"),
     ("POST", "/check-domain"),
+    ("POST", "/custom-tracking-domains"),
     ("POST", "/domains/{domain}/dkim-keys"),
     ("POST", "/domains/{domain}/dkim-keys/{selector}/rotate"),
     ("POST", "/send"),

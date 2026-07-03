@@ -12,6 +12,10 @@ from conftest import FakeRequestsClient
 import mailchannels
 from mailchannels.check_domain.types import CheckDomainResult
 from mailchannels.client import Client
+from mailchannels.custom_tracking_domains.types import (
+    CustomTrackingDomainListResponse,
+    CustomTrackingDomainResult,
+)
 from mailchannels.dkim.types import DkimKeyInfo, DkimKeyList, DkimRotateResponse
 from mailchannels.emails.types import QueuedSendResponse, SendResponse
 from mailchannels.metrics.types import (
@@ -69,6 +73,17 @@ def _dkim_key(selector: str = "mcdkim") -> dict[str, Any]:
                 "value": "v=DKIM1; p=public",
             }
         ],
+    }
+
+
+def _custom_tracking_domain(name: str = "newsletter") -> dict[str, Any]:
+    """Build a valid registered custom tracking domain response body."""
+    return {
+        "name": name,
+        "hostname": "click.example.com",
+        "scope": "click",
+        "status": "active",
+        "created_at": "2026-07-01T00:00:00Z",
     }
 
 
@@ -163,6 +178,31 @@ STRICT_RESPONSE_CASES = (
             "references": ["https://example.com/docs"],
         },
         invalid_type={"references": "not-a-list"},
+    ),
+    StrictResponseCase(
+        "custom-tracking-domains-list",
+        lambda client: client.custom_tracking_domains.list(),
+        CustomTrackingDomainListResponse,
+        {"custom_tracking_domains": [_custom_tracking_domain()], "total": 1},
+        missing_required={"custom_tracking_domains": []},
+        invalid_type={
+            "custom_tracking_domains": [
+                {**_custom_tracking_domain(), "scope": "not-a-scope"}
+            ],
+            "total": 1,
+        },
+    ),
+    StrictResponseCase(
+        "custom-tracking-domains-create",
+        lambda client: client.custom_tracking_domains.create(
+            name="newsletter",
+            hostname="click.example.com",
+            scope="click",
+        ),
+        CustomTrackingDomainResult,
+        _custom_tracking_domain(),
+        missing_required={**_custom_tracking_domain(), "created_at": None},
+        invalid_type={**_custom_tracking_domain(), "scope": "not-a-scope"},
     ),
     StrictResponseCase(
         "dkim-create",
@@ -689,7 +729,7 @@ def test_user_agent_uses_exported_version() -> None:
         }
     )
 
-    assert mailchannels.__version__ == "1.1.0"
+    assert mailchannels.__version__ == "1.2.0"
     assert mailchannels.get_version() == mailchannels.__version__
     assert transport.calls[0]["headers"]["User-Agent"] == (
         f"mailchannels-python/{mailchannels.__version__}"
@@ -702,12 +742,12 @@ def test_api_spec_compatibility_metadata_is_exported() -> None:
 
     assert isinstance(metadata, mailchannels.ApiSpecCompatibility)
     assert metadata.source_url == "https://docs.mailchannels.net/email-api.yaml"
-    assert metadata.openapi_version == "0.21.1"
+    assert metadata.openapi_version == "1.3.0"
     assert (
         metadata.sha256
-        == "55150d6ed81654a7135843c3bd70b1e661bc75a5fc7b2d1f1f44fbd607e90bff"
+        == "7cae0bb39ce25ec90e3e5858a014bf6fa00f3d62924c7822568a98f62ba349c2"
     )
-    assert metadata.checked_at == "2026-05-14T00:00:00+00:00"
+    assert metadata.checked_at == "2026-07-03T00:00:00+00:00"
     assert metadata.sdk_version == mailchannels.__version__
     assert metadata.to_dict() == {
         "source_url": metadata.source_url,

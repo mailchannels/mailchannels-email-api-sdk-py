@@ -21,6 +21,8 @@ from .types import (
     TrackingSettingsDict,
     TrackingToggle,
     TrackingToggleDict,
+    UnsubscribeSettings,
+    UnsubscribeSettingsDict,
 )
 
 __all__ = [
@@ -45,5 +47,7 @@ __all__ = [
     "TrackingToggle",
     "TrackingToggleDict",
     "UNSUBSCRIBE_URL_PLACEHOLDER",
+    "UnsubscribeSettings",
+    "UnsubscribeSettingsDict",
     "normalize_email_params",
 ]

@@ -37,8 +37,8 @@ class ApiSpecCompatibility:
 
 API_SPEC_COMPATIBILITY = ApiSpecCompatibility(
     source_url="https://docs.mailchannels.net/email-api.yaml",
-    openapi_version="0.21.1",
-    sha256="55150d6ed81654a7135843c3bd70b1e661bc75a5fc7b2d1f1f44fbd607e90bff",
-    checked_at="2026-05-14T00:00:00+00:00",
+    openapi_version="1.3.0",
+    sha256="7cae0bb39ce25ec90e3e5858a014bf6fa00f3d62924c7822568a98f62ba349c2",
+    checked_at="2026-07-03T00:00:00+00:00",
     sdk_version=__version__,
 )

@@ -223,16 +223,16 @@ something similar) so MailChannels support can correlate traffic.
 ## Version Metadata
 
 ```python
-mailchannels.__version__          # "1.1.0"
+mailchannels.__version__          # "1.2.0"
 mailchannels.get_version()        # same
 
 mailchannels.API_SPEC_COMPATIBILITY.to_dict()
 # {
 #   "source_url": "...",
-#   "openapi_version": "0.21.1",
+#   "openapi_version": "1.3.0",
 #   "sha256": "...",
 #   "checked_at": "...",
-#   "sdk_version": "1.1.0",
+#   "sdk_version": "1.2.0",
 # }
 ```
 

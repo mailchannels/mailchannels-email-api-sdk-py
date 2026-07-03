@@ -79,6 +79,7 @@ class Client(Generic[StrictResponses]):
         self.strict_responses = strict_responses
 
         from .check_domain import CheckDomainResource
+        from .custom_tracking_domains import CustomTrackingDomainsResource
         from .dkim import DkimResource
         from .emails import EmailsResource
         from .metrics import MetricsResource
@@ -90,6 +91,9 @@ class Client(Generic[StrictResponses]):
         self.dkim: DkimResource[StrictResponses] = DkimResource(self)
         self.check_domain: CheckDomainResource[StrictResponses] = (
             CheckDomainResource(self)
+        )
+        self.custom_tracking_domains: CustomTrackingDomainsResource[StrictResponses] = (
+            CustomTrackingDomainsResource(self)
         )
         self.emails: EmailsResource[StrictResponses] = EmailsResource(self)
         self.metrics: MetricsResource[StrictResponses] = MetricsResource(self)

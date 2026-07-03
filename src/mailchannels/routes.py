@@ -23,6 +23,30 @@ class SDKRoute:
 
 SDK_ROUTES: tuple[SDKRoute, ...] = (
     SDKRoute("POST", "/check-domain", "CheckDomain", "check"),
+    SDKRoute(
+        "GET",
+        "/custom-tracking-domains",
+        "CustomTrackingDomains",
+        "list",
+    ),
+    SDKRoute(
+        "POST",
+        "/custom-tracking-domains",
+        "CustomTrackingDomains",
+        "create",
+    ),
+    SDKRoute(
+        "PATCH",
+        "/custom-tracking-domains/{hostname}/{scope}",
+        "CustomTrackingDomains",
+        "update",
+    ),
+    SDKRoute(
+        "DELETE",
+        "/custom-tracking-domains/{hostname}/{scope}",
+        "CustomTrackingDomains",
+        "delete",
+    ),
     SDKRoute("POST", "/send", "Emails", "send"),
     SDKRoute("POST", "/send-async", "Emails", "queue"),
     SDKRoute("POST", "/domains/{domain}/dkim-keys", "Dkim", "create"),

@@ -2,17 +2,17 @@
 
 This report is generated from the MailChannels OpenAPI document and the SDK route registry.
 
-- SDK version: `1.1.0`
+- SDK version: `1.2.0`
 - OpenAPI source: `https://docs.mailchannels.net/email-api.yaml`
 - OpenAPI version: `1.3.0`
 - OpenAPI SHA-256: `7cae0bb39ce25ec90e3e5858a014bf6fa00f3d62924c7822568a98f62ba349c2`
-- Generated at: `2026-07-03T15:48:13+00:00`
+- Generated at: `2026-07-03T18:38:59+00:00`
 
 ## Summary
 
 - OpenAPI operations: `42`
-- SDK-supported operations: `38`
-- Pending OpenAPI operations: `4`
+- SDK-supported operations: `42`
+- Pending OpenAPI operations: `0`
 - SDK routes absent from OpenAPI: `0`
 
 ## Coverage Matrix
@@ -20,10 +20,10 @@ This report is generated from the MailChannels OpenAPI document and the SDK rout
 | Method | Path | Summary | SDK surface | Sync | Async | Contract test | Online test | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `POST` | `/check-domain` | DKIM, SPF & Domain Lockdown Check | `mailchannels.CheckDomain.check()` | yes | yes | yes | routine | supported |
-| `GET` | `/custom-tracking-domains` | Retrieve Custom Tracking Domains | pending | no | no | no | none | pending |
-| `POST` | `/custom-tracking-domains` | Register Custom Tracking Domain | pending | no | no | no | none | pending |
-| `DELETE` | `/custom-tracking-domains/{hostname}/{scope}` | Delete Custom Tracking Domain | pending | no | no | no | none | pending |
-| `PATCH` | `/custom-tracking-domains/{hostname}/{scope}` | Update Custom Tracking Domain | pending | no | no | no | none | pending |
+| `GET` | `/custom-tracking-domains` | Retrieve Custom Tracking Domains | `mailchannels.CustomTrackingDomains.list()` | yes | yes | yes | none | supported |
+| `POST` | `/custom-tracking-domains` | Register Custom Tracking Domain | `mailchannels.CustomTrackingDomains.create()` | yes | yes | yes | none | supported |
+| `DELETE` | `/custom-tracking-domains/{hostname}/{scope}` | Delete Custom Tracking Domain | `mailchannels.CustomTrackingDomains.delete()` | yes | yes | yes | none | supported |
+| `PATCH` | `/custom-tracking-domains/{hostname}/{scope}` | Update Custom Tracking Domain | `mailchannels.CustomTrackingDomains.update()` | yes | yes | yes | none | supported |
 | `GET` | `/domains/{domain}/dkim-keys` | Retrieve DKIM Keys | `mailchannels.Dkim.list()` | yes | yes | yes | routine | supported |
 | `POST` | `/domains/{domain}/dkim-keys` | Create DKIM Key Pair | `mailchannels.Dkim.create()` | yes | yes | yes | none | supported |
 | `PATCH` | `/domains/{domain}/dkim-keys/{selector}` | Update DKIM Key Status | `mailchannels.Dkim.update_status()` | yes | yes | yes | none | supported |

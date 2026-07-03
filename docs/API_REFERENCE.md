@@ -4,9 +4,9 @@ This reference is generated from public SDK exports, type hints, Pydantic models
 
 For task-oriented examples, start with the README. This file is the formal public surface reference.
 
-- SDK version: `1.1.0`
-- Top-level exports: `69`
-- Documented public module exports: `178`
+- SDK version: `1.2.0`
+- Top-level exports: `76`
+- Documented public module exports: `195`
 
 ## Top-Level Exports
 
@@ -29,6 +29,12 @@ For task-oriented examples, start with the README. This file is the formal publi
 | `ConfigurationError` | `exception` | Raised when SDK configuration is missing or invalid. |
 | `ConflictError` | `exception` | Raised when MailChannels reports a resource conflict. |
 | `Content` | `Pydantic model` | Email body content part. |
+| `CustomTrackingDomain` | `Pydantic model` | A registered MailChannels custom tracking domain. |
+| `CustomTrackingDomainListResponse` | `Pydantic model` | Response model for listing custom tracking domains. |
+| `CustomTrackingDomainResult` | `Pydantic model` | Response model for registering or updating a custom tracking domain. |
+| `CustomTrackingDomains` | `class` | Module-level custom tracking domain operations using global SDK configuration. |
+| `CustomTrackingScope` | `value` | Allowed event types a custom tracking domain can handle. |
+| `CustomTrackingStatus` | `value` | Allowed status values for a custom tracking domain. |
 | `Dkim` | `class` | Module-level DKIM key management using global SDK configuration. |
 | `DkimResult` | `Pydantic model` | One DKIM result returned by the domain check endpoint. |
 | `DkimSetting` | `Pydantic model` | DKIM settings used by the domain check endpoint. |
@@ -65,6 +71,7 @@ For task-oriented examples, start with the README. This file is the formal publi
 | `TrackingSettings` | `Pydantic model` | Open and click tracking settings for a MailChannels send. |
 | `TrackingToggle` | `Pydantic model` | Open or click tracking toggle for a MailChannels send. |
 | `UNSUBSCRIBE_URL_PLACEHOLDER` | `constant` | Mustache placeholder for MailChannels-hosted one-click unsubscribe URLs. |
+| `UnsubscribeSettings` | `Pydantic model` | Unsubscribe experience settings for a MailChannels send. |
 | `Usage` | `class` | Module-level parent-account usage operations. |
 | `UsageStats` | `Pydantic model` | MailChannels usage statistics for the current billing period. |
 | `WebhookEventPayload` | `Pydantic model` | Common fields present on MailChannels delivery event payloads. |
@@ -306,6 +313,83 @@ Fields:
 | `value` | `str` | yes | `` |
 | `template_type` | `Literal['mustache'] \| None` | no | `None` |
 
+#### `mailchannels.CustomTrackingDomain`
+
+- Kind: `Pydantic model`
+- Summary: A registered MailChannels custom tracking domain.
+- Signature: `mailchannels.CustomTrackingDomain(name: str, hostname: str, scope: CustomTrackingScope, status: CustomTrackingStatus, created_at: str)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `name` | `str` | yes | `` |
+| `hostname` | `str` | yes | `` |
+| `scope` | `CustomTrackingScope` | yes | `` |
+| `status` | `CustomTrackingStatus` | yes | `` |
+| `created_at` | `str` | yes | `` |
+
+#### `mailchannels.CustomTrackingDomainListResponse`
+
+- Kind: `Pydantic model`
+- Summary: Response model for listing custom tracking domains.
+- Signature: `mailchannels.CustomTrackingDomainListResponse(custom_tracking_domains: list[CustomTrackingDomain], total: int)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `custom_tracking_domains` | `list[CustomTrackingDomain]` | yes | `` |
+| `total` | `int` | yes | `` |
+
+#### `mailchannels.CustomTrackingDomainResult`
+
+- Kind: `Pydantic model`
+- Summary: Response model for registering or updating a custom tracking domain.
+- Signature: `mailchannels.CustomTrackingDomainResult(name: str | None, hostname: str | None, scope: CustomTrackingScope | None, status: CustomTrackingStatus | None, created_at: str | None, instructions: str | None, token: str | None, txt_record_name: str | None, txt_record_value: str | None)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `name` | `str \| None` | no | `None` |
+| `hostname` | `str \| None` | no | `None` |
+| `scope` | `CustomTrackingScope \| None` | no | `None` |
+| `status` | `CustomTrackingStatus \| None` | no | `None` |
+| `created_at` | `str \| None` | no | `None` |
+| `instructions` | `str \| None` | no | `None` |
+| `token` | `str \| None` | no | `None` |
+| `txt_record_name` | `str \| None` | no | `None` |
+| `txt_record_value` | `str \| None` | no | `None` |
+
+#### `mailchannels.CustomTrackingDomains`
+
+- Kind: `class`
+- Summary: Module-level custom tracking domain operations using global SDK configuration.
+
+Methods:
+
+| Method | Signature | Summary |
+| --- | --- | --- |
+| `create` | `create(*, name: str, hostname: str, scope: CustomTrackingScope) -> CustomTrackingDomainResult | MailChannelsResponse` | Register a custom tracking domain for click, open, or unsubscribe links. |
+| `create_async` | `create_async(*, name: str, hostname: str, scope: CustomTrackingScope) -> CustomTrackingDomainResult | MailChannelsResponse` | Register a custom tracking domain using async HTTP. |
+| `delete` | `delete(hostname: str, scope: CustomTrackingScope) -> EmptyResponse | MailChannelsResponse` | Permanently delete a custom tracking domain. |
+| `delete_async` | `delete_async(hostname: str, scope: CustomTrackingScope) -> EmptyResponse | MailChannelsResponse` | Permanently delete a custom tracking domain using async HTTP. |
+| `list` | `list(*, name: str | None = None, status: CustomTrackingStatus | None = None, scope: CustomTrackingScope | None = None, limit: int | None = None, offset: int | None = None) -> CustomTrackingDomainListResponse | MailChannelsResponse` | Retrieve custom tracking domains registered under this account. |
+| `list_async` | `list_async(*, name: str | None = None, status: CustomTrackingStatus | None = None, scope: CustomTrackingScope | None = None, limit: int | None = None, offset: int | None = None) -> CustomTrackingDomainListResponse | MailChannelsResponse` | Retrieve custom tracking domains using async HTTP. |
+| `update` | `update(hostname: str, scope: CustomTrackingScope, *, name: str | None = None, status: CustomTrackingStatus | None = None) -> CustomTrackingDomainResult | MailChannelsResponse` | Update a custom tracking domain's label or active status. |
+| `update_async` | `update_async(hostname: str, scope: CustomTrackingScope, *, name: str | None = None, status: CustomTrackingStatus | None = None) -> CustomTrackingDomainResult | MailChannelsResponse` | Update a custom tracking domain using async HTTP. |
+
+#### `mailchannels.CustomTrackingScope`
+
+- Kind: `value`
+- Summary: Allowed event types a custom tracking domain can handle.
+
+#### `mailchannels.CustomTrackingStatus`
+
+- Kind: `value`
+- Summary: Allowed status values for a custom tracking domain.
+
 #### `mailchannels.Dkim`
 
 - Kind: `class`
@@ -387,7 +471,7 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Validated MailChannels email send payload.
-- Signature: `mailchannels.EmailParams(personalizations: list[Personalization], from_: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None, campaign_id: str | None, tracking_settings: TrackingSettings | None)`
+- Signature: `mailchannels.EmailParams(personalizations: list[Personalization], from_: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None, campaign_id: str | None, tracking_settings: TrackingSettings | None, unsubscribe_settings: UnsubscribeSettings | None)`
 
 Fields:
 
@@ -407,6 +491,7 @@ Fields:
 | `dkim_selector` | `str \| None` | no | `None` |
 | `campaign_id` | `str \| None` | no | `None` |
 | `tracking_settings` | `TrackingSettings \| None` | no | `None` |
+| `unsubscribe_settings` | `UnsubscribeSettings \| None` | no | `None` |
 
 Methods:
 
@@ -635,6 +720,7 @@ Fields:
 | `to` | `list[EmailAddressDict] \| EmailAddressDict \| list[str] \| str` | no |
 | `tracking_settings` | `TrackingSettingsDict` | no |
 | `transactional` | `bool` | no |
+| `unsubscribe_settings` | `UnsubscribeSettingsDict` | no |
 
 #### `mailchannels.SendResponse`
 
@@ -795,18 +881,31 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Open or click tracking toggle for a MailChannels send.
-- Signature: `mailchannels.TrackingToggle(enable: bool)`
+- Signature: `mailchannels.TrackingToggle(enable: bool, custom_domain_name: str | None)`
 
 Fields:
 
 | Field | Type | Required | Default |
 | --- | --- | --- | --- |
 | `enable` | `bool` | no | `False` |
+| `custom_domain_name` | `str \| None` | no | `None` |
 
 #### `mailchannels.UNSUBSCRIBE_URL_PLACEHOLDER`
 
 - Kind: `constant`
 - Summary: Mustache placeholder for MailChannels-hosted one-click unsubscribe URLs.
+
+#### `mailchannels.UnsubscribeSettings`
+
+- Kind: `Pydantic model`
+- Summary: Unsubscribe experience settings for a MailChannels send.
+- Signature: `mailchannels.UnsubscribeSettings(custom_domain_name: str | None)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `custom_domain_name` | `str \| None` | no | `None` |
 
 #### `mailchannels.Usage`
 
@@ -1063,7 +1162,7 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Validated MailChannels email send payload.
-- Signature: `mailchannels.emails.EmailParams(personalizations: list[Personalization], from_: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None, campaign_id: str | None, tracking_settings: TrackingSettings | None)`
+- Signature: `mailchannels.emails.EmailParams(personalizations: list[Personalization], from_: EmailAddress, subject: str, content: list[Content], reply_to: EmailAddress | None, envelope_from: EmailAddress | None, headers: EmailHeaders | None, attachments: list[Attachment] | None, transactional: bool | None, dkim_domain: str | None, dkim_private_key: str | None, dkim_selector: str | None, campaign_id: str | None, tracking_settings: TrackingSettings | None, unsubscribe_settings: UnsubscribeSettings | None)`
 
 Fields:
 
@@ -1083,6 +1182,7 @@ Fields:
 | `dkim_selector` | `str \| None` | no | `None` |
 | `campaign_id` | `str \| None` | no | `None` |
 | `tracking_settings` | `TrackingSettings \| None` | no | `None` |
+| `unsubscribe_settings` | `UnsubscribeSettings \| None` | no | `None` |
 
 Methods:
 
@@ -1212,6 +1312,7 @@ Fields:
 | `to` | `list[EmailAddressDict] \| EmailAddressDict \| list[str] \| str` | no |
 | `tracking_settings` | `TrackingSettingsDict` | no |
 | `transactional` | `bool` | no |
+| `unsubscribe_settings` | `UnsubscribeSettingsDict` | no |
 
 #### `mailchannels.emails.SendResponse`
 
@@ -1271,13 +1372,14 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: Open or click tracking toggle for a MailChannels send.
-- Signature: `mailchannels.emails.TrackingToggle(enable: bool)`
+- Signature: `mailchannels.emails.TrackingToggle(enable: bool, custom_domain_name: str | None)`
 
 Fields:
 
 | Field | Type | Required | Default |
 | --- | --- | --- | --- |
 | `enable` | `bool` | no | `False` |
+| `custom_domain_name` | `str \| None` | no | `None` |
 
 #### `mailchannels.emails.TrackingToggleDict`
 
@@ -1288,12 +1390,36 @@ Fields:
 
 | Field | Type | Required |
 | --- | --- | --- |
+| `custom_domain_name` | `str` | no |
 | `enable` | `bool` | no |
 
 #### `mailchannels.emails.UNSUBSCRIBE_URL_PLACEHOLDER`
 
 - Kind: `constant`
 - Summary: Mustache placeholder for MailChannels-hosted one-click unsubscribe URLs.
+
+#### `mailchannels.emails.UnsubscribeSettings`
+
+- Kind: `Pydantic model`
+- Summary: Unsubscribe experience settings for a MailChannels send.
+- Signature: `mailchannels.emails.UnsubscribeSettings(custom_domain_name: str | None)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `custom_domain_name` | `str \| None` | no | `None` |
+
+#### `mailchannels.emails.UnsubscribeSettingsDict`
+
+- Kind: `TypedDict`
+- Summary: Dictionary form of MailChannels unsubscribe settings.
+
+Fields:
+
+| Field | Type | Required |
+| --- | --- | --- |
+| `custom_domain_name` | `str` | no |
 
 #### `mailchannels.emails.normalize_email_params`
 
@@ -1448,6 +1574,121 @@ Fields:
 | `spfRecord` | `str \| None` | no | `None` |
 | `spfRecordError` | `str \| None` | no | `None` |
 | `verdict` | `DomainCheckVerdict \| None` | no | `None` |
+
+### `mailchannels.custom_tracking_domains`
+
+Custom tracking domain resource exports.
+
+#### `mailchannels.custom_tracking_domains.CustomTrackingDomain`
+
+- Kind: `Pydantic model`
+- Summary: A registered MailChannels custom tracking domain.
+- Signature: `mailchannels.custom_tracking_domains.CustomTrackingDomain(name: str, hostname: str, scope: CustomTrackingScope, status: CustomTrackingStatus, created_at: str)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `name` | `str` | yes | `` |
+| `hostname` | `str` | yes | `` |
+| `scope` | `CustomTrackingScope` | yes | `` |
+| `status` | `CustomTrackingStatus` | yes | `` |
+| `created_at` | `str` | yes | `` |
+
+#### `mailchannels.custom_tracking_domains.CustomTrackingDomainListParams`
+
+- Kind: `TypedDict`
+- Summary: Query parameters for retrieving custom tracking domains.
+
+Fields:
+
+| Field | Type | Required |
+| --- | --- | --- |
+| `limit` | `int` | no |
+| `name` | `str` | no |
+| `offset` | `int` | no |
+| `scope` | `CustomTrackingScope` | no |
+| `status` | `CustomTrackingStatus` | no |
+
+#### `mailchannels.custom_tracking_domains.CustomTrackingDomainListResponse`
+
+- Kind: `Pydantic model`
+- Summary: Response model for listing custom tracking domains.
+- Signature: `mailchannels.custom_tracking_domains.CustomTrackingDomainListResponse(custom_tracking_domains: list[CustomTrackingDomain], total: int)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `custom_tracking_domains` | `list[CustomTrackingDomain]` | yes | `` |
+| `total` | `int` | yes | `` |
+
+#### `mailchannels.custom_tracking_domains.CustomTrackingDomainResult`
+
+- Kind: `Pydantic model`
+- Summary: Response model for registering or updating a custom tracking domain.
+- Signature: `mailchannels.custom_tracking_domains.CustomTrackingDomainResult(name: str | None, hostname: str | None, scope: CustomTrackingScope | None, status: CustomTrackingStatus | None, created_at: str | None, instructions: str | None, token: str | None, txt_record_name: str | None, txt_record_value: str | None)`
+
+Fields:
+
+| Field | Type | Required | Default |
+| --- | --- | --- | --- |
+| `name` | `str \| None` | no | `None` |
+| `hostname` | `str \| None` | no | `None` |
+| `scope` | `CustomTrackingScope \| None` | no | `None` |
+| `status` | `CustomTrackingStatus \| None` | no | `None` |
+| `created_at` | `str \| None` | no | `None` |
+| `instructions` | `str \| None` | no | `None` |
+| `token` | `str \| None` | no | `None` |
+| `txt_record_name` | `str \| None` | no | `None` |
+| `txt_record_value` | `str \| None` | no | `None` |
+
+#### `mailchannels.custom_tracking_domains.CustomTrackingDomains`
+
+- Kind: `class`
+- Summary: Module-level custom tracking domain operations using global SDK configuration.
+
+Methods:
+
+| Method | Signature | Summary |
+| --- | --- | --- |
+| `create` | `create(*, name: str, hostname: str, scope: CustomTrackingScope) -> CustomTrackingDomainResult | MailChannelsResponse` | Register a custom tracking domain for click, open, or unsubscribe links. |
+| `create_async` | `create_async(*, name: str, hostname: str, scope: CustomTrackingScope) -> CustomTrackingDomainResult | MailChannelsResponse` | Register a custom tracking domain using async HTTP. |
+| `delete` | `delete(hostname: str, scope: CustomTrackingScope) -> EmptyResponse | MailChannelsResponse` | Permanently delete a custom tracking domain. |
+| `delete_async` | `delete_async(hostname: str, scope: CustomTrackingScope) -> EmptyResponse | MailChannelsResponse` | Permanently delete a custom tracking domain using async HTTP. |
+| `list` | `list(*, name: str | None = None, status: CustomTrackingStatus | None = None, scope: CustomTrackingScope | None = None, limit: int | None = None, offset: int | None = None) -> CustomTrackingDomainListResponse | MailChannelsResponse` | Retrieve custom tracking domains registered under this account. |
+| `list_async` | `list_async(*, name: str | None = None, status: CustomTrackingStatus | None = None, scope: CustomTrackingScope | None = None, limit: int | None = None, offset: int | None = None) -> CustomTrackingDomainListResponse | MailChannelsResponse` | Retrieve custom tracking domains using async HTTP. |
+| `update` | `update(hostname: str, scope: CustomTrackingScope, *, name: str | None = None, status: CustomTrackingStatus | None = None) -> CustomTrackingDomainResult | MailChannelsResponse` | Update a custom tracking domain's label or active status. |
+| `update_async` | `update_async(hostname: str, scope: CustomTrackingScope, *, name: str | None = None, status: CustomTrackingStatus | None = None) -> CustomTrackingDomainResult | MailChannelsResponse` | Update a custom tracking domain using async HTTP. |
+
+#### `mailchannels.custom_tracking_domains.CustomTrackingDomainsResource`
+
+- Kind: `class`
+- Summary: Client-bound custom tracking domain operations.
+- Signature: `mailchannels.custom_tracking_domains.CustomTrackingDomainsResource(client: Any) -> None`
+
+Methods:
+
+| Method | Signature | Summary |
+| --- | --- | --- |
+| `create` | `create(*, name: str, hostname: str, scope: CustomTrackingScope) -> CustomTrackingDomainResult | MailChannelsResponse` | Register a custom tracking domain for click, open, or unsubscribe links. |
+| `create_async` | `create_async(*, name: str, hostname: str, scope: CustomTrackingScope) -> CustomTrackingDomainResult | MailChannelsResponse` | Register a custom tracking domain using async HTTP. |
+| `delete` | `delete(hostname: str, scope: CustomTrackingScope) -> EmptyResponse | MailChannelsResponse` | Permanently delete a custom tracking domain. |
+| `delete_async` | `delete_async(hostname: str, scope: CustomTrackingScope) -> EmptyResponse | MailChannelsResponse` | Permanently delete a custom tracking domain using async HTTP. |
+| `list` | `list(*, name: str | None = None, status: CustomTrackingStatus | None = None, scope: CustomTrackingScope | None = None, limit: int | None = None, offset: int | None = None) -> CustomTrackingDomainListResponse | MailChannelsResponse` | Retrieve custom tracking domains registered under this account. |
+| `list_async` | `list_async(*, name: str | None = None, status: CustomTrackingStatus | None = None, scope: CustomTrackingScope | None = None, limit: int | None = None, offset: int | None = None) -> CustomTrackingDomainListResponse | MailChannelsResponse` | Retrieve custom tracking domains using async HTTP. |
+| `update` | `update(hostname: str, scope: CustomTrackingScope, *, name: str | None = None, status: CustomTrackingStatus | None = None) -> CustomTrackingDomainResult | MailChannelsResponse` | Update a custom tracking domain's label or active status. |
+| `update_async` | `update_async(hostname: str, scope: CustomTrackingScope, *, name: str | None = None, status: CustomTrackingStatus | None = None) -> CustomTrackingDomainResult | MailChannelsResponse` | Update a custom tracking domain using async HTTP. |
+
+#### `mailchannels.custom_tracking_domains.CustomTrackingScope`
+
+- Kind: `value`
+- Summary: Allowed event types a custom tracking domain can handle.
+
+#### `mailchannels.custom_tracking_domains.CustomTrackingStatus`
+
+- Kind: `value`
+- Summary: Allowed status values for a custom tracking domain.
 
 ### `mailchannels.dkim`
 

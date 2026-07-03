@@ -10,6 +10,31 @@ onward, breaking changes will require a major version bump.
 
 Reserved for in-progress work targeting the next release.
 
+## [1.2.0] - 2026-07-03
+
+### Added
+
+- **Custom Tracking Domains.** A new `CustomTrackingDomains` resource
+  (`list()`, `create()`, `update()`, `delete()`, plus `_async` variants and
+  module-level convenience methods) wraps the `/custom-tracking-domains`
+  endpoints, letting you register a branded hostname for click tracking,
+  open tracking, or unsubscribe links instead of MailChannels' shared
+  domains. Registration requires a CNAME and, on first use, a TXT
+  ownership-verification record; `create()`/`update()` both return a
+  `CustomTrackingDomainResult`, a single response model that represents
+  either a completed registration (`name`/`hostname`/`scope`/`status`/
+  `created_at`) or a pending-verification result (`instructions`/`token`/
+  `txt_record_name`/`txt_record_value`), since MailChannels returns either
+  shape with a 2xx status. `list()` returns the separate `CustomTrackingDomain`
+  model (always fully registered) inside a `CustomTrackingDomainListResponse`.
+- `TrackingToggle` (the `open_tracking`/`click_tracking` settings on a send)
+  now accepts `custom_domain_name` to select a registered custom tracking
+  domain at send time.
+- `EmailParams`/`SendParams` gained `unsubscribe_settings.custom_domain_name`
+  to route unsubscribe links through a registered custom domain.
+- `openapi_version` in `API_SPEC_COMPATIBILITY` is now pinned to `1.3.0`,
+  matching full route parity with the live MailChannels Email API spec.
+
 ## [1.1.0] - 2026-07-03
 
 ### Added

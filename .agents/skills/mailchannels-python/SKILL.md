@@ -1,6 +1,6 @@
 ---
 name: mailchannels-python
-description: Python SDK for the MailChannels Email API (PyPI `mailchannels`; `import mailchannels`). Use when sending or queueing email, working with attachments, mustache templates, unsubscribe, custom headers, DKIM keys, sub-accounts, domain checks, metrics, usage, suppressions, or webhooks (incl. signature verification); also configuring clients & custom HTTP transports, asyncio (`*_async` methods), dict-like vs strict Pydantic responses, and error handling. Skip when (a) developing the SDK itself — defer to the repo's root AGENTS.md; (b) the user is in a non-Python language — MailChannels publishes separate SDKs for other ecosystems and the Python types/idioms here don't apply.
+description: Python SDK for the MailChannels Email API (PyPI `mailchannels`; `import mailchannels`). Use when sending or queueing email, working with attachments, mustache templates, unsubscribe, custom headers, custom tracking domains, DKIM keys, sub-accounts, domain checks, metrics, usage, suppressions, or webhooks (incl. signature verification); also configuring clients & custom HTTP transports, asyncio (`*_async` methods), dict-like vs strict Pydantic responses, and error handling. Skip when (a) developing the SDK itself — defer to the repo's root AGENTS.md; (b) the user is in a non-Python language — MailChannels publishes separate SDKs for other ecosystems and the Python types/idioms here don't apply.
 ---
 
 # MailChannels Python SDK
@@ -49,8 +49,13 @@ You're about to write Python SDK code. What does it need to do?
 │   │   → resources/unsubscribe.md
 │   ├── …with custom X-… headers?
 │   │   → resources/custom-headers.md
+│   ├── …with a custom tracking/unsubscribe domain?
+│   │   → resources/custom-tracking-domains.md
 │   └── …from asyncio code (FastAPI, Starlette, aiohttp, …)?
 │       → resources/async.md
+│
+├── Register or manage custom tracking domains (click/open/unsubscribe)
+│   → resources/custom-tracking-domains.md
 │
 ├── Manage hosted DKIM keys (create / list / rotate / revoke)
 │   → resources/dkim.md

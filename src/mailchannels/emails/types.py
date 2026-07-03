@@ -69,6 +69,7 @@ class TrackingToggleDict(TypedDict, total=False):
     """Dictionary form of an open/click tracking toggle."""
 
     enable: bool
+    custom_domain_name: str
 
 
 class TrackingSettingsDict(TypedDict, total=False):
@@ -76,6 +77,12 @@ class TrackingSettingsDict(TypedDict, total=False):
 
     open_tracking: TrackingToggleDict
     click_tracking: TrackingToggleDict
+
+
+class UnsubscribeSettingsDict(TypedDict, total=False):
+    """Dictionary form of MailChannels unsubscribe settings."""
+
+    custom_domain_name: str
 
 
 class PersonalizationDict(TypedDict, total=False):
@@ -123,6 +130,7 @@ class SendParams(TypedDict, total=False):
     envelope_from: EmailAddressDict
     campaign_id: str
     tracking_settings: TrackingSettingsDict
+    unsubscribe_settings: UnsubscribeSettingsDict
 
 
 class EmailAddress(BaseModel):
@@ -188,6 +196,7 @@ class TrackingToggle(BaseModel):
     """Open or click tracking toggle for a MailChannels send."""
 
     enable: bool = False
+    custom_domain_name: str | None = None
 
 
 class TrackingSettings(BaseModel):
@@ -195,6 +204,12 @@ class TrackingSettings(BaseModel):
 
     open_tracking: TrackingToggle | None = None
     click_tracking: TrackingToggle | None = None
+
+
+class UnsubscribeSettings(BaseModel):
+    """Unsubscribe experience settings for a MailChannels send."""
+
+    custom_domain_name: str | None = None
 
 
 class Personalization(BaseModel):
@@ -249,6 +264,7 @@ class EmailParams(BaseModel):
     dkim_selector: str | None = None
     campaign_id: str | None = None
     tracking_settings: TrackingSettings | None = None
+    unsubscribe_settings: UnsubscribeSettings | None = None
 
     @field_validator("headers")
     @classmethod

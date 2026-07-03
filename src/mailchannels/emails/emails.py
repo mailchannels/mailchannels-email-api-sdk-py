@@ -294,6 +294,7 @@ def _normalize_mapping(params: SendParamsType) -> dict[str, Any]:
     _copy_optional(payload, normalized, "dkim_selector")
     _copy_optional(payload, normalized, "campaign_id")
     _copy_optional(payload, normalized, "tracking_settings")
+    _copy_optional(payload, normalized, "unsubscribe_settings")
     return normalized
 
 
