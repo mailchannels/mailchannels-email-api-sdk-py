@@ -741,7 +741,7 @@ def test_api_spec_compatibility_metadata_is_exported() -> None:
     metadata = mailchannels.API_SPEC_COMPATIBILITY
 
     assert isinstance(metadata, mailchannels.ApiSpecCompatibility)
-    assert metadata.source_url == "https://docs.mailchannels.net/email-api.yaml"
+    assert metadata.source_url == "https://docs.mailchannels.com/email-api.yaml"
     assert metadata.openapi_version == "1.3.0"
     assert (
         metadata.sha256

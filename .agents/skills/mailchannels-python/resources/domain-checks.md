@@ -114,7 +114,7 @@ If your lockdown record uses `auth=` (account-wide authorization), omit
 `sender_id` and call `CheckDomain.check("example.com")` with just the
 domain.
 
-[lockdown-docs]: https://docs.mailchannels.net/email-api/advanced/domain-lockdown/
+[lockdown-docs]: https://docs.mailchannels.com/email-api/advanced/domain-lockdown/
 
 ## When To Use
 

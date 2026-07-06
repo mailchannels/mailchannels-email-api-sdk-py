@@ -18,7 +18,7 @@ from openapi_spec_validator import validate
 from mailchannels import get_version
 from mailchannels.routes import SDK_ROUTES, SDKRoute
 
-DEFAULT_SPEC_URL = "https://docs.mailchannels.net/email-api.yaml"
+DEFAULT_SPEC_URL = "https://docs.mailchannels.com/email-api.yaml"
 DEFAULT_OUTPUT_PATH = Path("docs/API_COVERAGE.md")
 HTTP_METHODS = {"delete", "get", "patch", "post", "put"}
 ROUTINE_ONLINE_ROUTES = frozenset(
