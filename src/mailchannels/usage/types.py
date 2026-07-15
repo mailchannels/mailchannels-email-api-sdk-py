@@ -13,3 +13,4 @@ class UsageStats(BaseModel):
     total_usage: int
     period_start_date: str | None = None
     period_end_date: str | None = None
+    monthly_limit: int | None = None

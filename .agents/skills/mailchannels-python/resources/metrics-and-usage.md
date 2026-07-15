@@ -90,6 +90,13 @@ usage = mailchannels.Usage.retrieve()
 print(usage.total_usage)          # int, messages sent this period
 print(usage.period_start_date)    # ISO date
 print(usage.period_end_date)
+print(usage.monthly_limit)        # effective cap for the period; 0 means
+                                   # the account can't send. For a
+                                   # sub-account with no explicit limit
+                                   # set, this already resolves to the
+                                   # parent account's limit — see
+                                   # sub-accounts.md for how that differs
+                                   # from Limits.retrieve()'s -1.
 ```
 
 For a specific sub-account, use `SubAccounts.retrieve_usage(handle)` instead.

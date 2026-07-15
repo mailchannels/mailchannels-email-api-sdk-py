@@ -4,7 +4,7 @@ This reference is generated from public SDK exports, type hints, Pydantic models
 
 For task-oriented examples, start with the README. This file is the formal public surface reference.
 
-- SDK version: `1.2.0`
+- SDK version: `1.3.0`
 - Top-level exports: `76`
 - Documented public module exports: `195`
 
@@ -929,7 +929,7 @@ mailchannels.Usage.retrieve()
 
 - Kind: `Pydantic model`
 - Summary: MailChannels usage statistics for the current billing period.
-- Signature: `mailchannels.UsageStats(total_usage: int, period_start_date: str | None, period_end_date: str | None)`
+- Signature: `mailchannels.UsageStats(total_usage: int, period_start_date: str | None, period_end_date: str | None, monthly_limit: int | None)`
 
 Fields:
 
@@ -938,6 +938,7 @@ Fields:
 | `total_usage` | `int` | yes | `` |
 | `period_start_date` | `str \| None` | no | `None` |
 | `period_end_date` | `str \| None` | no | `None` |
+| `monthly_limit` | `int \| None` | no | `None` |
 
 #### `mailchannels.WebhookEventPayload`
 
@@ -2258,7 +2259,7 @@ Methods:
 
 - Kind: `Pydantic model`
 - Summary: MailChannels usage statistics for the current billing period.
-- Signature: `mailchannels.sub_accounts.UsageStats(total_usage: int, period_start_date: str | None, period_end_date: str | None)`
+- Signature: `mailchannels.sub_accounts.UsageStats(total_usage: int, period_start_date: str | None, period_end_date: str | None, monthly_limit: int | None)`
 
 Fields:
 
@@ -2267,6 +2268,7 @@ Fields:
 | `total_usage` | `int` | yes | `` |
 | `period_start_date` | `str \| None` | no | `None` |
 | `period_end_date` | `str \| None` | no | `None` |
+| `monthly_limit` | `int \| None` | no | `None` |
 
 ### `mailchannels.suppressions`
 
@@ -2395,7 +2397,7 @@ Methods:
 
 - Kind: `Pydantic model`
 - Summary: MailChannels usage statistics for the current billing period.
-- Signature: `mailchannels.usage.UsageStats(total_usage: int, period_start_date: str | None, period_end_date: str | None)`
+- Signature: `mailchannels.usage.UsageStats(total_usage: int, period_start_date: str | None, period_end_date: str | None, monthly_limit: int | None)`
 
 Fields:
 
@@ -2404,6 +2406,7 @@ Fields:
 | `total_usage` | `int` | yes | `` |
 | `period_start_date` | `str \| None` | no | `None` |
 | `period_end_date` | `str \| None` | no | `None` |
+| `monthly_limit` | `int \| None` | no | `None` |
 
 ### `mailchannels.webhooks`
 

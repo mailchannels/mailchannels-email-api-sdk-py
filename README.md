@@ -8,7 +8,7 @@
 [![PyPI - Wheel](https://img.shields.io/pypi/wheel/mailchannels)](https://pypi.org/project/mailchannels/)
 
 <!-- generated:api-version -->
-Built and tested against MailChannels Email API 1.3.0.
+Built and tested against MailChannels Email API 1.5.0.
 <!-- /generated:api-version -->
 
 `mailchannels` is a typed Python SDK for the MailChannels Email API. It keeps
@@ -520,6 +520,12 @@ or decide when to raise, lower, or suspend a limit.
 ```python
 usage = mailchannels.SubAccounts.retrieve_usage("clienta")
 parent_usage = mailchannels.Usage.retrieve()
+
+# monthly_limit is the effective cap for the period — 0 means the account
+# can't send. A sub-account with no explicit limit set already resolves
+# this to the parent account's limit (contrast SubAccounts.Limits.retrieve(),
+# which reports -1 in that case).
+print(f"{usage['total_usage']} / {usage['monthly_limit']}")
 ```
 
 When sending as a sub-account, create a separate client with that sub-account's

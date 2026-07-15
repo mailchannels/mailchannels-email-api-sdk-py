@@ -10,6 +10,22 @@ onward, breaking changes will require a major version bump.
 
 Reserved for in-progress work targeting the next release.
 
+## [1.3.0] - 2026-07-15
+
+### Added
+
+- `UsageStats` (shared by `Usage.retrieve()` and
+  `SubAccounts.retrieve_usage()`) gains `monthly_limit` — the effective
+  send cap for the current billing period. A value of `0` means the
+  account cannot send; on a sub-account with no explicit limit set, this
+  reports the parent account's limit rather than `-1`. Typed
+  `int | None = None` even though the spec marks it required, matching
+  this SDK's existing convention of keeping new response fields optional
+  so they can never break a caller's mocked test fixtures.
+- `API_SPEC_COMPATIBILITY.openapi_version` bumped to `1.5.0` (from
+  `1.3.0`), reflecting the current public API contract — route-level
+  parity was already complete; this only refreshes the pinned metadata.
+
 ## [1.2.0] - 2026-07-03
 
 ### Added

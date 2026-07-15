@@ -83,10 +83,20 @@ parent_usage = mailchannels.Usage.retrieve()
 sub_usage = mailchannels.SubAccounts.retrieve_usage("clienta")
 
 print(parent_usage.total_usage, parent_usage.period_start_date, parent_usage.period_end_date)
+print(sub_usage.monthly_limit)
 ```
 
 `Usage.retrieve()` is for the parent. Use `SubAccounts.retrieve_usage(handle)`
 when asking about one specific sub-account.
+
+`UsageStats.monthly_limit` (returned by both calls above) is the
+*effective* cap already in force for the period — not the same thing as
+the `monthly_limit` alias on `Limits.set()` above, which just *sets* a
+sub-account's own `sends` limit. A sub-account with no explicit limit set
+returns `-1` from `Limits.retrieve()`, but `retrieve_usage(handle)` still
+reports the real number in effect (the parent account's limit) rather
+than `-1`, so use `monthly_limit` on the usage response — not
+`Limits.retrieve()` — for progress-bar-style "X of Y sent" displays.
 
 ## Sending As A Sub-Account
 

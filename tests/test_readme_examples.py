@@ -71,6 +71,7 @@ def _example_response() -> SDKResponse:
         "total_usage": 10,
         "period_start_date": "2026-04-01",
         "period_end_date": "2026-04-30",
+        "monthly_limit": 10000,
         "handle": "clienta",
         "company_name": "Client A",
         "sends": 100_000,

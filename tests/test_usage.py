@@ -19,6 +19,7 @@ def test_usage_retrieve_uses_top_level_usage_endpoint() -> None:
                 "total_usage": 5000,
                 "period_start_date": "2026-04-01",
                 "period_end_date": "2026-04-30",
+                "monthly_limit": 10000,
             },
             "{}",
         )
@@ -28,6 +29,7 @@ def test_usage_retrieve_uses_top_level_usage_endpoint() -> None:
     result = client.usage.retrieve()
 
     assert result.total_usage == 5000
+    assert result.monthly_limit == 10000
     assert transport.calls[0]["method"] == "GET"
     assert transport.calls[0]["url"] == "https://api.example.test/tx/v1/usage"
 

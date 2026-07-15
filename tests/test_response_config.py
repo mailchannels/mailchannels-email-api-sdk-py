@@ -165,7 +165,7 @@ STRICT_RESPONSE_CASES = (
         "usage",
         lambda client: client.usage.retrieve(),
         UsageStats,
-        {"total_usage": 42},
+        {"total_usage": 42, "monthly_limit": 10000},
         missing_required={"period_start_date": "2026-04-01"},
         invalid_type={"total_usage": "not-an-int"},
     ),
@@ -342,7 +342,7 @@ STRICT_RESPONSE_CASES = (
         "sub-account-usage",
         lambda client: client.sub_accounts.retrieve_usage("clienta"),
         SubAccountUsageStats,
-        {"total_usage": 10},
+        {"total_usage": 10, "monthly_limit": 5000},
         missing_required={"period_start_date": "2026-04-01"},
         invalid_type={"total_usage": "not-an-int"},
     ),
@@ -729,7 +729,7 @@ def test_user_agent_uses_exported_version() -> None:
         }
     )
 
-    assert mailchannels.__version__ == "1.2.0"
+    assert mailchannels.__version__ == "1.3.0"
     assert mailchannels.get_version() == mailchannels.__version__
     assert transport.calls[0]["headers"]["User-Agent"] == (
         f"mailchannels-python/{mailchannels.__version__}"
@@ -742,12 +742,12 @@ def test_api_spec_compatibility_metadata_is_exported() -> None:
 
     assert isinstance(metadata, mailchannels.ApiSpecCompatibility)
     assert metadata.source_url == "https://docs.mailchannels.com/email-api.yaml"
-    assert metadata.openapi_version == "1.3.0"
+    assert metadata.openapi_version == "1.5.0"
     assert (
         metadata.sha256
-        == "7cae0bb39ce25ec90e3e5858a014bf6fa00f3d62924c7822568a98f62ba349c2"
+        == "e9461d58a544ea411a2bb98019c4d792ae4601dd0bb9bc72314ce40691185227"
     )
-    assert metadata.checked_at == "2026-07-03T00:00:00+00:00"
+    assert metadata.checked_at == "2026-07-15T00:00:00+00:00"
     assert metadata.sdk_version == mailchannels.__version__
     assert metadata.to_dict() == {
         "source_url": metadata.source_url,
