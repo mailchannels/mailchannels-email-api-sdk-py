@@ -29,6 +29,7 @@ class CheckDomainResource(Generic[StrictResponses]):
         *,
         sender_id: str | None = None,
         dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+        envelope_from_domain: str | None = None,
     ) -> CheckDomainResult: ...
 
     @overload
@@ -38,6 +39,7 @@ class CheckDomainResource(Generic[StrictResponses]):
         *,
         sender_id: str | None = None,
         dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+        envelope_from_domain: str | None = None,
     ) -> MailChannelsResponse: ...
 
     @overload
@@ -47,6 +49,7 @@ class CheckDomainResource(Generic[StrictResponses]):
         *,
         sender_id: str | None = None,
         dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+        envelope_from_domain: str | None = None,
     ) -> CheckDomainResult | MailChannelsResponse: ...
 
     def check(
@@ -55,12 +58,14 @@ class CheckDomainResource(Generic[StrictResponses]):
         *,
         sender_id: str | None = None,
         dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+        envelope_from_domain: str | None = None,
     ) -> CheckDomainResult | MailChannelsResponse:
         """Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status."""
         payload = _check_domain_payload(
             domain,
             sender_id=sender_id,
             dkim_settings=dkim_settings,
+            envelope_from_domain=envelope_from_domain,
         )
         logger.info("Checking MailChannels domain configuration domain=%s", domain)
         return self._client.request(
@@ -77,6 +82,7 @@ class CheckDomainResource(Generic[StrictResponses]):
         *,
         sender_id: str | None = None,
         dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+        envelope_from_domain: str | None = None,
     ) -> CheckDomainResult: ...
 
     @overload
@@ -86,6 +92,7 @@ class CheckDomainResource(Generic[StrictResponses]):
         *,
         sender_id: str | None = None,
         dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+        envelope_from_domain: str | None = None,
     ) -> MailChannelsResponse: ...
 
     @overload
@@ -95,6 +102,7 @@ class CheckDomainResource(Generic[StrictResponses]):
         *,
         sender_id: str | None = None,
         dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+        envelope_from_domain: str | None = None,
     ) -> CheckDomainResult | MailChannelsResponse: ...
 
     async def check_async(
@@ -103,12 +111,14 @@ class CheckDomainResource(Generic[StrictResponses]):
         *,
         sender_id: str | None = None,
         dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+        envelope_from_domain: str | None = None,
     ) -> CheckDomainResult | MailChannelsResponse:
         """Check domain configuration status using async HTTP."""
         payload = _check_domain_payload(
             domain,
             sender_id=sender_id,
             dkim_settings=dkim_settings,
+            envelope_from_domain=envelope_from_domain,
         )
         logger.info(
             "Checking MailChannels domain configuration using async HTTP domain=%s",
@@ -132,6 +142,7 @@ class CheckDomain:
         *,
         sender_id: str | None = None,
         dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+        envelope_from_domain: str | None = None,
     ) -> CheckDomainResult | MailChannelsResponse:
         """Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status."""
         from ..client import get_default_client
@@ -140,6 +151,7 @@ class CheckDomain:
             domain,
             sender_id=sender_id,
             dkim_settings=dkim_settings,
+            envelope_from_domain=envelope_from_domain,
         )
 
     @classmethod
@@ -149,6 +161,7 @@ class CheckDomain:
         *,
         sender_id: str | None = None,
         dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+        envelope_from_domain: str | None = None,
     ) -> CheckDomainResult | MailChannelsResponse:
         """Check domain configuration status using async HTTP."""
         from ..client import get_default_client
@@ -157,6 +170,7 @@ class CheckDomain:
             domain,
             sender_id=sender_id,
             dkim_settings=dkim_settings,
+            envelope_from_domain=envelope_from_domain,
         )
 
 
@@ -165,6 +179,7 @@ def _check_domain_payload(
     *,
     sender_id: str | None = None,
     dkim_settings: list[DkimSetting | dict[str, str]] | None = None,
+    envelope_from_domain: str | None = None,
 ) -> dict[str, Any]:
     """Build and validate a `/check-domain` request payload."""
     try:
@@ -172,6 +187,7 @@ def _check_domain_payload(
             domain=domain,
             sender_id=sender_id,
             dkim_settings=dkim_settings,
+            envelope_from_domain=envelope_from_domain,
         )
     except ValidationError as error:
         logger.error("Invalid MailChannels domain check parameters: %s", error)

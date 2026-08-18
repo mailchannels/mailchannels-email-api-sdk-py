@@ -4,7 +4,7 @@ This reference is generated from public SDK exports, type hints, Pydantic models
 
 For task-oriented examples, start with the README. This file is the formal public surface reference.
 
-- SDK version: `1.3.0`
+- SDK version: `1.4.0`
 - Top-level exports: `76`
 - Documented public module exports: `195`
 
@@ -210,8 +210,8 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
+| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None, envelope_from_domain: str | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
+| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None, envelope_from_domain: str | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
 
 Example for `check`:
 
@@ -223,7 +223,7 @@ mailchannels.CheckDomain.check("example.com")
 
 - Kind: `Pydantic model`
 - Summary: Request body for `/check-domain`.
-- Signature: `mailchannels.CheckDomainParams(domain: str, sender_id: str | None, dkim_settings: list[DkimSetting | dict[str, str]] | None)`
+- Signature: `mailchannels.CheckDomainParams(domain: str, sender_id: str | None, dkim_settings: list[DkimSetting | dict[str, str]] | None, envelope_from_domain: str | None)`
 
 Fields:
 
@@ -232,6 +232,7 @@ Fields:
 | `domain` | `str` | yes | `` |
 | `sender_id` | `str \| None` | no | `None` |
 | `dkim_settings` | `list[DkimSetting \| dict[str, str]] \| None` | no | `None` |
+| `envelope_from_domain` | `str \| None` | no | `None` |
 
 #### `mailchannels.CheckDomainResource`
 
@@ -243,8 +244,8 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
+| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None, envelope_from_domain: str | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
+| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None, envelope_from_domain: str | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
 
 #### `mailchannels.CheckDomainResult`
 
@@ -1441,14 +1442,14 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
+| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None, envelope_from_domain: str | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
+| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None, envelope_from_domain: str | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
 
 #### `mailchannels.check_domain.CheckDomainParams`
 
 - Kind: `Pydantic model`
 - Summary: Request body for `/check-domain`.
-- Signature: `mailchannels.check_domain.CheckDomainParams(domain: str, sender_id: str | None, dkim_settings: list[DkimSetting | dict[str, str]] | None)`
+- Signature: `mailchannels.check_domain.CheckDomainParams(domain: str, sender_id: str | None, dkim_settings: list[DkimSetting | dict[str, str]] | None, envelope_from_domain: str | None)`
 
 Fields:
 
@@ -1457,6 +1458,7 @@ Fields:
 | `domain` | `str` | yes | `` |
 | `sender_id` | `str \| None` | no | `None` |
 | `dkim_settings` | `list[DkimSetting \| dict[str, str]] \| None` | no | `None` |
+| `envelope_from_domain` | `str \| None` | no | `None` |
 
 #### `mailchannels.check_domain.CheckDomainResource`
 
@@ -1468,8 +1470,8 @@ Methods:
 
 | Method | Signature | Summary |
 | --- | --- | --- |
-| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
-| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
+| `check` | `check(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None, envelope_from_domain: str | None = None) -> CheckDomainResult | MailChannelsResponse` | Check DKIM, SPF, sender-domain DNS, and Domain Lockdown status. |
+| `check_async` | `check_async(domain: str, *, sender_id: str | None = None, dkim_settings: list[DkimSetting | dict[str, str]] | None = None, envelope_from_domain: str | None = None) -> CheckDomainResult | MailChannelsResponse` | Check domain configuration status using async HTTP. |
 
 #### `mailchannels.check_domain.CheckDomainResult`
 

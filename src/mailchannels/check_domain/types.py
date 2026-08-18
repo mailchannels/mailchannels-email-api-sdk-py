@@ -26,6 +26,7 @@ class CheckDomainParams(BaseModel):
         default=None,
         max_length=10,
     )
+    envelope_from_domain: str | None = None
 
 
 class DkimResult(BaseModel):

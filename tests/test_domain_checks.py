@@ -29,6 +29,7 @@ def test_domain_check_posts_expected_payload() -> None:
             DkimSetting(dkim_domain="example.com", dkim_selector="mcdkim"),
             {"dkim_selector": "other"},
         ],
+        envelope_from_domain="example.net",
     )
 
     assert result.check_results["spf"]["verdict"] == "passed"
@@ -43,6 +44,7 @@ def test_domain_check_posts_expected_payload() -> None:
             {"dkim_domain": "example.com", "dkim_selector": "mcdkim"},
             {"dkim_selector": "other"},
         ],
+        "envelope_from_domain": "example.net",
     }
 
 

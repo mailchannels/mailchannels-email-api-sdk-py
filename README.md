@@ -8,7 +8,7 @@
 [![PyPI - Wheel](https://img.shields.io/pypi/wheel/mailchannels)](https://pypi.org/project/mailchannels/)
 
 <!-- generated:api-version -->
-Built and tested against MailChannels Email API 1.5.0.
+Built and tested against MailChannels Email API 1.7.0.
 <!-- /generated:api-version -->
 
 `mailchannels` is a typed Python SDK for the MailChannels Email API. It keeps

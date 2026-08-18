@@ -68,14 +68,17 @@ ROUTE_CONTRACTS: tuple[OperationContract, ...] = (
             "example.com",
             sender_id="sender-123",
             dkim_settings=[{"dkim_selector": "mcdkim"}],
+            envelope_from_domain="example.net",
         ),
         lambda client: client.check_domain.check_async(
             "example.com",
             sender_id="sender-123",
             dkim_settings=[{"dkim_selector": "mcdkim"}],
+            envelope_from_domain="example.net",
         ),
         json_required=frozenset({"domain"}),
-        json_allowed=frozenset({"domain", "sender_id", "dkim_settings"}),
+        json_allowed=frozenset({"domain", "sender_id", "dkim_settings",
+                                "envelope_from_domain"}),
     ),
     OperationContract(
         "GET",
