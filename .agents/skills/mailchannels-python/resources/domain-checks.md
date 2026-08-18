@@ -36,6 +36,35 @@ if checks is not None:
 print(result.references)                      # support links if anything failed
 ```
 
+## With Envelope-from Domain
+
+SPF is evaluated against the envelope sender domain — the domain of the
+`Envelope-From` address. DKIM, the sender-domain DNS check (A/MX), and Domain
+Lockdown are all evaluated against the sending `domain` (the domain of the
+sender address) regardless of `envelope_from_domain`.
+
+If your envelope-from domain differs from the domain you pass as `domain`,
+provide it as `envelope_from_domain` so SPF is checked against the right
+domain — otherwise SPF may fail even though your mail is properly
+authenticated.
+
+```python
+import mailchannels
+
+result = mailchannels.CheckDomain.check("example.com",
+                                        envelope_from_domain="example.net")
+
+checks = result.check_results
+if checks is not None:
+    if checks.spf is not None:
+        print(checks.spf.verdict)             # checked on example.net
+    if checks.domain_lockdown is not None:
+        print(checks.domain_lockdown.verdict) # checked on example.com
+    if checks.sender_domain is not None:
+        print(checks.sender_domain.verdict)   # checked on example.com
+    print(checks.dkim)                        # checked on example.com — list[DkimResult] | None
+```
+
 ## With Specific DKIM Settings
 
 If you don't pass any `dkim_settings`, MailChannels uses all stored keys for
