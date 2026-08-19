@@ -10,6 +10,19 @@ onward, breaking changes will require a major version bump.
 
 Reserved for in-progress work targeting the next release.
 
+## [1.4.0] - 2026-08-18
+
+### Added
+
+- `CheckDomain.check()`/`check_async()` gain `envelope_from_domain` — an
+  optional override for the domain SPF is evaluated against, for callers
+  whose envelope-from domain differs from the sending `domain`. DKIM, the
+  sender-domain DNS check (A/MX), and domain lockdown are unaffected and
+  always check the sending `domain`. Without it, SPF is still checked
+  against `domain` as before.
+- `API_SPEC_COMPATIBILITY.openapi_version` bumped to `1.7.0` (from
+  `1.5.0`), reflecting the current public API contract.
+
 ## [1.3.0] - 2026-07-15
 
 ### Added
