@@ -10,6 +10,17 @@ onward, breaking changes will require a major version bump.
 
 Reserved for in-progress work targeting the next release.
 
+## [1.4.1] - 2026-08-20
+
+### Changed
+
+- Updated documentation for `CheckDomain.check()` /`check_async()` to
+  clarify backend API behavior when `envelope_from_domain` is provided:
+  - SPF and Domain Lockdown are evaluated against `envelope_from_domain` (when provided).
+  - DKIM and sender-domain DNS checks (A/MX) remain evaluated against `domain`.
+- `API_SPEC_COMPATIBILITY.openapi_version` bumped to `1.7.1` (from
+  `1.7.0`), reflecting the current public API contract.
+
 ## [1.4.0] - 2026-08-18
 
 ### Added
