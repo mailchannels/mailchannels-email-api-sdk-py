@@ -67,12 +67,12 @@ definitions:
           - uv sync --extra dev
           - rm -rf dist/
           - uv build
-          - uv run twine check dist/*
+          - uvx --with twine==7.0.0 twine check dist/*
           # --skip-existing lets repeated main-branch merges succeed without
           # bumping the version: TestPyPI/PyPI artifacts are immutable, so we
           # only republish when the version in pyproject.toml has actually
           # changed.
-          - uv run twine upload
+          - uvx --with twine==7.0.0 twine upload
               --skip-existing
               --repository-url https://test.pypi.org/legacy/
               --username __token__
@@ -87,8 +87,8 @@ definitions:
           - uv sync --extra dev
           - rm -rf dist/
           - uv build
-          - uv run twine check dist/*
-          - uv run twine upload
+          - uvx --with twine==7.0.0 twine check dist/*
+          - uvx --with twine==7.0.0 twine upload
               --username __token__
               --password "$PYPI_API_TOKEN"
               dist/*

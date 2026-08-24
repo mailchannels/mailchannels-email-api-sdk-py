@@ -134,9 +134,9 @@ password = pypi-...your-testpypi-token...
 ```bash
 rm -rf dist/
 uv build
-uv run twine check dist/*
-uv run twine upload --repository testpypi dist/*  # dry run
-uv run twine upload dist/*                        # real publish
+uvx --with twine==7.0.0 twine check dist/*
+uvx --with twine==7.0.0 twine upload --repository testpypi dist/*  # dry run
+uvx --with twine==7.0.0 twine upload dist/*                        # real publish
 ```
 
 ## Online API Tests
