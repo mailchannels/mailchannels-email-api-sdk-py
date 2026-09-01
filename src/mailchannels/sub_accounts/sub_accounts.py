@@ -83,16 +83,29 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
             response_model=ApiKey,
         )
 
-    def list(self, handle: str) -> ApiKeyList | MailChannelsResponse:
+    def list(
+        self,
+        handle: str,
+        *,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> ApiKeyList | MailChannelsResponse:
         """Retrieve API keys for a sub-account."""
         logger.info("Listing MailChannels sub-account API keys handle=%s", handle)
         return self._client.request(
             "GET",
             encode_path_segments("sub-account", handle, "api-key"),
+            params=pagination_query(limit=limit, offset=offset) or None,
             response_model=ApiKeyList,
         )
 
-    async def list_async(self, handle: str) -> ApiKeyList | MailChannelsResponse:
+    async def list_async(
+        self,
+        handle: str,
+        *,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> ApiKeyList | MailChannelsResponse:
         """Retrieve API keys for a sub-account using async HTTP."""
         logger.info(
             "Listing MailChannels sub-account API keys using async HTTP handle=%s",
@@ -101,6 +114,7 @@ class SubAccountApiKeysResource(Generic[StrictResponses]):
         return await self._client.request_async(
             "GET",
             encode_path_segments("sub-account", handle, "api-key"),
+            params=pagination_query(limit=limit, offset=offset) or None,
             response_model=ApiKeyList,
         )
 
@@ -736,18 +750,38 @@ class _ApiKeysProxy:
         return await get_default_client().sub_accounts.api_keys.create_async(handle)
 
     @classmethod
-    def list(cls, handle: str) -> ApiKeyList | MailChannelsResponse:
+    def list(
+        cls,
+        handle: str,
+        *,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> ApiKeyList | MailChannelsResponse:
         """Retrieve API keys for a sub-account."""
         from ..client import get_default_client
 
-        return get_default_client().sub_accounts.api_keys.list(handle)
+        return get_default_client().sub_accounts.api_keys.list(
+            handle,
+            limit=limit,
+            offset=offset,
+        )
 
     @classmethod
-    async def list_async(cls, handle: str) -> ApiKeyList | MailChannelsResponse:
+    async def list_async(
+        cls,
+        handle: str,
+        *,
+        limit: int | None = None,
+        offset: int | None = None,
+    ) -> ApiKeyList | MailChannelsResponse:
         """Retrieve API keys for a sub-account using async HTTP."""
         from ..client import get_default_client
 
-        return await get_default_client().sub_accounts.api_keys.list_async(handle)
+        return await get_default_client().sub_accounts.api_keys.list_async(
+            handle,
+            limit=limit,
+            offset=offset,
+        )
 
     @classmethod
     def delete(

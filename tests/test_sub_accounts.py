@@ -58,6 +58,44 @@ def test_sub_account_nested_resources_use_expected_paths() -> None:
     assert transport.calls[3]["json"] == {"sends": 100_000}
 
 
+def test_sub_account_api_keys_list_forwards_pagination_params() -> None:
+    """It sends limit/offset as query params when listing API keys."""
+    transport = FakeRequestsClient()
+    client = Client(api_key="test-key", http_client=transport)
+
+    client.sub_accounts.api_keys.list("clienta", limit=250, offset=100)
+
+    assert transport.calls[0]["method"] == "GET"
+    assert transport.calls[0]["url"] == (
+        "https://api.example.test/tx/v1/sub-account/clienta/api-key"
+    )
+    assert transport.calls[0]["params"] == {"limit": 250, "offset": 100}
+
+
+def test_sub_account_api_keys_list_omits_pagination_by_default() -> None:
+    """It omits limit/offset from the query when not supplied."""
+    transport = FakeRequestsClient()
+    client = Client(api_key="test-key", http_client=transport)
+
+    client.sub_accounts.api_keys.list("clienta")
+
+    assert transport.calls[0]["params"] is None
+
+
+async def test_sub_account_api_keys_list_async_forwards_pagination_params() -> None:
+    """It sends limit/offset as query params on the async API keys listing."""
+    transport = FakeHTTPXClient()
+    client = Client(api_key="test-key", async_http_client=transport)
+
+    await client.sub_accounts.api_keys.list_async("clienta", limit=25, offset=5)
+
+    assert transport.calls[0]["method"] == "GET"
+    assert transport.calls[0]["url"] == (
+        "https://api.example.test/tx/v1/sub-account/clienta/api-key"
+    )
+    assert transport.calls[0]["params"] == {"limit": 25, "offset": 5}
+
+
 def test_sub_account_path_variables_are_url_encoded() -> None:
     """It encodes sub-account handles and nested resource IDs in paths."""
     transport = FakeRequestsClient(SDKResponse(204, None, ""))

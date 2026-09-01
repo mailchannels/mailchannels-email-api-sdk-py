@@ -4,7 +4,7 @@ This reference is generated from public SDK exports, type hints, Pydantic models
 
 For task-oriented examples, start with the README. This file is the formal public surface reference.
 
-- SDK version: `1.4.1`
+- SDK version: `1.5.0`
 - Top-level exports: `76`
 - Documented public module exports: `195`
 
@@ -2149,8 +2149,8 @@ Methods:
 | `create_async` | `create_async(handle: str) -> ApiKey | MailChannelsResponse` | Create an API key for a sub-account using async HTTP. |
 | `delete` | `delete(handle: str, key_id: str) -> EmptyResponse | MailChannelsResponse` | Delete an API key from a sub-account. |
 | `delete_async` | `delete_async(handle: str, key_id: str) -> EmptyResponse | MailChannelsResponse` | Delete an API key from a sub-account using async HTTP. |
-| `list` | `list(handle: str) -> ApiKeyList | MailChannelsResponse` | Retrieve API keys for a sub-account. |
-| `list_async` | `list_async(handle: str) -> ApiKeyList | MailChannelsResponse` | Retrieve API keys for a sub-account using async HTTP. |
+| `list` | `list(handle: str, *, limit: int | None = None, offset: int | None = None) -> ApiKeyList | MailChannelsResponse` | Retrieve API keys for a sub-account. |
+| `list_async` | `list_async(handle: str, *, limit: int | None = None, offset: int | None = None) -> ApiKeyList | MailChannelsResponse` | Retrieve API keys for a sub-account using async HTTP. |
 
 #### `mailchannels.sub_accounts.SubAccountLimit`
 
