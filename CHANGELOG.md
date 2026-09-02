@@ -6,9 +6,16 @@ this project adheres to [Semantic Versioning](https://semver.org/). Until
 `1.0.0` the public API may still change between minor releases; from `1.0.0`
 onward, breaking changes will require a major version bump.
 
-## [Unreleased]
+## [1.5.0] - 2026-09-01
 
-Reserved for in-progress work targeting the next release.
+### Changed
+
+- `SubAccounts.ApiKeys.list()`/`list_async()` (and the underlying
+  `SubAccountApiKeysResource.list()`/`list_async()`) accept optional
+  `limit` and `offset` keyword arguments. This lets callers page through
+  API keys for sub-accounts that have more than the API's default of 100
+  keys per page. When omitted, the SDK sends no pagination query parameters
+  and the API applies its documented defaults (`limit=100`, `offset=0`).
 
 ## [1.4.1] - 2026-08-20
 
