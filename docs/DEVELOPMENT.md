@@ -202,9 +202,41 @@ export MAILCHANNELS_ONLINE_DESTRUCTIVE=1
 uv run pytest -m online_destructive --online --online-destructive
 ```
 
-## SmolVM Verification
+## Containerized Verification
 
-Run the suite in SmolVM before committing. In this macOS sandbox, copying a tar
+Run the full suite in Docker on Linux or SmolVM on macOS before committing.
+
+### Linux: Docker
+
+From the repository root, create a source archive and mount it read-only into
+a disposable Python container. The environment and build artifacts remain
+inside the container, avoiding root-owned files in your checkout:
+
+```bash
+tar --exclude .venv --exclude .git --exclude dist --exclude .mypy_cache --exclude .ruff_cache --exclude .pytest_cache --exclude .env --exclude '.env.*' -cf /tmp/mailchannels-python-sdk.tar .
+docker run --rm --mount type=bind,src=/tmp/mailchannels-python-sdk.tar,dst=/tmp/sdk.tar,readonly python:3.13-slim sh -ec '
+  mkdir -p /workspace
+  tar -xf /tmp/sdk.tar -C /workspace
+  cd /workspace
+  pip install uv
+  uv sync --extra async --extra dev
+  uv run pytest --cov --cov-report=term-missing
+  uv run python scripts/check_skill_snippets.py
+  uv run ruff check src tests examples scripts typing_tests
+  uv run mypy
+  uv run python scripts/run_consumer_typing.py
+  uv build
+  uv run python scripts/smoke_wheel_install.py
+  uv run python scripts/check_openapi_drift.py
+'
+```
+
+This runs the offline suite without forwarding API credentials. Live API tests
+remain a separate, explicitly configured workflow.
+
+### macOS: SmolVM
+
+In the macOS sandbox, copying a tar
 archive into the VM is more reliable than a direct bind mount:
 
 ```bash

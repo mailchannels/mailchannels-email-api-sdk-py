@@ -43,9 +43,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py"
+Homepage = "https://docs.mailchannels.com/email-api/overview"
 Source = "https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py"
-Documentation = "https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/README.md"
+Documentation = "https://docs.mailchannels.com/email-api/python/quickstart"
 Issues = "https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/issues"
 
 [project.optional-dependencies]
