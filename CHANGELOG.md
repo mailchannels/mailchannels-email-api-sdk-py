@@ -6,6 +6,21 @@ this project adheres to [Semantic Versioning](https://semver.org/). Until
 `1.0.0` the public API may still change between minor releases; from `1.0.0`
 onward, breaking changes will require a major version bump.
 
+## [Unreleased]
+
+### Added
+
+- Direct SDK integration recipes for Django and FastAPI, including client
+  lifecycle and async installation guidance.
+
+### Changed
+
+- Package Homepage and Documentation links point to the official Email API
+  overview and Python quickstart. These metadata changes take effect on PyPI
+  with the next package release.
+- Framework recipe links work from the PyPI README and separately installed
+  agent skill; the skill overview stays focused on SDK consumers.
+
 ## [1.5.0] - 2026-09-01
 
 ### Changed

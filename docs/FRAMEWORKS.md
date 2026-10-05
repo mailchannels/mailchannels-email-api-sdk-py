@@ -4,7 +4,7 @@ These recipes use the official [`mailchannels` package](https://pypi.org/project
 directly. Complete the [Python quickstart](https://docs.mailchannels.com/email-api/python/quickstart)
 and configure your sender domain first. Keep `MAILCHANNELS_API_KEY` in your
 deployment's secret store. A dry run validates a request without sending email;
-it does not prove inbox delivery. The free plan allows 100 emails per day and
+it does not prove inbox delivery. The [free plan](https://docs.mailchannels.com/email-api/billing/pricing) allows 100 emails per day and
 restricts recipients to verified account users until a payment method is added.
 
 ## Django: a synchronous application service
@@ -48,7 +48,8 @@ The context manager closes the synchronous HTTP session after the call.
 
 This service does not configure Django's `EMAIL_BACKEND`, implement
 `django.core.mail.send_mail`, or add an Anymail provider. For an async Django
-view, use `async with mailchannels.Client(...)` and
+view, first install the async extra with `uv add "mailchannels[async]"`, then
+use `async with mailchannels.Client(...)` and
 `await client.emails.send_async(...)` instead of blocking the event loop with
 the synchronous service above. See Django's [settings](https://docs.djangoproject.com/en/5.2/topics/settings/)
 and [async support](https://docs.djangoproject.com/en/5.2/topics/async/) documentation.

@@ -32,7 +32,7 @@ credentials.
 
 - Official documentation: [Python quickstart](https://docs.mailchannels.com/email-api/python/quickstart) and [Email API overview](https://docs.mailchannels.com/email-api/overview).
 - New to the SDK: start with [Five-Minute Quickstart](#five-minute-quickstart).
-- Using Django or FastAPI: see [Framework Recipes](docs/FRAMEWORKS.md) for application configuration and client lifecycle.
+- Using Django or FastAPI: see [Framework Recipes](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/FRAMEWORKS.md) for application configuration and client lifecycle.
 - Building a sending workflow: use [Common Sending Recipes](#common-sending-recipes).
 - Building a multi-tenant product: read [Account And Domain Operations](#account-and-domain-operations).
 - Operating at scale: jump to [Production Operations](#production-operations).
