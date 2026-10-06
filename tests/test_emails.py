@@ -366,3 +366,22 @@ def test_module_level_email_api_uses_global_configuration(
     )
 
     assert transport.calls[0]["headers"]["X-API-Key"] == "module-key"
+
+
+def test_framework_typed_sender_and_recipient_shortcuts() -> None:
+    """Framework recipe shortcuts preserve the sender and recipient envelope."""
+    params: mailchannels.SendParams = {
+        "from_": {"email": "sender@example.com"},
+        "to": "recipient@example.com",
+        "subject": "Your notification",
+        "text": "Your requested operation has completed.",
+    }
+    payload = normalize_email_params(params)
+    assert payload["from"] == {"email": "sender@example.com"}
+    assert payload["personalizations"] == [
+        {"to": [{"email": "recipient@example.com"}]}
+    ]
+    assert payload["content"] == [
+        {"type": "text/plain", "value": "Your requested operation has completed."}
+    ]
+    assert "from_" not in payload

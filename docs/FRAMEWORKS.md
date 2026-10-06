@@ -28,16 +28,14 @@ import mailchannels
 
 def send_notification(recipient: str, *, dry_run: bool = True) -> None:
     """Validate or send a notification to an application-approved recipient."""
+    payload: mailchannels.SendParams = {
+        "from_": {"email": settings.MAILCHANNELS_SENDER},
+        "to": recipient,
+        "subject": "Your notification",
+        "text": "Your requested operation has completed.",
+    }
     with mailchannels.Client(api_key=settings.MAILCHANNELS_API_KEY) as client:
-        client.emails.send(
-            {
-                "from": {"email": settings.MAILCHANNELS_SENDER},
-                "to": [{"email": recipient}],
-                "subject": "Your notification",
-                "text": "Your requested operation has completed.",
-            },
-            dry_run=dry_run,
-        )
+        client.emails.send(payload, dry_run=dry_run)
 ```
 
 Call this service from your synchronous application code or task worker. The
@@ -45,6 +43,7 @@ default validates only; pass `dry_run=False` deliberately when ready to send.
 Use a recipient selected and authorized by your application. SDK exceptions
 propagate to the caller so your existing error handling can record a failure.
 The context manager closes the synchronous HTTP session after the call.
+Use the SDK's typed `from_` key; it is serialized to the API's `from` field.
 
 This service does not configure Django's `EMAIL_BACKEND`, implement
 `django.core.mail.send_mail`, or add an Anymail provider. For an async Django
@@ -68,7 +67,7 @@ one client per application process and close it on shutdown:
 ```python
 import os
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from typing import AsyncIterator, Literal, cast
 
 from fastapi import FastAPI, Request
 import mailchannels
@@ -77,9 +76,10 @@ import mailchannels
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Own the async MailChannels client for this application process."""
-    async with mailchannels.Client(
+    client = mailchannels.Client[Literal[False]](
         api_key=os.environ["MAILCHANNELS_API_KEY"]
-    ) as client:
+    )
+    async with client:
         app.state.mailchannels = client
         yield
 
@@ -91,16 +91,20 @@ async def send_notification(
     request: Request, recipient: str, *, dry_run: bool = True
 ) -> None:
     """Validate or send a notification from an authorized application flow."""
-    await request.app.state.mailchannels.emails.send_async(
-        {
-            "from": {"email": os.environ["MAILCHANNELS_SENDER"]},
-            "to": [{"email": recipient}],
-            "subject": "Your notification",
-            "text": "Your requested operation has completed.",
-        },
-        dry_run=dry_run,
-    )
+    client = cast(mailchannels.Client[Literal[False]], request.app.state.mailchannels)
+    payload: mailchannels.SendParams = {
+        "from_": {"email": os.environ["MAILCHANNELS_SENDER"]},
+        "to": recipient,
+        "subject": "Your notification",
+        "text": "Your requested operation has completed.",
+    }
+    await client.emails.send_async(payload, dry_run=dry_run)
 ```
+
+The cast gives the dynamically stored application client its SDK type so the
+send call and payload are checked. It relies on this lifespan handler owning
+`app.state.mailchannels`; a cast is not runtime validation. Keep that state slot
+private to this handler and do not replace it with another value.
 
 Call the helper from an existing authenticated route after checking that the
 user may trigger the notification. Keep the sender and dry-run choice under
