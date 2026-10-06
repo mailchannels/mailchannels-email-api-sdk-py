@@ -3,7 +3,7 @@
 - The `rg` command is installed; use it for quick searching.
 - Development hosts may run Linux or macOS. Use Docker on Linux and SmolVM on macOS for containerized verification; see `docs/DEVELOPMENT.md`.
 - The canonical Git server is Bitbucket; inspect the configured remote before publishing changes.
-- We're using a "monorepo" approach and avoiding PRs. Push to main upstream. There is only one developer on this project.
+- This repository has multiple developers. Work on a feature branch and submit a Bitbucket pull request for review; do not push changes directly to main.
 - Update README.md with each major commit.
 - Don't use README.md as a change log. It's user documentation; they don't go there to look for changes.
 - Update the agent-facing skill under `.agents/skills/mailchannels-python/` with each change to this repo so future LLMs know how to use the MailChannels Python SDK correctly. `SKILL.md` is the entry point with the decision tree; per-topic recipes live in `resources/`.

@@ -13,7 +13,7 @@ for other languages and their APIs differ.
 > **Scope.** This skill is for *consuming* the Python SDK from application
 > code. Working **on** the SDK (adding features, fixing bugs, releasing
 > the package) is a different job — defer to the repo's root `AGENTS.md`
-> for dev rules in that case. If the user is working in a non-Python
+> for development rules and the Bitbucket pull-request workflow. If the user is working in a non-Python
 > language, this skill does not apply — use the MailChannels skill for
 > that language's SDK, or fall back to the raw HTTP API.
 
