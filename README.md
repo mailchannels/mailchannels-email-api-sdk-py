@@ -196,6 +196,18 @@ sub-account handles, DKIM domains/selectors, suppression recipients, metric
 sender groups, and webhook batch IDs before building request URLs. Do not
 pre-encode those values yourself; a literal `%` is encoded as `%25`.
 
+### Redirects
+
+The built-in synchronous and asynchronous transports do not follow HTTP
+redirects, including redirects to the same host. This prevents forwarding
+`X-Api-Key` and replaying send or management requests at a redirect target.
+A redirect raises `ApiError` through `Client`, with the original status and
+response headers. Direct transport calls return the original `SDKResponse`.
+Configure the intended API base URL explicitly; do not automatically retry a
+redirect or copy its `Location` into a new request. Custom transports should
+also disable redirect following. Response bodies are still read normally;
+this policy does not impose a response-size limit or a total elapsed deadline.
+
 ### Read Responses
 
 SDK responses behave like ordinary dictionaries, but they also support

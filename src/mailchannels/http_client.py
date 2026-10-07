@@ -42,6 +42,7 @@ class RequestsClient:
             json=json,
             params=params,
             timeout=self.timeout,
+            allow_redirects=False,
         )
         try:
             data: Any = response.json()
