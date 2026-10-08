@@ -70,7 +70,7 @@ definitions:
           - uvx --with twine==7.0.0 twine check dist/*
           # --skip-existing lets repeated main-branch merges succeed without
           # bumping the version: TestPyPI/PyPI artifacts are immutable, so we
-          # only republish when the version in pyproject.toml has actually
+          # only republish when the __version__ in src/mailchannels/version.py has actually
           # changed.
           - uvx --with twine==7.0.0 twine upload
               --skip-existing
@@ -103,7 +103,7 @@ pipelines:
       # test suite on every supported Python version, and (if all of that
       # passed) publish the build to TestPyPI. TestPyPI uploads use
       # `--skip-existing` so we only push a new artifact when the version
-      # in pyproject.toml has changed.
+      # in src/mailchannels/version.py has changed.
       - step: *checks
       - parallel:
           - step: *py39
@@ -140,7 +140,8 @@ pipelines:
     publish-testpypi:
       # Manual TestPyPI publish. The same step also runs automatically on
       # every merge to `main` (see `branches.main` above); this trigger
-      # exists for ad-hoc dry runs on feature branches. Requires
+      # uploads real artifacts for feature branches too; it is not an upload-free
+      # dry run. Requires
       # PYPI_TEST_API_TOKEN configured as a secured repository variable in
       # Bitbucket.
       - step: *checks
@@ -151,7 +152,7 @@ pipelines:
       # then builds the wheel + sdist and uploads them. Requires
       # PYPI_API_TOKEN configured as a secured repository variable in
       # Bitbucket. A given version on PyPI is immutable, so bump the version
-      # in pyproject.toml before triggering, and tag the release commit
+      # in src/mailchannels/version.py before triggering, and tag the release commit
       # with `v<version>` so the source tree records what was published.
       #
       # When we're ready, this trigger should move out of `custom:` and into
