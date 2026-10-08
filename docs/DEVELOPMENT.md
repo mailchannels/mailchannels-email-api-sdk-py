@@ -101,7 +101,9 @@ only fires if checks pass.
        --index-url https://test.pypi.org/simple/ \
        --dest "$testpypi_check/wheels" "mailchannels==$release_version"
    python -m pip hash "$testpypi_check"/wheels/mailchannels-*.whl
-   # Compare this hash with the release pipeline's uploaded wheel before installing.
+   # Compare with the SHA256 on this exact TestPyPI release's file page.
+   # This checks downloaded bytes against the index; it is not independent provenance.
+   # For provenance, also compare with a separately retained, approved build digest.
    python -m pip install --index-url https://pypi.org/simple/ \
        "$testpypi_check"/wheels/mailchannels-*.whl
    python -c 'import importlib.metadata, sys; assert importlib.metadata.version("mailchannels") == sys.argv[1]' "$release_version"
@@ -255,7 +257,7 @@ In the macOS sandbox, copying a tar
 archive into the VM is more reliable than a direct bind mount:
 
 ```bash
-COPYFILE_DISABLE=1 tar --exclude .venv --exclude .git --exclude dist --exclude .mypy_cache --exclude .ruff_cache --exclude .pytest_cache -cf /tmp/mailchannels-python-sdk.tar .
+COPYFILE_DISABLE=1 tar --exclude .venv --exclude .git --exclude dist --exclude .mypy_cache --exclude .ruff_cache --exclude .pytest_cache --exclude .env --exclude '.env.*' -cf /tmp/mailchannels-python-sdk.tar .
 smolvm machine create mc-sdk-tests --net --image python:3.13-slim
 smolvm machine start --name mc-sdk-tests
 smolvm machine cp /tmp/mailchannels-python-sdk.tar mc-sdk-tests:/workspace/mailchannels-python-sdk.tar
