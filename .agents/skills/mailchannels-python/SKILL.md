@@ -12,7 +12,8 @@ for other languages and their APIs differ.
 
 > **Scope.** This skill is for *consuming* the Python SDK from application
 > code. Working **on** the SDK (adding features, fixing bugs, releasing
-> the package) is a different job — defer to the repo's root `AGENTS.md`
+> the package) is a different job — defer to the repo's root
+> [AGENTS.md](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/AGENTS.md)
 > for development rules and the Bitbucket pull-request workflow.
 > If the user is working in a non-Python
 > language, this skill does not apply — use the MailChannels skill for

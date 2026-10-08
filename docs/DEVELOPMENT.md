@@ -103,7 +103,6 @@ only fires if checks pass.
    python -m pip hash "$testpypi_check"/wheels/mailchannels-*.whl
    # Compare with the SHA256 on this exact TestPyPI release's file page.
    # This checks downloaded bytes against the index; it is not independent provenance.
-   # For provenance, also compare with a separately retained, approved build digest.
    python -m pip install --index-url https://pypi.org/simple/ \
        "$testpypi_check"/wheels/mailchannels-*.whl
    python -c 'import importlib.metadata, sys; assert importlib.metadata.version("mailchannels") == sys.argv[1]' "$release_version"
