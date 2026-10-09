@@ -10,6 +10,10 @@ package (PyPI: `mailchannels`, importable as `import mailchannels`). It is
 specific to the official Python SDK — MailChannels publishes separate SDKs
 for other languages and their APIs differ.
 
+The SDK is MIT licensed. Build metadata uses the SPDX `MIT` expression and
+includes `LICENSE` in both wheel and source distributions; development work
+should preserve this PEP 639 metadata and Hatchling>=1.27 requirement.
+
 > **Scope.** This skill is for *consuming* the Python SDK from application
 > code. Working **on** the SDK (adding features, fixing bugs, releasing
 > the package) is a different job — defer to the repo's root

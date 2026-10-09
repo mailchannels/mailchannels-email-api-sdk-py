@@ -817,3 +817,8 @@ engage, and the body tells it what to do.
 ## License
 
 MIT License. See [LICENSE](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/LICENSE).
+
+## License
+
+The SDK is distributed under the [MIT license](LICENSE). Published artifacts
+include the license text and the SPDX `MIT` license expression.

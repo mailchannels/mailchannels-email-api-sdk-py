@@ -42,6 +42,14 @@ that the README API-version line
 ([tests/test_readme_version.py](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/tests/test_readme_version.py))
 stays in sync with `API_SPEC_COMPATIBILITY`.
 
+## License metadata
+
+Packaging uses PEP 639: `license = "MIT"` and `license-files = ["LICENSE"]`,
+with Hatchling 1.27 or newer. Keep the MIT text in both wheel and source archives.
+Before uploading, verify `License-Expression: MIT` and `License-File: LICENSE`
+in built metadata and run `twine check`; do not restore deprecated license
+classifiers. These checks do not upload or change the release version.
+
 ## Publishing to PyPI
 
 Publishing is driven by Bitbucket Pipelines. PyPI does not have a native
