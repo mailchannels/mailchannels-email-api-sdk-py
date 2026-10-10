@@ -42,6 +42,14 @@ that the README API-version line
 ([tests/test_readme_version.py](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/tests/test_readme_version.py))
 stays in sync with `API_SPEC_COMPATIBILITY`.
 
+## License metadata
+
+Packaging uses PEP 639: `license = "MIT"` and `license-files = ["LICENSE"]`,
+with Hatchling 1.27 or newer. Keep the MIT text in both wheel and source archives.
+Before uploading, verify `License-Expression: MIT` and `License-File: LICENSE`
+in built metadata and run `twine check`; do not restore deprecated license
+classifiers. These checks do not upload or change the release version.
+
 ## Publishing to PyPI
 
 Publishing is driven by Bitbucket Pipelines. PyPI does not have a native
@@ -51,9 +59,9 @@ with an API token.
 - **TestPyPI publish** (<https://test.pypi.org/>) runs automatically on every
   merge to `main`, after the full check suite and the 3.9–3.13 Python
   matrix all pass. It uses `twine upload --skip-existing`, so a merge that
-  doesn't change the version in `pyproject.toml` succeeds silently without
+  doesn't change `__version__` in `src/mailchannels/version.py` succeeds silently without
   republishing the same artifact. The `custom: publish-testpypi` trigger
-  still exists for ad-hoc dry runs on feature branches.
+  also uploads real artifacts to TestPyPI; it is not an upload-free dry run.
 - **Real PyPI publish** (<https://pypi.org/>) runs only when you manually
   trigger the `custom: publish-pypi` pipeline from the Bitbucket UI. We'll
   move this onto a tag trigger (`pipelines.tags: 'v*'`) once the release
@@ -78,30 +86,46 @@ only fires if checks pass.
 
 ### Release procedure
 
-1. Update `version` in `pyproject.toml`, commit the bump, and merge the
-   commit into `main` through your normal workflow.
+1. Update `__version__` in `src/mailchannels/version.py`, commit the bump, and
+   merge the commit into `main` through your normal workflow. `pyproject.toml`
+   declares a dynamic version read from this file via Hatch; do not add a static
+   project version. Select an unused version and verify the built metadata.
 2. Wait for the `branches.main` pipeline to complete. The matrix runs,
    then the TestPyPI publish step automatically uploads the new artifact
    (it skips silently if the version hasn't changed).
-3. Verify the install from TestPyPI in a clean venv on your machine:
+3. Download the exact release wheel from TestPyPI, then install that local file
+   with dependencies from PyPI in a clean venv. Run these commands from the
+   reviewed release checkout. Do not combine indexes with `--extra-index-url`: pip
+   does not prioritize TestPyPI and could select the package from production PyPI.
+   Use a clean pip configuration without extra indexes/find-links; the first
+   command must retrieve the SDK wheel only from TestPyPI:
 
    ```bash
-   python -m venv /tmp/testpypi-check && source /tmp/testpypi-check/bin/activate
-   pip install --index-url https://test.pypi.org/simple/ \
-               --extra-index-url https://pypi.org/simple/ \
-               mailchannels
-   python -c "import mailchannels; print(mailchannels.__version__)"
+   release_version=$(python -c 'import runpy; print(runpy.run_path("src/mailchannels/version.py")["__version__"])')
+   testpypi_check=$(mktemp -d)
+   python -m venv "$testpypi_check/venv"
+   source "$testpypi_check/venv/bin/activate"
+   python -m pip download --no-deps --only-binary=:all: \
+       --index-url https://test.pypi.org/simple/ \
+       --dest "$testpypi_check/wheels" "mailchannels==$release_version"
+   python -m pip hash "$testpypi_check"/wheels/mailchannels-*.whl
+   # Compare with the SHA256 on this exact TestPyPI release's file page.
+   # This checks downloaded bytes against the index; it is not independent provenance.
+   python -m pip install --index-url https://pypi.org/simple/ \
+       "$testpypi_check"/wheels/mailchannels-*.whl
+   python -c 'import importlib.metadata, sys; assert importlib.metadata.version("mailchannels") == sys.argv[1]' "$release_version"
    deactivate
    ```
 
-4. If the dry run looks right, trigger **Pipelines → Run pipeline → Custom →
+4. If the TestPyPI validation looks right, trigger **Pipelines → Run pipeline → Custom →
    `publish-pypi`** on the release commit from the Bitbucket UI to push to
    real PyPI.
 5. Tag the release commit and push the tag:
 
    ```bash
-   git tag -s v$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])') -m "Release vX.Y.Z"
-   git push origin tag
+   release_version=$(python -c 'import runpy; print(runpy.run_path("src/mailchannels/version.py")["__version__"])')
+   git tag -s "v${release_version}" -m "Release v${release_version}"
+   git push origin "refs/tags/v${release_version}"
    ```
 
 A given version on PyPI is immutable — if you upload a broken artifact, you
@@ -135,7 +159,7 @@ password = pypi-...your-testpypi-token...
 rm -rf dist/
 uv build
 uvx --with twine==7.0.0 twine check dist/*
-uvx --with twine==7.0.0 twine upload --repository testpypi dist/*  # dry run
+uvx --with twine==7.0.0 twine upload --repository testpypi dist/*  # real TestPyPI upload
 uvx --with twine==7.0.0 twine upload dist/*                        # real publish
 ```
 
@@ -202,13 +226,45 @@ export MAILCHANNELS_ONLINE_DESTRUCTIVE=1
 uv run pytest -m online_destructive --online --online-destructive
 ```
 
-## SmolVM Verification
+## Containerized Verification
 
-Run the suite in SmolVM before committing. In this macOS sandbox, copying a tar
+Run the full suite in Docker on Linux or SmolVM on macOS before committing.
+
+### Linux: Docker
+
+From the repository root, create a source archive and mount it read-only into
+a disposable Python container. The environment and build artifacts remain
+inside the container, avoiding root-owned files in your checkout:
+
+```bash
+tar --exclude .venv --exclude .git --exclude dist --exclude .mypy_cache --exclude .ruff_cache --exclude .pytest_cache --exclude .env --exclude '.env.*' -cf /tmp/mailchannels-python-sdk.tar .
+docker run --rm --mount type=bind,src=/tmp/mailchannels-python-sdk.tar,dst=/tmp/sdk.tar,readonly python:3.13-slim sh -ec '
+  mkdir -p /workspace
+  tar -xf /tmp/sdk.tar -C /workspace
+  cd /workspace
+  pip install uv
+  uv sync --extra async --extra dev
+  uv run pytest --cov --cov-report=term-missing
+  uv run python scripts/check_skill_snippets.py
+  uv run ruff check src tests examples scripts typing_tests
+  uv run mypy
+  uv run python scripts/run_consumer_typing.py
+  uv build
+  uv run python scripts/smoke_wheel_install.py
+  uv run python scripts/check_openapi_drift.py
+'
+```
+
+This runs the offline suite without forwarding API credentials. Live API tests
+remain a separate, explicitly configured workflow.
+
+### macOS: SmolVM
+
+In the macOS sandbox, copying a tar
 archive into the VM is more reliable than a direct bind mount:
 
 ```bash
-COPYFILE_DISABLE=1 tar --exclude .venv --exclude .git --exclude dist --exclude .mypy_cache --exclude .ruff_cache --exclude .pytest_cache -cf /tmp/mailchannels-python-sdk.tar .
+COPYFILE_DISABLE=1 tar --exclude .venv --exclude .git --exclude dist --exclude .mypy_cache --exclude .ruff_cache --exclude .pytest_cache --exclude .env --exclude '.env.*' -cf /tmp/mailchannels-python-sdk.tar .
 smolvm machine create mc-sdk-tests --net --image python:3.13-slim
 smolvm machine start --name mc-sdk-tests
 smolvm machine cp /tmp/mailchannels-python-sdk.tar mc-sdk-tests:/workspace/mailchannels-python-sdk.tar

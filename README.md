@@ -30,7 +30,9 @@ credentials.
 
 ## Start Here
 
+- Official documentation: [Python quickstart](https://docs.mailchannels.com/email-api/python/quickstart) and [Email API overview](https://docs.mailchannels.com/email-api/overview).
 - New to the SDK: start with [Five-Minute Quickstart](#five-minute-quickstart).
+- Using Django or FastAPI: see [Framework Recipes](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/FRAMEWORKS.md) for typed sender payloads, application configuration and client lifecycle.
 - Building a sending workflow: use [Common Sending Recipes](#common-sending-recipes).
 - Building a multi-tenant product: read [Account And Domain Operations](#account-and-domain-operations).
 - Operating at scale: jump to [Production Operations](#production-operations).
@@ -815,3 +817,8 @@ engage, and the body tells it what to do.
 ## License
 
 MIT License. See [LICENSE](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/LICENSE).
+
+## License
+
+The SDK is distributed under the [MIT license](LICENSE). Published artifacts
+include the license text and the SPDX `MIT` license expression.

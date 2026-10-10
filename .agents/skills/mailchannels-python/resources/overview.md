@@ -1,5 +1,15 @@
 # Python SDK Overview
 
+Start with the [official Python quickstart](https://docs.mailchannels.com/email-api/python/quickstart).
+The repository's [framework recipes](https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py/src/main/docs/FRAMEWORKS.md) show direct
+SDK use in Django and FastAPI. The Django recipe is a service function, not a
+Django email backend or an Anymail provider. Use async SDK methods in async
+application code and close the client when its application lifecycle ends.
+Use `from_` in typed send dictionaries (the SDK serializes it to `from`).
+Framework application state is dynamic: restore the concrete SDK client type
+at that boundary before calling send methods, and keep the state owned by the
+client lifespan handler. A typing cast does not validate runtime state.
+
 The Python `mailchannels` package (PyPI: `mailchannels`) exposes resources
 both at module level and on an explicit `Client` instance. Pick the entry
 point that fits the application's shape:
