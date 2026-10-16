@@ -8,6 +8,8 @@ onward, breaking changes will require a major version bump.
 
 ## [Unreleased]
 
+## [1.5.1] - 2026-10-16
+
 ### Added
 
 - Direct SDK integration recipes for Django and FastAPI, including client
@@ -16,10 +18,17 @@ onward, breaking changes will require a major version bump.
 ### Changed
 
 - Package Homepage and Documentation links point to the official Email API
-  overview and Python quickstart. These metadata changes take effect on PyPI
-  with the next package release.
+  overview and Python quickstart.
 - Framework recipe links work from the PyPI README and separately installed
   agent skill; the skill overview stays focused on SDK consumers.
+- Distributions declare the SPDX `MIT` license expression and include the
+  license file, replacing the legacy license classifier.
+
+### Fixed
+
+- The built-in sync and async transports no longer follow HTTP redirects, so
+  `X-Api-Key` is never forwarded to a redirect target. A redirect raises
+  `ApiError` through `Client` with the original status and headers.
 
 ## [1.5.0] - 2026-09-01
 
