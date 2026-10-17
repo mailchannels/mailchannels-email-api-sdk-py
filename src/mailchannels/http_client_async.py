@@ -85,6 +85,8 @@ class HTTPXClient:
                 'Install async support with `pip install "mailchannels[async]"`.',
                 code="AsyncClientNotConfigured",
             ) from error
-        self._client = httpx.AsyncClient(timeout=self.timeout)
+        self._client = httpx.AsyncClient(
+            timeout=self.timeout, follow_redirects=False
+        )
         logger.debug("Created persistent MailChannels async HTTP client")
         return self._client

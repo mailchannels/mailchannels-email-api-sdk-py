@@ -239,3 +239,15 @@ mailchannels.API_SPEC_COMPATIBILITY.to_dict()
 `API_SPEC_COMPATIBILITY` is the immutable record of which MailChannels
 API spec the installed SDK release was built and tested against. Log it
 on service startup if you want a paper trail.
+
+### Redirects
+
+The built-in synchronous and asynchronous transports do not follow HTTP
+redirects, including redirects to the same host. This prevents forwarding
+`X-Api-Key` and replaying send or management requests at a redirect target.
+A redirect raises `ApiError` through `Client`, with the original status and
+response headers. Direct transport calls return the original `SDKResponse`.
+Configure the intended API base URL explicitly; do not automatically retry a
+redirect or copy its `Location` into a new request. Custom transports should
+also disable redirect following. Response bodies are still read normally;
+this policy does not impose a response-size limit or a total elapsed deadline.

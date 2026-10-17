@@ -92,8 +92,10 @@ def test_requests_client_passes_request_arguments_and_timeout(
             json: dict[str, Any] | None,
             params: dict[str, Any] | None,
             timeout: float,
+            allow_redirects: bool,
         ) -> _FakeRequestsResponse:
             """Record the request arguments and return a JSON response."""
+            assert allow_redirects is False
             calls.append(
                 {
                     "method": method,
@@ -191,8 +193,9 @@ async def test_httpx_client_passes_request_arguments_and_timeout(
     class FakeAsyncClient:
         """Minimal async client matching httpx.AsyncClient."""
 
-        def __init__(self, *, timeout: float) -> None:
+        def __init__(self, *, timeout: float, follow_redirects: bool) -> None:
             """Record the configured timeout."""
+            assert follow_redirects is False
             self.timeout = timeout
             self.closed = False
             clients.append(self)
@@ -276,8 +279,9 @@ async def test_httpx_client_handles_non_json_response(
     class FakeAsyncClient:
         """Minimal async client returning a non-JSON response."""
 
-        def __init__(self, *, timeout: float) -> None:
+        def __init__(self, *, timeout: float, follow_redirects: bool) -> None:
             """Accept the configured timeout."""
+            assert follow_redirects is False
 
         async def request(self, *args: object, **kwargs: object) -> _FakeHTTPXResponse:
             """Return a response whose JSON parser fails."""
