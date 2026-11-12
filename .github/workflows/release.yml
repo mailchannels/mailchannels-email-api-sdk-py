@@ -5,10 +5,11 @@ name: Publish release to PyPI
 #
 # Flow: a release tag is pushed on Bitbucket -> the "Sync public Bitbucket source" workflow mirrors
 # it here -> this workflow runs after every successful sync (or on manual dispatch). When the latest
-# tagged version is not on PyPI yet, it builds the distributions once, uploads those exact files to
-# TestPyPI, then uploads the same files to PyPI. Configure required reviewers on the `pypi`
-# environment so the run pauses for TestPyPI validation before the irreversible PyPI upload.
-# Re-runs are safe: published versions are skipped.
+# tagged version is not on PyPI yet, it runs the checks and tests on the tagged commit, builds the
+# distributions once, uploads them to TestPyPI, checks that TestPyPI holds exactly those files (by
+# SHA256), then uploads the same files to PyPI.
+# Configure required reviewers on the `pypi` environment so the run pauses for TestPyPI validation
+# before the irreversible PyPI upload. Re-runs are safe: published versions are skipped.
 #
 # Trusted publisher settings for project `mailchannels` must match on both https://pypi.org and
 # https://test.pypi.org:
@@ -104,14 +105,23 @@ jobs:
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         if: steps.check.outputs.publish == 'true'
 
-      # Tests already ran on this commit in Bitbucket Pipelines; only verify the
-      # distributions built here, since these are the files that get uploaded.
+      # Same checks as the Bitbucket `checks` step, so a broken commit that was
+      # tagged by mistake never reaches TestPyPI or PyPI.
+      - name: Run checks and tests
+        if: steps.check.outputs.publish == 'true'
+        run: |
+          uv sync --extra async --extra dev
+          uv run ruff check src tests examples scripts typing_tests
+          uv run mypy
+          uv run pytest --cov --cov-report=term-missing
+          uv run python scripts/check_openapi_drift.py
+          uv run python scripts/run_consumer_typing.py
+
       - name: Build and verify distributions
         if: steps.check.outputs.publish == 'true'
         env:
           VERSION: ${{ steps.release.outputs.version }}
         run: |
-          uv sync --extra async --extra dev
           rm -rf dist/
           uv build
           uvx --with twine==7.0.0 twine check --strict dist/*
@@ -155,8 +165,25 @@ jobs:
         with:
           repository-url: https://test.pypi.org/legacy/
           # A re-run after a failed or rejected PyPI step finds this version
-          # already on TestPyPI; skip it instead of failing.
+          # already on TestPyPI; skip it instead of failing. The next step
+          # makes sure the skipped files are identical to these.
           skip-existing: true
+
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          sparse-checkout: .github
+          persist-credentials: false
+          path: mirror
+
+      # Rebuilding the same version on a re-run on successful test pypi release could produce
+      # different artifacts than what maintainers validated on TestPyPI (e.g., due to a newer
+      # build backend). Only proceed to PyPI if TestPyPI contains these exact files. This script
+      # is sourced from the mirror-only `.github/` directory, never from upstream code.
+      - name: Verify TestPyPI holds exactly these files
+        env:
+          VERSION: ${{ needs.build.outputs.version }}
+        run: python3 -I mirror/.github/verify_testpypi.py "$VERSION" dist
 
   publish-pypi:
     name: Publish to PyPI
