@@ -1,15 +1,19 @@
 name: Publish release to PyPI
 
-# Publishes the latest upstream `v*` release tag to TestPyPI and then PyPI using Trusted Publishing
-# (OIDC); no PyPI or TestPyPI API token is stored anywhere.
+# Publishes the latest upstream vX.Y.Z tag to TestPyPI and then PyPI with Trusted Publishing
+# (OIDC). No PyPI or TestPyPI API token exists anywhere.
 #
-# Flow: a release tag is pushed on Bitbucket -> the "Sync public Bitbucket source" workflow mirrors
-# it here -> this workflow runs after every successful sync (or on manual dispatch). When the latest
-# tagged version is not on PyPI yet, it runs the checks and tests on the tagged commit, builds the
-# distributions once, uploads them to TestPyPI, checks that TestPyPI holds exactly those files (by
-# SHA256), then uploads the same files to PyPI.
-# Configure required reviewers on the `pypi` environment so the run pauses for TestPyPI validation
-# before the irreversible PyPI upload. Re-runs are safe: published versions are skipped.
+#   sync.yml mirrors Bitbucket main and tags, then this workflow runs:
+#       build             plan (find latest tag, decide upload or not); run the tests;
+#                         build the wheel and sdist once
+#       publish-testpypi  upload those files to TestPyPI
+#       publish-pypi      wait for a maintainer to approve the `pypi` environment, then upload the
+#                         same files to PyPI
+#
+# Each version gets one release attempt.
+# If a run fails because of a temporary problem (e.g. a network error or a flaky test),
+# use "Re-run failed jobs" on that run. It reuses the files already built in that run.
+# If the failure needs a code fix, fix it in Bitbucket and tag a new patch version instead.
 #
 # Trusted publisher settings for project `mailchannels` must match on both https://pypi.org and
 # https://test.pypi.org:
@@ -31,6 +35,9 @@ concurrency:
   group: mirror-release
   cancel-in-progress: false
 
+env:
+  UPSTREAM: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py.git
+
 jobs:
   build:
     name: Build release distributions
@@ -43,13 +50,13 @@ jobs:
         github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # The build job runs upstream code (build backend, tests), so it gets no
-    # OIDC token; only the publish jobs below can mint one.
+    # This job runs upstream code (build backend, tests), so it cannot mint an OIDC token;
+    # only the publish jobs below can.
     permissions:
       contents: read
     outputs:
-      publish: ${{ steps.check.outputs.publish }}
-      version: ${{ steps.release.outputs.version }}
+      publish: ${{ steps.plan.outputs.publish }}
+      version: ${{ steps.plan.outputs.version }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -57,58 +64,26 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Find latest upstream release tag
-        id: release
-        run: |
-          TAG=$(git tag --list 'v*' --sort=-version:refname \
-            | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -n 1 || true)
-          if [ -z "$TAG" ]; then
-            echo "::error::No vX.Y.Z release tags found"
-            exit 1
-          fi
-          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
-          echo "Latest release tag: $TAG"
+      # Finds the latest vX.Y.Z tag, checks that it's on main, and checks whether that version is
+      # already on PyPI. See .github/release.py.
+      - name: Plan release
+        id: plan
+        run: python3 -I .github/release.py plan "$UPSTREAM"
 
-      - name: Check whether the version is already on PyPI
-        id: check
-        env:
-          VERSION: ${{ steps.release.outputs.version }}
-        run: |
-          STATUS=$(curl -sS -o /dev/null -w '%{http_code}' \
-            "https://pypi.org/pypi/mailchannels/$VERSION/json")
-          case "$STATUS" in
-            200)
-              echo "publish=false" >> "$GITHUB_OUTPUT"
-              echo "mailchannels $VERSION is already on PyPI; nothing to do" ;;
-            404)
-              echo "publish=true" >> "$GITHUB_OUTPUT"
-              echo "mailchannels $VERSION needs publishing" ;;
-            *)
-              echo "::error::Unexpected PyPI response $STATUS"
-              exit 1 ;;
-          esac
-
+      # Release tags have no mirror-only .github/ directory, so check the tag out beside it.
       - name: Check out release tag
-        if: steps.check.outputs.publish == 'true'
+        if: steps.plan.outputs.publish == 'true'
         env:
-          TAG: ${{ steps.release.outputs.tag }}
-          VERSION: ${{ steps.release.outputs.version }}
-        run: |
-          git checkout --detach "refs/tags/$TAG"
-          SOURCE_VERSION=$(sed -n 's/^__version__ = "\(.*\)"$/\1/p' src/mailchannels/version.py)
-          if [ "$SOURCE_VERSION" != "$VERSION" ]; then
-            echo "::error::Tag $TAG does not match __version__ '$SOURCE_VERSION'"
-            exit 1
-          fi
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: git worktree add --detach source "refs/tags/$TAG"
 
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
-        if: steps.check.outputs.publish == 'true'
+        if: steps.plan.outputs.publish == 'true'
 
-      # Same checks as the Bitbucket `checks` step, so a broken commit that was
-      # tagged by mistake never reaches TestPyPI or PyPI.
+      # Same checks as the Bitbucket `checks` step.
       - name: Run checks and tests
-        if: steps.check.outputs.publish == 'true'
+        if: steps.plan.outputs.publish == 'true'
+        working-directory: source
         run: |
           uv sync --extra async --extra dev
           uv run ruff check src tests examples scripts typing_tests
@@ -118,9 +93,8 @@ jobs:
           uv run python scripts/run_consumer_typing.py
 
       - name: Build and verify distributions
-        if: steps.check.outputs.publish == 'true'
-        env:
-          VERSION: ${{ steps.release.outputs.version }}
+        if: steps.plan.outputs.publish == 'true'
+        working-directory: source
         run: |
           rm -rf dist/
           uv build
@@ -135,11 +109,12 @@ jobs:
           done
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: steps.check.outputs.publish == 'true'
+        if: steps.plan.outputs.publish == 'true'
         with:
           name: python-package-distributions
-          path: dist/
+          path: source/dist/
           if-no-files-found: error
+          # Covers the wait for `pypi` approval.
           retention-days: 7
 
   publish-testpypi:
@@ -164,26 +139,6 @@ jobs:
         uses: pypa/gh-action-pypi-publish@aef6c9b6e301dc803e1bc9133e9ce67ae9b0906b # v1.14.3
         with:
           repository-url: https://test.pypi.org/legacy/
-          # A re-run after a failed or rejected PyPI step finds this version
-          # already on TestPyPI; skip it instead of failing. The next step
-          # makes sure the skipped files are identical to these.
-          skip-existing: true
-
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          ref: main
-          sparse-checkout: .github
-          persist-credentials: false
-          path: mirror
-
-      # Rebuilding the same version on a re-run on successful test pypi release could produce
-      # different artifacts than what maintainers validated on TestPyPI (e.g., due to a newer
-      # build backend). Only proceed to PyPI if TestPyPI contains these exact files. This script
-      # is sourced from the mirror-only `.github/` directory, never from upstream code.
-      - name: Verify TestPyPI holds exactly these files
-        env:
-          VERSION: ${{ needs.build.outputs.version }}
-        run: python3 -I mirror/.github/verify_testpypi.py "$VERSION" dist
 
   publish-pypi:
     name: Publish to PyPI
@@ -191,6 +146,8 @@ jobs:
     if: needs.build.outputs.publish == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # Required reviewers on this environment pause the run so maintainers can validate the
+    # TestPyPI release before the irreversible PyPI upload.
     environment:
       name: pypi
       url: https://pypi.org/project/mailchannels/${{ needs.build.outputs.version }}/
