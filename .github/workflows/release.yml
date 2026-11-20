@@ -94,6 +94,8 @@ jobs:
 
       - name: Build and verify distributions
         if: steps.plan.outputs.publish == 'true'
+        env:
+          VERSION: ${{ steps.plan.outputs.version }}
         working-directory: source
         run: |
           rm -rf dist/
@@ -114,7 +116,7 @@ jobs:
           name: python-package-distributions
           path: source/dist/
           if-no-files-found: error
-          # Covers the wait for `pypi` approval.
+          # Buffer for validating the TestPyPI release; releases should finish well before expiry.
           retention-days: 7
 
   publish-testpypi:
