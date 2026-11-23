@@ -8,6 +8,14 @@ onward, breaking changes will require a major version bump.
 
 ## [Unreleased]
 
+### Added
+
+- `Client(user_agent=...)` names an application or integration built on the
+  SDK. Requests send it ahead of the SDK token, as
+  `User-Agent: my-app/1.2.0 mailchannels-python/<version>`, so integrations no
+  longer need a custom transport to identify themselves. Values that are empty
+  or not printable ASCII raise `ConfigurationError` (`InvalidUserAgent`).
+
 ## [1.5.1] - 2026-10-16
 
 ### Added

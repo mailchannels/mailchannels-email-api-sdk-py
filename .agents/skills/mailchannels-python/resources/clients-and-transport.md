@@ -216,9 +216,23 @@ mailchannels.default_async_http_client = MyAsyncTransport()   # type: ignore[ass
   httpx specifically, `respx` is also a clean option without writing a
   full transport.
 
-The default transports send `User-Agent: mailchannels-python/{version}`.
-If your custom transport replaces them entirely, keep that header (or
-something similar) so MailChannels support can correlate traffic.
+`Client` sends `User-Agent: mailchannels-python/{version}` through every
+transport. To identify an application or integration built on the SDK, pass
+`user_agent` instead of writing a transport that rewrites the header; the SDK
+token stays last:
+
+```python
+import mailchannels
+
+integration_client = mailchannels.Client(
+    api_key="...",
+    user_agent="my-integration/1.2.0",
+)
+# User-Agent: my-integration/1.2.0 mailchannels-python/{version}
+```
+
+The value must be non-empty printable ASCII without surrounding whitespace;
+anything else raises `ConfigurationError` with code `InvalidUserAgent`.
 
 ## Version Metadata
 

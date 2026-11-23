@@ -44,7 +44,9 @@ print(usage.http_headers)
 ## Version And API Compatibility
 
 The package exports its version so applications can log it at startup or include
-it in diagnostics. The SDK uses the same value in its `User-Agent` header.
+it in diagnostics. The SDK uses the same value in its `User-Agent` header,
+`mailchannels-python/<version>`. Pass `user_agent="my-app/1.2.0"` to `Client` to
+name your application or integration ahead of it.
 
 ```python
 import mailchannels

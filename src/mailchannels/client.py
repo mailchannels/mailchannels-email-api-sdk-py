@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 import sys
 from typing import Any, Generic, Literal, TypeVar, overload
 from urllib.parse import urljoin
@@ -18,11 +19,12 @@ from .response import (
     response_data,
     response_model_data,
 )
-from .version import user_agent
+from .version import user_agent as sdk_user_agent
 
 logger = logging.getLogger(__name__)
 
 DEFAULT_BASE_URL = "https://api.mailchannels.net/tx/v1"
+_USER_AGENT_PATTERN = re.compile(r"[\x21-\x7e](?:[\x20-\x7e]*[\x21-\x7e])?")
 StrictResponses = TypeVar("StrictResponses", bound=bool)
 
 
@@ -38,6 +40,7 @@ class Client(Generic[StrictResponses]):
         http_client: SyncHTTPClient | None = None,
         async_http_client: AsyncHTTPClient | None = None,
         strict_responses: Literal[False] = False,
+        user_agent: str | None = None,
     ) -> None: ...
 
     @overload
@@ -49,6 +52,7 @@ class Client(Generic[StrictResponses]):
         http_client: SyncHTTPClient | None = None,
         async_http_client: AsyncHTTPClient | None = None,
         strict_responses: Literal[True],
+        user_agent: str | None = None,
     ) -> None: ...
 
     @overload
@@ -60,6 +64,7 @@ class Client(Generic[StrictResponses]):
         http_client: SyncHTTPClient | None = None,
         async_http_client: AsyncHTTPClient | None = None,
         strict_responses: bool,
+        user_agent: str | None = None,
     ) -> None: ...
 
     def __init__(
@@ -70,13 +75,20 @@ class Client(Generic[StrictResponses]):
         http_client: SyncHTTPClient | None = None,
         async_http_client: AsyncHTTPClient | None = None,
         strict_responses: bool = False,
+        user_agent: str | None = None,
     ) -> None:
-        """Create a MailChannels API client."""
+        """Create a MailChannels API client.
+
+        ``user_agent`` names the application or integration built on the SDK,
+        for example ``"my-app/1.2.0"``. Requests send it ahead of the SDK's own
+        ``mailchannels-python/<version>`` token.
+        """
         self.api_key = api_key
         self.base_url = (base_url or _configured_base_url()).rstrip("/")
         self.http_client = http_client or RequestsClient()
         self.async_http_client = async_http_client or HTTPXClient()
         self.strict_responses = strict_responses
+        self.user_agent = _validated_user_agent(user_agent)
 
         from .check_domain import CheckDomainResource
         from .custom_tracking_domains import CustomTrackingDomainsResource
@@ -179,13 +191,19 @@ class Client(Generic[StrictResponses]):
             )
         headers = {
             "Content-Type": "application/json",
-            "User-Agent": user_agent(),
+            "User-Agent": self._user_agent_header(),
         }
         if require_api_key and api_key:
             headers["X-API-Key"] = str(api_key)
         if extra_headers:
             headers.update(extra_headers)
         return headers
+
+    def _user_agent_header(self) -> str:
+        """Return the User-Agent header with any caller token before the SDK's."""
+        if self.user_agent is None:
+            return sdk_user_agent()
+        return f"{self.user_agent} {sdk_user_agent()}"
 
     def _url(self, path: str) -> str:
         """Resolve an API path against this client's base URL."""
@@ -246,6 +264,20 @@ def _module_attr(name: str) -> Any:
     if module is None:
         return None
     return getattr(module, name, None)
+
+
+def _validated_user_agent(value: str | None) -> str | None:
+    """Return a caller User-Agent token, rejecting values unsafe in an HTTP header."""
+    if value is None:
+        return None
+    if not _USER_AGENT_PATTERN.fullmatch(value):
+        logger.error("MailChannels client user_agent is empty or not printable ASCII")
+        raise ConfigurationError(
+            "`user_agent` must be non-empty printable ASCII without leading or "
+            "trailing whitespace, for example `my-app/1.2.0`.",
+            code="InvalidUserAgent",
+        )
+    return value
 
 
 def _configured_base_url() -> str:

@@ -279,7 +279,7 @@ Fields:
 
 - Kind: `class`
 - Summary: Client for the MailChannels Email API.
-- Signature: `mailchannels.Client(*, api_key: str | None = None, base_url: str | None = None, http_client: SyncHTTPClient | None = None, async_http_client: AsyncHTTPClient | None = None, strict_responses: bool = False) -> None`
+- Signature: `mailchannels.Client(*, api_key: str | None = None, base_url: str | None = None, http_client: SyncHTTPClient | None = None, async_http_client: AsyncHTTPClient | None = None, strict_responses: bool = False, user_agent: str | None = None) -> None`
 
 Methods:
 

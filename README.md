@@ -85,6 +85,16 @@ parent_client = mailchannels.Client(api_key="PARENT-ACCOUNT-API-KEY")
 sub_account_client = mailchannels.Client(api_key="SUB-ACCOUNT-API-KEY")
 ```
 
+If you build a plugin, integration or product on the SDK, name it with
+`user_agent`. Requests send `User-Agent: my-app/1.2.0 mailchannels-python/<version>`,
+so MailChannels can tell your traffic apart from other SDK users.
+
+```python
+import mailchannels
+
+client = mailchannels.Client(api_key="YOUR-API-KEY", user_agent="my-app/1.2.0")
+```
+
 ### Send
 
 Use `Emails.send()` when you want immediate validation feedback from the regular
