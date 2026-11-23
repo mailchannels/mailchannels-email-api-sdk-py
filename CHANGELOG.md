@@ -6,7 +6,7 @@ this project adheres to [Semantic Versioning](https://semver.org/). Until
 `1.0.0` the public API may still change between minor releases; from `1.0.0`
 onward, breaking changes will require a major version bump.
 
-## [Unreleased]
+## [1.6.0] - 2026-11-23
 
 ### Added
 
