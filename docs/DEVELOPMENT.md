@@ -52,37 +52,53 @@ classifiers. These checks do not upload or change the release version.
 
 ## Publishing to PyPI
 
-Publishing is driven by Bitbucket Pipelines. PyPI does not have a native
-Bitbucket integration for trusted publishing, so the pipeline authenticates
-with an API token.
+TestPyPI and PyPI releases use [Trusted Publishing](https://docs.pypi.org/trusted-publishers/)
+(OIDC), so no PyPI or TestPyPI API token exists anywhere. Trusted Publishing
+does not support Bitbucket, so uploads run from the GitHub mirror
+<https://github.com/mailchannels/mailchannels-email-api-sdk-py>, which consists of two workflows:
 
-- **TestPyPI publish** (<https://test.pypi.org/>) runs automatically on every
-  merge to `main`, after the full check suite and the 3.9–3.13 Python
-  matrix all pass. It uses `twine upload --skip-existing`, so a merge that
-  doesn't change `__version__` in `src/mailchannels/version.py` succeeds silently without
-  republishing the same artifact. The `custom: publish-testpypi` trigger
-  also uploads real artifacts to TestPyPI; it is not an upload-free dry run.
-- **Real PyPI publish** (<https://pypi.org/>) runs only when you manually
-  trigger the `custom: publish-pypi` pipeline from the Bitbucket UI. We'll
-  move this onto a tag trigger (`pipelines.tags: 'v*'`) once the release
-  cadence settles down.
+- **Sync public Bitbucket source**
+  ([`.github/workflows/sync.yml`](https://github.com/mailchannels/mailchannels-email-api-sdk-py/blob/main/.github/workflows/sync.yml))
+  copies Bitbucket `main` and all tags to the mirror.
+- **Publish release to PyPI**
+  ([`.github/workflows/release.yml`](https://github.com/mailchannels/mailchannels-email-api-sdk-py/blob/main/.github/workflows/release.yml))
+  builds the latest release tag and uploads it.
 
-Both pipelines run the full check suite (`*checks`) first; the publish step
-only fires if checks pass.
+The `.github/` directory exists only on the mirror; change it with a pull request on GitHub.
+Everything else on the mirror is a copy of this repository.
+
+Merging to `main` never uploads anything. A release starts when you push a `vX.Y.Z` tag.
 
 ### One-time setup
 
-1. Create a PyPI account at <https://pypi.org/> and a TestPyPI account at
-   <https://test.pypi.org/>. The two are separate accounts with separate
-   tokens.
-2. Generate an API token scoped to the `mailchannels` project on each. The
-   tokens look like `pypi-AgEIc...`.
-3. In Bitbucket, open **Repository settings → Repository variables** and add
-   two **secured** variables:
-   - `PYPI_API_TOKEN` — the real PyPI token.
-   - `PYPI_TEST_API_TOKEN` — the TestPyPI token.
+1. On PyPI, open <https://pypi.org/manage/project/mailchannels/settings/publishing/>
+   and add a GitHub Actions trusted publisher with owner `mailchannels`, repository
+   `mailchannels-email-api-sdk-py`, workflow `release.yml`, and environment `pypi`.
+2. On TestPyPI, open
+   <https://test.pypi.org/manage/project/mailchannels/settings/publishing/>
+   and add the same publisher, but with environment `testpypi`. TestPyPI
+   accounts and projects are separate from PyPI ones.
+3. In the GitHub mirror, under **Settings → Environments**, create:
+   - `testpypi`, with deployments restricted to the `main` branch;
+   - `pypi`, with deployments restricted to the `main` branch and **required reviewers**
+   set to the release maintainers.
 
-   Marking them secured prevents them from appearing in pipeline logs.
+### How a release flows
+
+```text
+Bitbucket                    GitHub mirror                           Maintainer
+---------                    -------------                           ----------
+1. merge version bump
+   to main, push tag  ---->  2. sync.yml (daily or manual)
+   vX.Y.Z                       copies main and tags
+                                  | succeeded
+                                  v
+                             3. release.yml
+                                build: plan, checks, build once
+                                publish-testpypi: upload  ------->  4. validate on TestPyPI
+                                publish-pypi: wait        <-------     approve (or reject)
+                                  upload the same files to PyPI
+```
 
 ### Release procedure
 
@@ -90,12 +106,23 @@ only fires if checks pass.
    merge the commit into `main` through your normal workflow. `pyproject.toml`
    declares a dynamic version read from this file via Hatch; do not add a static
    project version. Select an unused version and verify the built metadata.
-2. Wait for the `branches.main` pipeline to complete. The matrix runs,
-   then the TestPyPI publish step automatically uploads the new artifact
-   (it skips silently if the version hasn't changed).
-3. Download the exact release wheel from TestPyPI, then install that local file
+2. Wait for the `branches.main` pipeline to complete, then tag the release commit and push the tag:
+
+   ```bash
+   release_version=$(python -c 'import runpy; print(runpy.run_path("src/mailchannels/version.py")["__version__"])')
+   git tag -s "v${release_version}" -m "Release v${release_version}"
+   git push origin "refs/tags/v${release_version}"
+   ```
+   Only tag a commit that is already on `main`. `release.yml` will reject the release if the tag is
+   not on `main`.
+3. In the GitHub mirror, go to **Actions → Sync public Bitbucket source → Run workflow** to sync
+   right away. Don't wait for the scheduled sync. When the sync finishes, `Publish release to PyPI`
+   starts automatically: it runs the checks, uploads to TestPyPI, and then waits for someone to
+   approve the `pypi` deployment. The build is retained for 7 days, allowing time to test the
+   package before approving the upload.
+4. Download the exact release wheel from TestPyPI, then install that local file
    with dependencies from PyPI in a clean venv. Run these commands from the
-   reviewed release checkout. Do not combine indexes with `--extra-index-url`: pip
+   release tag checkout. Do not combine indexes with `--extra-index-url`: pip
    does not prioritize TestPyPI and could select the package from production PyPI.
    Use a clean pip configuration without extra indexes/find-links; the first
    command must retrieve the SDK wheel only from TestPyPI:
@@ -117,43 +144,30 @@ only fires if checks pass.
    deactivate
    ```
 
-4. If the TestPyPI validation looks right, trigger **Pipelines → Run pipeline → Custom →
-   `publish-pypi`** on the release commit from the Bitbucket UI to push to
-   real PyPI.
-5. Tag the release commit and push the tag:
+5. Check that the installed package works. Then:
+   - **If it works**, approve the `pypi` deployment. Then check that the version appears on 
+   <https://pypi.org/project/mailchannels/>.
+   - **If it's broken**, reject the `pypi` deployment rather than leaving it to expire. Fix the
+     problem on `main` in Bitbucket and release the next patch version.
 
-   ```bash
-   release_version=$(python -c 'import runpy; print(runpy.run_path("src/mailchannels/version.py")["__version__"])')
-   git tag -s "v${release_version}" -m "Release v${release_version}"
-   git push origin "refs/tags/v${release_version}"
-   ```
+A given version on PyPI and TestPypi is immutable — if you upload a broken artifact, you must bump
+the patch version and republish. So test thoroughly before releasing a new version, and use the
+approval pause after the TestPyPI upload as a final check.
 
-A given version on PyPI is immutable — if you upload a broken artifact, you
-must bump the patch version and republish. The TestPyPI step exists exactly
-to catch that before it can happen on real PyPI.
+#### Recovering from a release failure
+
+If a publish job fails after the build succeeds, select **"Re-run failed jobs"** to retry uploading
+the same successful build stored in the artifact. Avoid "Re-run all jobs" as it rebuilds the package.
+
+If a code change is needed, make it through a new PR and release a new version. A version already
+uploaded to either index is immutable and cannot be reused.
 
 ### Publishing from a local machine (fallback)
 
-If you ever need to publish without Bitbucket (e.g., the pipeline is down),
-the same flow works locally. Store both tokens in `~/.pypirc`:
-
-```ini
-[distutils]
-index-servers =
-    pypi
-    testpypi
-
-[pypi]
-username = __token__
-password = pypi-...your-pypi-token...
-
-[testpypi]
-repository = https://test.pypi.org/legacy/
-username = __token__
-password = pypi-...your-testpypi-token...
-```
-
-`chmod 600 ~/.pypirc` so the tokens are not world-readable. Then run:
+Uploads should go through the trusted-publishing workflow above, so no
+long-lived token is kept. If you ever need to publish without the trusted workflow, create temporary tokens scoped to `mailchannels` on TestPyPI and
+PyPI, upload by hand from the release tag checkout, and then revoke the tokens
+right away:
 
 ```bash
 rm -rf dist/
