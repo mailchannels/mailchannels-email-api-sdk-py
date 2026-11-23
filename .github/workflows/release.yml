@@ -1,0 +1,166 @@
+name: Publish release to PyPI
+
+# Publishes the latest upstream vX.Y.Z tag to TestPyPI and then PyPI with Trusted Publishing
+# (OIDC). No PyPI or TestPyPI API token exists anywhere.
+#
+#   sync.yml mirrors Bitbucket main and tags, then this workflow runs:
+#       build             plan (find latest tag, decide upload or not); run the tests;
+#                         build the wheel and sdist once
+#       publish-testpypi  upload those files to TestPyPI
+#       publish-pypi      wait for a maintainer to approve the `pypi` environment, then upload the
+#                         same files to PyPI
+#
+# Each version gets one release attempt.
+# If a run fails because of a temporary problem (e.g. a network error or a flaky test),
+# use "Re-run failed jobs" on that run. It reuses the files already built in that run.
+# If the failure needs a code fix, fix it in Bitbucket and tag a new patch version instead.
+#
+# Trusted publisher settings for project `mailchannels` must match on both https://pypi.org and
+# https://test.pypi.org:
+#   owner: mailchannels
+#   repository: mailchannels-email-api-sdk-py
+#   workflow: release.yml
+#   environment: pypi (PyPI) / testpypi (TestPyPI)
+
+on:
+  workflow_run:
+    workflows: [Sync public Bitbucket source]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: mirror-release
+  cancel-in-progress: false
+
+env:
+  UPSTREAM: https://bitbucket.org/mailchannels/mailchannels-email-api-sdk-py.git
+
+jobs:
+  build:
+    name: Build release distributions
+    if: >-
+      github.repository == 'mailchannels/mailchannels-email-api-sdk-py' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # This job runs upstream code (build backend, tests), so it cannot mint an OIDC token;
+    # only the publish jobs below can.
+    permissions:
+      contents: read
+    outputs:
+      publish: ${{ steps.plan.outputs.publish }}
+      version: ${{ steps.plan.outputs.version }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      # Finds the latest vX.Y.Z tag, checks that it's on main, and checks whether that version is
+      # already on PyPI. See .github/release.py.
+      - name: Plan release
+        id: plan
+        run: python3 -I .github/release.py plan "$UPSTREAM"
+
+      # Release tags have no mirror-only .github/ directory, so check the tag out beside it.
+      - name: Check out release tag
+        if: steps.plan.outputs.publish == 'true'
+        env:
+          TAG: ${{ steps.plan.outputs.tag }}
+        run: git worktree add --detach source "refs/tags/$TAG"
+
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        if: steps.plan.outputs.publish == 'true'
+
+      # Same checks as the Bitbucket `checks` step.
+      - name: Run checks and tests
+        if: steps.plan.outputs.publish == 'true'
+        working-directory: source
+        run: |
+          uv sync --extra async --extra dev
+          uv run ruff check src tests examples scripts typing_tests
+          uv run mypy
+          uv run pytest --cov --cov-report=term-missing
+          uv run python scripts/check_openapi_drift.py
+          uv run python scripts/run_consumer_typing.py
+
+      - name: Build and verify distributions
+        if: steps.plan.outputs.publish == 'true'
+        env:
+          VERSION: ${{ steps.plan.outputs.version }}
+        working-directory: source
+        run: |
+          rm -rf dist/
+          uv build
+          uvx --with twine==7.0.0 twine check --strict dist/*
+          uv run python scripts/smoke_wheel_install.py
+          ls dist/
+          for f in dist/*; do
+            case "$(basename "$f")" in
+              "mailchannels-$VERSION.tar.gz"|"mailchannels-$VERSION-"*.whl) ;;
+              *) echo "::error::Unexpected distribution $f"; exit 1 ;;
+            esac
+          done
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: steps.plan.outputs.publish == 'true'
+        with:
+          name: python-package-distributions
+          path: source/dist/
+          if-no-files-found: error
+          # Buffer for validating the TestPyPI release; releases should finish well before expiry.
+          retention-days: 7
+
+  publish-testpypi:
+    name: Publish to TestPyPI
+    needs: build
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/mailchannels/${{ needs.build.outputs.version }}/
+    permissions:
+      # Mandatory for Trusted Publishing (OIDC) and PEP 740 attestations.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish distributions to TestPyPI
+        uses: pypa/gh-action-pypi-publish@aef6c9b6e301dc803e1bc9133e9ce67ae9b0906b # v1.14.3
+        with:
+          repository-url: https://test.pypi.org/legacy/
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: [build, publish-testpypi]
+    if: needs.build.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Required reviewers on this environment pause the run so maintainers can validate the
+    # TestPyPI release before the irreversible PyPI upload.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/mailchannels/${{ needs.build.outputs.version }}/
+    permissions:
+      # Mandatory for Trusted Publishing (OIDC) and PEP 740 attestations.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@aef6c9b6e301dc803e1bc9133e9ce67ae9b0906b # v1.14.3
