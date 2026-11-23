@@ -6,7 +6,15 @@ this project adheres to [Semantic Versioning](https://semver.org/). Until
 `1.0.0` the public API may still change between minor releases; from `1.0.0`
 onward, breaking changes will require a major version bump.
 
-## [Unreleased]
+## [1.6.0] - 2026-11-23
+
+### Added
+
+- `Client(user_agent=...)` names an application or integration built on the
+  SDK. Requests send it ahead of the SDK token, as
+  `User-Agent: my-app/1.2.0 mailchannels-python/<version>`, so integrations no
+  longer need a custom transport to identify themselves. Values that are empty
+  or not printable ASCII raise `ConfigurationError` (`InvalidUserAgent`).
 
 ## [1.5.1] - 2026-10-16
 

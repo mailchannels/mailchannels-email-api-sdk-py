@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Any
 
 import pytest
-from conftest import FakeRequestsClient
+from conftest import FakeHTTPXClient, FakeRequestsClient
 
 import mailchannels
 from mailchannels.check_domain.types import CheckDomainResult
@@ -729,11 +729,72 @@ def test_user_agent_uses_exported_version() -> None:
         }
     )
 
-    assert mailchannels.__version__ == "1.5.1"
+    assert mailchannels.__version__ == "1.6.0"
     assert mailchannels.get_version() == mailchannels.__version__
     assert transport.calls[0]["headers"]["User-Agent"] == (
         f"mailchannels-python/{mailchannels.__version__}"
     )
+
+
+QUEUE_PAYLOAD: dict[str, Any] = {
+    "from": {"email": "sender@example.com"},
+    "to": "recipient@example.net",
+    "subject": "Hello",
+    "text": "Hello",
+}
+
+
+def test_user_agent_puts_caller_token_before_sdk_token() -> None:
+    """It names the integration first and keeps the SDK token for attribution."""
+    transport = FakeRequestsClient()
+    client = Client(
+        api_key="test-key",
+        http_client=transport,
+        user_agent="mailchannels-langchain/0.1.0",
+    )
+
+    client.emails.queue(QUEUE_PAYLOAD)
+
+    assert transport.calls[0]["headers"]["User-Agent"] == (
+        f"mailchannels-langchain/0.1.0 mailchannels-python/{mailchannels.__version__}"
+    )
+
+
+async def test_user_agent_applies_to_async_requests() -> None:
+    """It sends the same combined User-Agent through the async transport."""
+    transport = FakeHTTPXClient()
+    client = Client(
+        api_key="test-key",
+        async_http_client=transport,
+        user_agent="my-app/2.0 (+https://example.com)",
+    )
+
+    await client.emails.queue_async(QUEUE_PAYLOAD)
+
+    assert transport.calls[0]["headers"]["User-Agent"] == (
+        "my-app/2.0 (+https://example.com) "
+        f"mailchannels-python/{mailchannels.__version__}"
+    )
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "",
+        " ",
+        " my-app/1.0",
+        "my-app/1.0 ",
+        "my-app/1.0\r\nX-Injected: yes",
+        "my-app/1.0\x00",
+        "café/1.0",
+    ],
+)
+def test_user_agent_rejects_values_unsafe_in_a_header(value: str) -> None:
+    """It fails at construction instead of sending a malformed header."""
+    with pytest.raises(mailchannels.ConfigurationError) as error:
+        Client(api_key="test-key", http_client=FakeRequestsClient(), user_agent=value)
+
+    assert error.value.code == "InvalidUserAgent"
 
 
 def test_api_spec_compatibility_metadata_is_exported() -> None:
