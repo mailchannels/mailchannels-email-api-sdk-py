@@ -6,6 +6,28 @@ this project adheres to [Semantic Versioning](https://semver.org/). Until
 `1.0.0` the public API may still change between minor releases; from `1.0.0`
 onward, breaking changes will require a major version bump.
 
+## [1.7.0] - 2026-11-25
+
+### Added
+
+- Webhook failure alerts from Email API 1.9.0:
+  `Webhooks.create(endpoint, failure_threshold=...)` sets the number of
+  consecutive failed deliveries that triggers an alert at enrollment (the API
+  can enroll the webhook without applying it; confirm with `Webhooks.list()`),
+  `Webhooks.update(endpoint, failure_threshold=...)` changes it on an enrolled
+  webhook (`PATCH /webhook`), and `Webhooks.delete_failure_threshold(endpoint)`
+  disables alerts without removing the webhook
+  (`DELETE /webhook/failure-threshold`). Each has an `_async` variant.
+- `Webhook.failure_threshold` exposes the current threshold on
+  `Webhooks.list()` results; it is `None` when alerts are disabled.
+
+### Changed
+
+- Webhook log messages record only the scheme and host of the endpoint URL,
+  since webhook URLs often carry credentials in the path or query.
+- `API_SPEC_COMPATIBILITY.openapi_version` bumped to `1.9.0` (from
+  `1.7.0`), reflecting the current public API contract.
+
 ## [1.6.0] - 2026-11-23
 
 ### Added

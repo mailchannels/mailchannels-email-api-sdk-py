@@ -79,8 +79,8 @@ You're about to write Python SDK code. What does it need to do?
 ├── Manage the suppression list (list, create, delete)
 │   → resources/suppressions.md
 │
-├── Receive or manage delivery-event webhooks (enroll, validate,
-│   inspect batches, verify signatures)
+├── Receive or manage delivery-event webhooks (enroll, failure-alert
+│   thresholds, validate, inspect batches, verify signatures)
 │   → resources/webhooks.md
 │
 ├── Catch / log / retry SDK or API errors

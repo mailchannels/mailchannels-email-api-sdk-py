@@ -54,6 +54,8 @@ DESTRUCTIVE_ONLINE_ROUTES = frozenset(
         ("POST", "/webhook"),
         ("GET", "/webhook"),
         ("DELETE", "/webhook"),
+        ("PATCH", "/webhook"),
+        ("DELETE", "/webhook/failure-threshold"),
         ("POST", "/webhook/validate"),
     }
 )

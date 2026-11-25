@@ -567,8 +567,42 @@ ROUTE_CONTRACTS: tuple[OperationContract, ...] = (
     OperationContract(
         "POST",
         "/webhook",
-        lambda client: client.webhooks.create("https://example.com/mailchannels"),
+        lambda client: client.webhooks.create(
+            "https://example.com/mailchannels",
+            failure_threshold=5,
+        ),
         lambda client: client.webhooks.create_async(
+            "https://example.com/mailchannels",
+            failure_threshold=5,
+        ),
+        json_required=frozenset({"failure_threshold"}),
+        json_allowed=frozenset({"failure_threshold"}),
+        query_required=frozenset({"endpoint"}),
+        query_allowed=frozenset({"endpoint"}),
+    ),
+    OperationContract(
+        "PATCH",
+        "/webhook",
+        lambda client: client.webhooks.update(
+            "https://example.com/mailchannels",
+            failure_threshold=5,
+        ),
+        lambda client: client.webhooks.update_async(
+            "https://example.com/mailchannels",
+            failure_threshold=5,
+        ),
+        json_required=frozenset({"failure_threshold"}),
+        json_allowed=frozenset({"failure_threshold"}),
+        query_required=frozenset({"endpoint"}),
+        query_allowed=frozenset({"endpoint"}),
+    ),
+    OperationContract(
+        "DELETE",
+        "/webhook/failure-threshold",
+        lambda client: client.webhooks.delete_failure_threshold(
+            "https://example.com/mailchannels"
+        ),
+        lambda client: client.webhooks.delete_failure_threshold_async(
             "https://example.com/mailchannels"
         ),
         query_required=frozenset({"endpoint"}),

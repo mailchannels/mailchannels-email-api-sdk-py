@@ -27,6 +27,7 @@ class Webhook(BaseModel):
     model_config = ConfigDict(extra="allow")
 
     webhook: str
+    failure_threshold: int | None = None
 
 
 class WebhookList(BaseModel):
