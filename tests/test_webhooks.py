@@ -11,9 +11,16 @@ from conftest import FakeHTTPXClient, FakeRequestsClient
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
+import mailchannels
 from mailchannels.client import Client
-from mailchannels.exceptions import NotFoundError
-from mailchannels.response import SDKResponse
+from mailchannels.exceptions import (
+    ConflictError,
+    InvalidRequestError,
+    NotFoundError,
+    ResponseValidationError,
+    ServerError,
+)
+from mailchannels.response import EmptyResponse, SDKResponse
 from mailchannels.version import user_agent
 from mailchannels.webhooks import (
     parse_signature_input,
@@ -22,6 +29,7 @@ from mailchannels.webhooks import (
     verify_content_digest,
     verify_webhook_signature,
 )
+from mailchannels.webhooks.webhooks import _masked_endpoint
 
 
 def test_webhook_management_uses_documented_paths() -> None:
@@ -49,7 +57,313 @@ def test_webhook_management_uses_documented_paths() -> None:
     assert transport.calls[0]["params"] == {
         "endpoint": "https://example.com/mailchannels"
     }
+    assert transport.calls[0]["json"] is None
     assert transport.calls[3]["json"] == {"request_id": "test_request_1"}
+
+
+ENDPOINT = "https://example.com/mailchannels?tenant=a b&x=1"
+
+
+@pytest.mark.parametrize("failure_threshold", [0, 1, 5, 10_000])
+def test_webhook_create_sends_failure_threshold_in_body(
+    failure_threshold: int,
+) -> None:
+    """It sends the optional failure threshold as the enrollment JSON body."""
+    transport = FakeRequestsClient(SDKResponse(204, None, ""))
+    client = Client(api_key="test-key", http_client=transport)
+
+    client.webhooks.create(ENDPOINT, failure_threshold=failure_threshold)
+
+    assert transport.calls[0]["method"] == "POST"
+    assert transport.calls[0]["url"] == "https://api.example.test/tx/v1/webhook"
+    assert transport.calls[0]["params"] == {"endpoint": ENDPOINT}
+    assert transport.calls[0]["json"] == {"failure_threshold": failure_threshold}
+
+
+def test_webhook_create_accepts_201_when_threshold_was_not_set() -> None:
+    """It treats the enrolled-without-threshold 201 response as success."""
+    transport = FakeRequestsClient(SDKResponse(201, None, "", {"X-Request-Id": "r1"}))
+    client = Client(api_key="test-key", http_client=transport)
+
+    result = client.webhooks.create(ENDPOINT, failure_threshold=3)
+
+    assert result == {"http_headers": {"X-Request-Id": "r1"}}
+
+
+def test_webhook_create_already_enrolled_raises_conflict() -> None:
+    """It surfaces an existing enrollment as ConflictError."""
+    transport = FakeRequestsClient(SDKResponse(409, None, ""))
+    client = Client(api_key="test-key", http_client=transport)
+
+    with pytest.raises(ConflictError):
+        client.webhooks.create(ENDPOINT, failure_threshold=3)
+
+
+@pytest.mark.parametrize("failure_threshold", [1, 5, 10_000])
+def test_webhook_update_patches_failure_threshold(failure_threshold: int) -> None:
+    """It updates webhook settings through PATCH /webhook."""
+    transport = FakeRequestsClient(SDKResponse(204, None, ""))
+    client = Client(api_key="test-key", http_client=transport)
+
+    result = client.webhooks.update(ENDPOINT, failure_threshold=failure_threshold)
+
+    assert result == {"http_headers": {}}
+    assert transport.calls == [
+        {
+            "method": "PATCH",
+            "url": "https://api.example.test/tx/v1/webhook",
+            "headers": {
+                "Content-Type": "application/json",
+                "User-Agent": user_agent(),
+                "X-API-Key": "test-key",
+            },
+            "json": {"failure_threshold": failure_threshold},
+            "params": {"endpoint": ENDPOINT},
+        }
+    ]
+
+
+def test_webhook_delete_failure_threshold_uses_documented_path() -> None:
+    """It removes the threshold through DELETE /webhook/failure-threshold."""
+    transport = FakeRequestsClient(SDKResponse(204, None, ""))
+    client = Client(api_key="test-key", http_client=transport)
+
+    result = client.webhooks.delete_failure_threshold(ENDPOINT)
+
+    assert result == {"http_headers": {}}
+    assert transport.calls == [
+        {
+            "method": "DELETE",
+            "url": "https://api.example.test/tx/v1/webhook/failure-threshold",
+            "headers": {
+                "Content-Type": "application/json",
+                "User-Agent": user_agent(),
+                "X-API-Key": "test-key",
+            },
+            "json": None,
+            "params": {"endpoint": ENDPOINT},
+        }
+    ]
+
+
+@pytest.mark.parametrize(
+    ("status_code", "error_class"),
+    [
+        (400, InvalidRequestError),
+        (404, NotFoundError),
+        (500, ServerError),
+    ],
+)
+def test_webhook_threshold_operations_raise_typed_errors(
+    status_code: int,
+    error_class: type[Exception],
+) -> None:
+    """It maps documented error statuses for update and threshold removal."""
+    transport = FakeRequestsClient(SDKResponse(status_code, None, ""))
+    client = Client(api_key="test-key", http_client=transport)
+
+    with pytest.raises(error_class):
+        client.webhooks.update(ENDPOINT, failure_threshold=0)
+    with pytest.raises(error_class):
+        client.webhooks.delete_failure_threshold("")
+
+    assert transport.calls[0]["json"] == {"failure_threshold": 0}
+    assert transport.calls[1]["params"] == {"endpoint": ""}
+
+
+def test_webhook_strict_responses_for_threshold_operations() -> None:
+    """It returns typed models for threshold operations in strict mode."""
+    transport = FakeRequestsClient(SDKResponse(204, None, "", {"X-Request-Id": "r1"}))
+    client = Client(api_key="test-key", http_client=transport, strict_responses=True)
+
+    created = client.webhooks.create(ENDPOINT, failure_threshold=2)
+    updated = client.webhooks.update(ENDPOINT, failure_threshold=3)
+    deleted = client.webhooks.delete_failure_threshold(ENDPOINT)
+
+    for result in (created, updated, deleted):
+        assert isinstance(result, EmptyResponse)
+        assert result.http_headers == {"X-Request-Id": "r1"}
+
+
+def test_webhook_strict_list_exposes_failure_threshold() -> None:
+    """It parses set, null, and absent failure thresholds from GET /webhook."""
+    transport = FakeRequestsClient(
+        SDKResponse(
+            200,
+            [
+                {"webhook": "https://example.com/a", "failure_threshold": 5},
+                {"webhook": "https://example.com/b", "failure_threshold": None},
+                {"webhook": "https://example.com/c"},
+            ],
+            "[]",
+        )
+    )
+    client = Client(api_key="test-key", http_client=transport, strict_responses=True)
+
+    result = client.webhooks.list()
+
+    assert [item.failure_threshold for item in result.data] == [5, None, None]
+
+
+def test_webhook_strict_list_rejects_non_integer_failure_threshold() -> None:
+    """It rejects a malformed failure threshold in strict mode."""
+    transport = FakeRequestsClient(
+        SDKResponse(
+            200,
+            [{"webhook": "https://example.com/a", "failure_threshold": "many"}],
+            "[]",
+        )
+    )
+    client = Client(api_key="test-key", http_client=transport, strict_responses=True)
+
+    with pytest.raises(ResponseValidationError):
+        client.webhooks.list()
+
+
+def test_webhook_threshold_operations_log_at_info(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """It logs webhook setting mutations at info level."""
+    transport = FakeRequestsClient(SDKResponse(204, None, ""))
+    client = Client(api_key="test-key", http_client=transport)
+
+    with caplog.at_level(logging.INFO, logger="mailchannels.webhooks.webhooks"):
+        client.webhooks.create(ENDPOINT, failure_threshold=2)
+        client.webhooks.update(ENDPOINT, failure_threshold=3)
+        client.webhooks.delete_failure_threshold(ENDPOINT)
+
+    records = [
+        record
+        for record in caplog.records
+        if record.name == "mailchannels.webhooks.webhooks"
+        and record.levelno == logging.INFO
+    ]
+    assert len(records) == 3
+
+
+SECRET_ENDPOINT = "https://user:pw@Hooks.Example.com:8443/in/path-token?token=SECRET#frag"
+
+
+async def test_webhook_logs_never_include_endpoint_credentials(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """It logs only the scheme and host of webhook endpoints, sync and async."""
+    client = Client(
+        api_key="test-key",
+        http_client=FakeRequestsClient(SDKResponse(204, None, "")),
+        async_http_client=FakeHTTPXClient(SDKResponse(204, None, "")),
+    )
+
+    with caplog.at_level(logging.DEBUG, logger="mailchannels.webhooks.webhooks"):
+        client.webhooks.create(SECRET_ENDPOINT, failure_threshold=2)
+        client.webhooks.update(SECRET_ENDPOINT, failure_threshold=3)
+        client.webhooks.delete_failure_threshold(SECRET_ENDPOINT)
+        await client.webhooks.create_async(SECRET_ENDPOINT)
+        await client.webhooks.update_async(SECRET_ENDPOINT, failure_threshold=3)
+        await client.webhooks.delete_failure_threshold_async(SECRET_ENDPOINT)
+
+    messages = [
+        record.getMessage()
+        for record in caplog.records
+        if record.name == "mailchannels.webhooks.webhooks"
+    ]
+    assert len(messages) == 6
+    for message in messages:
+        assert "endpoint=https://hooks.example.com:8443" in message
+        for secret in ("SECRET", "path-token", "user", "pw", "frag"):
+            assert secret not in message
+
+
+@pytest.mark.parametrize(
+    ("endpoint", "masked"),
+    [
+        ("https://example.com", "https://example.com"),
+        ("https://example.com/hook?token=abc", "https://example.com"),
+        ("  HTTPS://Example.COM/Hook  ", "https://example.com"),
+        ("http://user:pw@example.com:8080/x", "http://example.com:8080"),
+        ("https://[2001:db8::1]:8443/x?k=v", "https://[2001:db8::1]:8443"),
+        ("https://b\u00fccher.example/\u00fc?k=\u00fc", "https://b\u00fccher.example"),
+        ("https://example.com:notaport/x?token=abc", "unparseable endpoint"),
+        ("https://[::1/x?token=abc", "unparseable endpoint"),
+        ("example.com/hook?token=abc", "unparseable endpoint"),
+        ("token-only-secret", "unparseable endpoint"),
+        ("https:///path?token=abc", "unparseable endpoint"),
+        ("", "unparseable endpoint"),
+    ],
+)
+def test_masked_endpoint_keeps_only_scheme_and_host(endpoint: str, masked: str) -> None:
+    """It reduces any endpoint, valid or malformed, to a credential-free form."""
+    assert _masked_endpoint(endpoint) == masked
+
+
+async def test_webhook_threshold_async_methods_use_async_transport() -> None:
+    """It exposes async enrollment, update, and threshold removal."""
+    transport = FakeHTTPXClient(SDKResponse(204, None, ""))
+    client = Client(api_key="test-key", async_http_client=transport)
+
+    await client.webhooks.create_async(ENDPOINT)
+    await client.webhooks.create_async(ENDPOINT, failure_threshold=2)
+    await client.webhooks.update_async(ENDPOINT, failure_threshold=3)
+    await client.webhooks.delete_failure_threshold_async(ENDPOINT)
+
+    assert [
+        (call["method"], call["url"].removeprefix("https://api.example.test/tx/v1"))
+        for call in transport.calls
+    ] == [
+        ("POST", "/webhook"),
+        ("POST", "/webhook"),
+        ("PATCH", "/webhook"),
+        ("DELETE", "/webhook/failure-threshold"),
+    ]
+    assert [call["json"] for call in transport.calls] == [
+        None,
+        {"failure_threshold": 2},
+        {"failure_threshold": 3},
+        None,
+    ]
+    assert all(call["params"] == {"endpoint": ENDPOINT} for call in transport.calls)
+
+
+async def test_webhook_threshold_async_errors_raise_not_found() -> None:
+    """It raises NotFoundError from async calls for an unknown endpoint."""
+    transport = FakeHTTPXClient(SDKResponse(404, None, ""))
+    client = Client(api_key="test-key", async_http_client=transport)
+
+    with pytest.raises(NotFoundError):
+        await client.webhooks.update_async(ENDPOINT, failure_threshold=3)
+    with pytest.raises(NotFoundError):
+        await client.webhooks.delete_failure_threshold_async(ENDPOINT)
+
+
+async def test_webhook_module_level_threshold_operations(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """It exposes threshold operations on the module-level Webhooks namespace."""
+    transport = FakeRequestsClient(SDKResponse(204, None, ""))
+    async_transport = FakeHTTPXClient(SDKResponse(204, None, ""))
+    monkeypatch.setattr(mailchannels, "api_key", "module-key")
+    monkeypatch.setattr(mailchannels, "default_http_client", transport)
+    monkeypatch.setattr(mailchannels, "default_async_http_client", async_transport)
+
+    mailchannels.Webhooks.create(ENDPOINT)
+    mailchannels.Webhooks.create(ENDPOINT, failure_threshold=2)
+    mailchannels.Webhooks.update(ENDPOINT, failure_threshold=3)
+    mailchannels.Webhooks.delete_failure_threshold(ENDPOINT)
+    await mailchannels.Webhooks.create_async(ENDPOINT)
+    await mailchannels.Webhooks.create_async(ENDPOINT, failure_threshold=2)
+    await mailchannels.Webhooks.update_async(ENDPOINT, failure_threshold=3)
+    await mailchannels.Webhooks.delete_failure_threshold_async(ENDPOINT)
+
+    expected = [
+        ("POST", None),
+        ("POST", {"failure_threshold": 2}),
+        ("PATCH", {"failure_threshold": 3}),
+        ("DELETE", None),
+    ]
+    for calls in (transport.calls, async_transport.calls):
+        assert [(call["method"], call["json"]) for call in calls] == expected
+        assert all(call["params"] == {"endpoint": ENDPOINT} for call in calls)
+        assert all(call["headers"]["X-API-Key"] == "module-key" for call in calls)
 
 
 def test_webhook_batches_public_key_and_resend() -> None:

@@ -15,16 +15,66 @@ receivers can route correctly.
 import mailchannels
 
 mailchannels.Webhooks.create("https://example.com/mailchannels/events")
-mailchannels.Webhooks.list()           # list of enrolled URLs
+mailchannels.Webhooks.list()           # enrolled URLs and failure thresholds
 mailchannels.Webhooks.delete_all()     # removes ALL enrolled webhooks
 ```
 
 There is no per-URL delete — `delete_all()` removes every enrolled webhook
 for the customer. Enroll the replacement first if you're swapping URLs.
 
-If the endpoint is already enrolled, `create()` raises `ConflictError`.
+If a webhook is already enrolled for the customer — at this or any other
+endpoint — `create()` raises `ConflictError` and the existing webhook is left
+unchanged.
 
 The endpoint URL can be up to 8000 characters.
+
+MailChannels stores the endpoint in a canonical form — for example, the
+scheme and host are lowercased and any `#fragment` is dropped — so the URL
+`list()` returns can differ from the one passed to `create()`. Don't compare
+the two as raw strings.
+
+## Failure Alerts
+
+A webhook's `failure_threshold` is the number of consecutive failed
+deliveries before MailChannels triggers a failure alert. No threshold means
+alerts are disabled; `1` alerts on every failure.
+
+```python
+import mailchannels
+
+endpoint = "https://example.com/mailchannels/events"
+
+mailchannels.Webhooks.create(endpoint, failure_threshold=5)   # set at enrollment
+mailchannels.Webhooks.update(endpoint, failure_threshold=10)  # change it later
+mailchannels.Webhooks.delete_failure_threshold(endpoint)      # disable alerts
+```
+
+- `update()` requires `failure_threshold` and it must be 1 or greater. To
+  disable alerts call `delete_failure_threshold()`, not
+  `update(endpoint, failure_threshold=0)`.
+- `endpoint` is the URL of the enrolled webhook; pass the URL you enrolled. An
+  unknown endpoint raises `NotFoundError`.
+- `delete_failure_threshold()` only removes the threshold. The webhook stays
+  enrolled and keeps receiving events.
+- `create()` on an already-enrolled customer raises `ConflictError`; it never
+  changes the threshold. Use `update()` for that.
+- `create(endpoint, failure_threshold=...)` can succeed in enrolling the
+  webhook without setting the threshold (the API answers 201 instead of 204).
+  The SDK returns normally in both cases, so check `list()` afterwards and
+  call `update()` if the threshold is missing.
+
+Read the current value from `list()`. With `strict_responses=True` each entry
+is a `Webhook` model with `webhook` and `failure_threshold` (`None` when
+alerts are disabled):
+
+```python
+import mailchannels
+
+client = mailchannels.Client(api_key="YOUR-API-KEY", strict_responses=True)
+
+for entry in client.webhooks.list().data:
+    print(entry.webhook, entry.failure_threshold)
+```
 
 ## Validate
 

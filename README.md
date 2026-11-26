@@ -8,7 +8,7 @@
 [![PyPI - Wheel](https://img.shields.io/pypi/wheel/mailchannels)](https://pypi.org/project/mailchannels/)
 
 <!-- generated:api-version -->
-Built and tested against MailChannels Email API 1.7.0.
+Built and tested against MailChannels Email API 1.9.0.
 <!-- /generated:api-version -->
 
 `mailchannels` is a typed Python SDK for the MailChannels Email API. It keeps
@@ -675,17 +675,36 @@ suppression should be copied across the tenant accounts beneath it.
 
 MailChannels can send delivery events to your application for accepted,
 delivered, bounced, opened, clicked, complained, and unsubscribed messages. The
-SDK exposes webhook enrollment, validation, batch inspection, batch resend, and
-public signing-key retrieval.
+SDK exposes webhook enrollment, failure-alert thresholds, validation, batch
+inspection, batch resend, and public signing-key retrieval.
 
 ```python
-mailchannels.Webhooks.create("https://example.com/mailchannels/events")
+endpoint = "https://example.com/mailchannels/events"
+
+# Alert after 5 consecutive failed deliveries; omit failure_threshold for no alerts.
+mailchannels.Webhooks.create(endpoint, failure_threshold=5)
+mailchannels.Webhooks.update(endpoint, failure_threshold=10)
+mailchannels.Webhooks.delete_failure_threshold(endpoint)
 
 validation = mailchannels.Webhooks.validate(request_id="test_request_1")
 batches = mailchannels.Webhooks.batches(statuses=["4xx", "5xx"], limit=50)
 
 mailchannels.Webhooks.resend_batch(12345)
 ```
+
+`failure_threshold` is the number of consecutive failed deliveries before
+MailChannels triggers a failure alert for the webhook. `update()` needs a value
+of 1 or greater; `delete_failure_threshold()` turns alerts off while the webhook
+stays enrolled. `Webhooks.list()` reports each webhook's current
+`failure_threshold`.
+
+`create()` can enroll the webhook without applying the `failure_threshold` you
+passed, and it returns normally either way. Check `Webhooks.list()` afterwards
+and call `update()` if the threshold is missing.
+
+MailChannels stores the endpoint in a canonical form (for example, the scheme
+and host are lowercased), so the URL returned by `Webhooks.list()` can differ
+from the one you enrolled.
 
 Webhook receivers should verify the `customer_handle` in each event and check
 the signature headers MailChannels sends with the request. The SDK can verify

@@ -92,16 +92,25 @@ def test_online_destructive_sub_account_lifecycle() -> None:
 
 
 def test_online_destructive_webhook_lifecycle() -> None:
-    """Create, validate, list, and delete live webhooks in a destructive account."""
+    """Enroll, tune failure alerts on, validate, and delete live webhooks."""
     client = _client()
     endpoint = (
         os.environ.get("MAILCHANNELS_ONLINE_WEBHOOK_ENDPOINT")
         or f"https://example.invalid/mailchannels-sdk-test/{_unique_suffix()}"
     )
     try:
-        client.webhooks.create(endpoint)
+        client.webhooks.create(endpoint, failure_threshold=3)
         listed = client.webhooks.list()
         assert "http_headers" in listed
+        assert _webhook_thresholds(listed) == [3]
+        client.webhooks.update(endpoint, failure_threshold=5)
+        assert _webhook_thresholds(client.webhooks.list()) == [5]
+        client.webhooks.delete_failure_threshold(endpoint)
+        assert _webhook_thresholds(client.webhooks.list()) == [None]
+        with pytest.raises(mailchannels.NotFoundError):
+            client.webhooks.update(f"{endpoint}/missing", failure_threshold=5)
+        with pytest.raises(mailchannels.NotFoundError):
+            client.webhooks.delete_failure_threshold(f"{endpoint}/missing")
         client.webhooks.validate(request_id=f"sdk-test-{_unique_suffix()}")
     except mailchannels.ApiError as error:
         _xfail_live_server_error(error)
@@ -118,6 +127,15 @@ def test_online_destructive_webhook_lifecycle() -> None:
 def _unique_suffix() -> str:
     """Return a timestamp suffix for live throwaway resources."""
     return datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
+
+
+def _webhook_thresholds(listed: dict[str, Any]) -> list[int | None]:
+    """Return the failure threshold of each listed webhook.
+
+    Webhooks are not looked up by URL because the API stores endpoints in a
+    canonical form that can differ from the URL that was enrolled.
+    """
+    return [entry.get("failure_threshold") for entry in listed.get("data", [])]
 
 
 def _resource_id(response: dict[str, Any]) -> str | None:

@@ -729,7 +729,7 @@ def test_user_agent_uses_exported_version() -> None:
         }
     )
 
-    assert mailchannels.__version__ == "1.6.0"
+    assert mailchannels.__version__ == "1.7.0"
     assert mailchannels.get_version() == mailchannels.__version__
     assert transport.calls[0]["headers"]["User-Agent"] == (
         f"mailchannels-python/{mailchannels.__version__}"
@@ -803,12 +803,12 @@ def test_api_spec_compatibility_metadata_is_exported() -> None:
 
     assert isinstance(metadata, mailchannels.ApiSpecCompatibility)
     assert metadata.source_url == "https://docs.mailchannels.com/email-api.yaml"
-    assert metadata.openapi_version == "1.7.0"
+    assert metadata.openapi_version == "1.9.0"
     assert (
         metadata.sha256
-        == "98e341bf1d99061d959a506e2ac1956de2a67d18d79f496f2e770bb22956115b"
+        == "d87a3eae5cd7e9f5874f59da068e58a32d296a31aaa36bf6b6af4e0fd9aeb44d"
     )
-    assert metadata.checked_at == "2026-08-18T00:27:23+00:00"
+    assert metadata.checked_at == "2026-11-25T20:22:00+00:00"
     assert metadata.sdk_version == mailchannels.__version__
     assert metadata.to_dict() == {
         "source_url": metadata.source_url,

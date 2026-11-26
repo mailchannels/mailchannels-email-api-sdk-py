@@ -2,16 +2,16 @@
 
 This report is generated from the MailChannels OpenAPI document and the SDK route registry.
 
-- SDK version: `1.6.0`
+- SDK version: `1.7.0`
 - OpenAPI source: `https://docs.mailchannels.com/email-api.yaml`
-- OpenAPI version: `1.8.0`
-- OpenAPI SHA-256: `f7f7f3b3286fb895b2f52df784fa0072a9d1168bf998fe1eed2b582e1d34f438`
-- Generated at: `2026-11-23T20:21:46+00:00`
+- OpenAPI version: `1.9.0`
+- OpenAPI SHA-256: `d87a3eae5cd7e9f5874f59da068e58a32d296a31aaa36bf6b6af4e0fd9aeb44d`
+- Generated at: `2026-11-25T20:22:14+00:00`
 
 ## Summary
 
-- OpenAPI operations: `42`
-- SDK-supported operations: `42`
+- OpenAPI operations: `44`
+- SDK-supported operations: `44`
 - Pending OpenAPI operations: `0`
 - SDK routes absent from OpenAPI: `0`
 
@@ -56,9 +56,11 @@ This report is generated from the MailChannels OpenAPI document and the SDK rout
 | `GET` | `/usage` | Retrieve Usage Stats | `mailchannels.Usage.retrieve()` | yes | yes | yes | routine | supported |
 | `DELETE` | `/webhook` | Delete Customer Webhooks | `mailchannels.Webhooks.delete_all()` | yes | yes | yes | destructive | supported |
 | `GET` | `/webhook` | Retrieve Customer Webhooks | `mailchannels.Webhooks.list()` | yes | yes | yes | routine, destructive | supported |
+| `PATCH` | `/webhook` | Update Webhook Settings | `mailchannels.Webhooks.update()` | yes | yes | yes | destructive | supported |
 | `POST` | `/webhook` | Enroll for Webhook Notifications | `mailchannels.Webhooks.create()` | yes | yes | yes | destructive | supported |
 | `GET` | `/webhook-batch` | Retrieve Webhook Batches | `mailchannels.Webhooks.batches()` | yes | yes | yes | none | supported |
 | `POST` | `/webhook-batch/{batch_id}/resend` | Resend Events | `mailchannels.Webhooks.resend_batch()` | yes | yes | yes | none | supported |
+| `DELETE` | `/webhook/failure-threshold` | Remove Webhook Failure Threshold | `mailchannels.Webhooks.delete_failure_threshold()` | yes | yes | yes | destructive | supported |
 | `GET` | `/webhook/public-key` | Retrieve Webhook Signing Key | `mailchannels.Webhooks.public_key()` | yes | yes | yes | none | supported |
 | `POST` | `/webhook/validate` | Validate Enrolled Webhook | `mailchannels.Webhooks.validate()` | yes | yes | yes | destructive | supported |
 

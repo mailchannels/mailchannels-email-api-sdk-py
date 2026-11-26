@@ -73,7 +73,7 @@ shape (templates, unsubscribe, custom headers, sub-account sends, etc.).
 | `Metrics` | Volume, engagement, performance, recipient-behaviour, sender metrics. |
 | `Usage` | Parent-account usage for the current billing period. |
 | `Suppressions` | List, create, delete suppression entries. |
-| `Webhooks` | Enroll, validate, inspect batches, fetch public keys, verify signatures. |
+| `Webhooks` | Enroll, set failure-alert thresholds, validate, inspect batches, fetch public keys, verify signatures. |
 
 ## Path Variables
 
