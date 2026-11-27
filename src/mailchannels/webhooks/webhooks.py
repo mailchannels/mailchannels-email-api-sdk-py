@@ -11,6 +11,7 @@ import time
 from builtins import list as list_type
 from collections.abc import Mapping
 from typing import Any, Generic, Literal, TypeVar, overload
+from urllib.parse import urlsplit
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
@@ -38,6 +39,7 @@ _SIGNATURE_INPUT_RE = re.compile(
 _PARAM_RE = re.compile(r";(?P<key>[a-zA-Z0-9_-]+)=(?P<value>\"[^\"]*\"|[^;]+)")
 _DIGEST_RE = re.compile(r"sha-256=:(?P<digest>[^:]+):")
 _SIGNATURE_RE = re.compile(r"(?P<name>[^=, ]+)=:(?P<signature>[^:]+):")
+_UNPARSEABLE_ENDPOINT = "unparseable endpoint"
 
 
 class WebhooksResource(Generic[StrictResponses]):
@@ -87,28 +89,147 @@ class WebhooksResource(Generic[StrictResponses]):
             response_model=WebhookList,
         )
 
-    def create(self, endpoint: str) -> EmptyResponse | MailChannelsResponse:
-        """Enroll a webhook endpoint for delivery events."""
-        logger.info("Creating MailChannels webhook endpoint=%s", endpoint)
+    def create(
+        self,
+        endpoint: str,
+        *,
+        failure_threshold: int | None = None,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Enroll a webhook endpoint for delivery events.
+
+        `failure_threshold` is the number of consecutive failed deliveries
+        before a failure alert is triggered. Omit it to leave alerts disabled.
+        The API can enroll the webhook without applying the threshold, and this
+        call returns normally either way; read it back with `list()`.
+        """
+        logger.info(
+            "Creating MailChannels webhook endpoint=%s failure_threshold=%s",
+            _masked_endpoint(endpoint),
+            failure_threshold,
+        )
         return self._client.request(
             "POST",
             "/webhook",
             params={"endpoint": endpoint},
+            json=compact_query({"failure_threshold": failure_threshold}) or None,
             response_model=EmptyResponse,
         )
 
     async def create_async(
         self,
         endpoint: str,
+        *,
+        failure_threshold: int | None = None,
     ) -> EmptyResponse | MailChannelsResponse:
-        """Enroll a webhook endpoint for delivery events using async HTTP."""
+        """Enroll a webhook endpoint for delivery events using async HTTP.
+
+        `failure_threshold` is the number of consecutive failed deliveries
+        before a failure alert is triggered. Omit it to leave alerts disabled.
+        The API can enroll the webhook without applying the threshold, and this
+        call returns normally either way; read it back with `list()`.
+        """
         logger.info(
-            "Creating MailChannels webhook using async HTTP endpoint=%s",
-            endpoint,
+            "Creating MailChannels webhook using async HTTP endpoint=%s "
+            "failure_threshold=%s",
+            _masked_endpoint(endpoint),
+            failure_threshold,
         )
         return await self._client.request_async(
             "POST",
             "/webhook",
+            params={"endpoint": endpoint},
+            json=compact_query({"failure_threshold": failure_threshold}) or None,
+            response_model=EmptyResponse,
+        )
+
+    def update(
+        self,
+        endpoint: str,
+        *,
+        failure_threshold: int,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Update the settings of an enrolled webhook endpoint.
+
+        `endpoint` is the URL of an enrolled webhook.
+        `failure_threshold` must be 1 or greater; use
+        `delete_failure_threshold()` to disable failure alerts.
+        """
+        logger.info(
+            "Updating MailChannels webhook endpoint=%s failure_threshold=%s",
+            _masked_endpoint(endpoint),
+            failure_threshold,
+        )
+        return self._client.request(
+            "PATCH",
+            "/webhook",
+            params={"endpoint": endpoint},
+            json={"failure_threshold": failure_threshold},
+            response_model=EmptyResponse,
+        )
+
+    async def update_async(
+        self,
+        endpoint: str,
+        *,
+        failure_threshold: int,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Update the settings of an enrolled webhook endpoint using async HTTP.
+
+        `endpoint` is the URL of an enrolled webhook.
+        `failure_threshold` must be 1 or greater; use
+        `delete_failure_threshold_async()` to disable failure alerts.
+        """
+        logger.info(
+            "Updating MailChannels webhook using async HTTP endpoint=%s "
+            "failure_threshold=%s",
+            _masked_endpoint(endpoint),
+            failure_threshold,
+        )
+        return await self._client.request_async(
+            "PATCH",
+            "/webhook",
+            params={"endpoint": endpoint},
+            json={"failure_threshold": failure_threshold},
+            response_model=EmptyResponse,
+        )
+
+    def delete_failure_threshold(
+        self,
+        endpoint: str,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Remove the failure threshold from an enrolled webhook endpoint.
+
+        Failure alerts are disabled; the webhook stays enrolled and keeps
+        receiving events.
+        """
+        logger.info(
+            "Deleting MailChannels webhook failure threshold endpoint=%s",
+            _masked_endpoint(endpoint),
+        )
+        return self._client.request(
+            "DELETE",
+            "/webhook/failure-threshold",
+            params={"endpoint": endpoint},
+            response_model=EmptyResponse,
+        )
+
+    async def delete_failure_threshold_async(
+        self,
+        endpoint: str,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Remove the failure threshold from a webhook endpoint using async HTTP.
+
+        Failure alerts are disabled; the webhook stays enrolled and keeps
+        receiving events.
+        """
+        logger.info(
+            "Deleting MailChannels webhook failure threshold using async HTTP "
+            "endpoint=%s",
+            _masked_endpoint(endpoint),
+        )
+        return await self._client.request_async(
+            "DELETE",
+            "/webhook/failure-threshold",
             params={"endpoint": endpoint},
             response_model=EmptyResponse,
         )
@@ -484,21 +605,116 @@ class Webhooks:
         return await get_default_client().webhooks.list_async()
 
     @classmethod
-    def create(cls, endpoint: str) -> EmptyResponse | MailChannelsResponse:
-        """Enroll a webhook endpoint for delivery events."""
+    def create(
+        cls,
+        endpoint: str,
+        *,
+        failure_threshold: int | None = None,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Enroll a webhook endpoint for delivery events.
+
+        `failure_threshold` is the number of consecutive failed deliveries
+        before a failure alert is triggered. Omit it to leave alerts disabled.
+        The API can enroll the webhook without applying the threshold, and this
+        call returns normally either way; read it back with `list()`.
+        """
         from ..client import get_default_client
 
-        return get_default_client().webhooks.create(endpoint)
+        return get_default_client().webhooks.create(
+            endpoint,
+            failure_threshold=failure_threshold,
+        )
 
     @classmethod
     async def create_async(
         cls,
         endpoint: str,
+        *,
+        failure_threshold: int | None = None,
     ) -> EmptyResponse | MailChannelsResponse:
-        """Enroll a webhook endpoint for delivery events using async HTTP."""
+        """Enroll a webhook endpoint for delivery events using async HTTP.
+
+        `failure_threshold` is the number of consecutive failed deliveries
+        before a failure alert is triggered. Omit it to leave alerts disabled.
+        The API can enroll the webhook without applying the threshold, and this
+        call returns normally either way; read it back with `list()`.
+        """
         from ..client import get_default_client
 
-        return await get_default_client().webhooks.create_async(endpoint)
+        return await get_default_client().webhooks.create_async(
+            endpoint,
+            failure_threshold=failure_threshold,
+        )
+
+    @classmethod
+    def update(
+        cls,
+        endpoint: str,
+        *,
+        failure_threshold: int,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Update the settings of an enrolled webhook endpoint.
+
+        `endpoint` is the URL of an enrolled webhook.
+        `failure_threshold` must be 1 or greater; use
+        `delete_failure_threshold()` to disable failure alerts.
+        """
+        from ..client import get_default_client
+
+        return get_default_client().webhooks.update(
+            endpoint,
+            failure_threshold=failure_threshold,
+        )
+
+    @classmethod
+    async def update_async(
+        cls,
+        endpoint: str,
+        *,
+        failure_threshold: int,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Update the settings of an enrolled webhook endpoint using async HTTP.
+
+        `endpoint` is the URL of an enrolled webhook.
+        `failure_threshold` must be 1 or greater; use
+        `delete_failure_threshold_async()` to disable failure alerts.
+        """
+        from ..client import get_default_client
+
+        return await get_default_client().webhooks.update_async(
+            endpoint,
+            failure_threshold=failure_threshold,
+        )
+
+    @classmethod
+    def delete_failure_threshold(
+        cls,
+        endpoint: str,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Remove the failure threshold from an enrolled webhook endpoint.
+
+        Failure alerts are disabled; the webhook stays enrolled and keeps
+        receiving events.
+        """
+        from ..client import get_default_client
+
+        return get_default_client().webhooks.delete_failure_threshold(endpoint)
+
+    @classmethod
+    async def delete_failure_threshold_async(
+        cls,
+        endpoint: str,
+    ) -> EmptyResponse | MailChannelsResponse:
+        """Remove the failure threshold from a webhook endpoint using async HTTP.
+
+        Failure alerts are disabled; the webhook stays enrolled and keeps
+        receiving events.
+        """
+        from ..client import get_default_client
+
+        return await get_default_client().webhooks.delete_failure_threshold_async(
+            endpoint
+        )
 
     @classmethod
     def delete_all(cls) -> EmptyResponse | MailChannelsResponse:
@@ -918,6 +1134,22 @@ def _public_key_value(
     if isinstance(value, (str, bytes)):
         return value
     raise ValueError("Public key must be a key string, bytes, or response with `key`.")
+
+
+def _masked_endpoint(endpoint: str) -> str:
+    """Return only the scheme and host of a webhook URL for logging.
+
+    Webhook URLs often carry credentials in the userinfo, path, or query.
+    """
+    try:
+        parts = urlsplit(endpoint.strip())
+        port = parts.port
+    except ValueError:
+        return _UNPARSEABLE_ENDPOINT
+    if not parts.scheme or not parts.hostname:
+        return _UNPARSEABLE_ENDPOINT
+    host = f"[{parts.hostname}]" if ":" in parts.hostname else parts.hostname
+    return f"{parts.scheme}://{host}" + (f":{port}" if port is not None else "")
 
 
 def _header(headers: dict[str, str], name: str) -> str | None:

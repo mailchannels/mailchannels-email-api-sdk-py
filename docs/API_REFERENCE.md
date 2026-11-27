@@ -4,7 +4,7 @@ This reference is generated from public SDK exports, type hints, Pydantic models
 
 For task-oriented examples, start with the README. This file is the formal public surface reference.
 
-- SDK version: `1.6.0`
+- SDK version: `1.7.0`
 - Top-level exports: `76`
 - Documented public module exports: `195`
 
@@ -972,10 +972,12 @@ Methods:
 | --- | --- | --- |
 | `batches` | `batches(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches. |
 | `batches_async` | `batches_async(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches using async HTTP. |
-| `create` | `create(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events. |
-| `create_async` | `create_async(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events using async HTTP. |
+| `create` | `create(endpoint: str, *, failure_threshold: int | None = None) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events. |
+| `create_async` | `create_async(endpoint: str, *, failure_threshold: int | None = None) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events using async HTTP. |
 | `delete_all` | `delete_all() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint for the account. |
 | `delete_all_async` | `delete_all_async() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint using async HTTP. |
+| `delete_failure_threshold` | `delete_failure_threshold(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Remove the failure threshold from an enrolled webhook endpoint. |
+| `delete_failure_threshold_async` | `delete_failure_threshold_async(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Remove the failure threshold from a webhook endpoint using async HTTP. |
 | `list` | `list() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints. |
 | `list_async` | `list_async() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints using async HTTP. |
 | `parse_signature_input` | `parse_signature_input(value: str) -> SignatureParameters` | Parse a MailChannels RFC 9421 Signature-Input header value. |
@@ -985,6 +987,8 @@ Methods:
 | `resend_batch_async` | `resend_batch_async(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch using async HTTP. |
 | `signature_is_fresh` | `signature_is_fresh(parameters: SignatureParameters, *, max_age_seconds: int = 300, max_skew_seconds: int = 30, tolerance_seconds: int | None = None, now: int | None = None) -> bool` | Return whether a signature timestamp is within the allowed replay window. |
 | `signature_key_id` | `signature_key_id(headers: dict[str, str]) -> str | None` | Extract the signing key ID from webhook headers. |
+| `update` | `update(endpoint: str, *, failure_threshold: int) -> EmptyResponse | MailChannelsResponse` | Update the settings of an enrolled webhook endpoint. |
+| `update_async` | `update_async(endpoint: str, *, failure_threshold: int) -> EmptyResponse | MailChannelsResponse` | Update the settings of an enrolled webhook endpoint using async HTTP. |
 | `validate` | `validate(*, request_id: str | None = None) -> WebhookValidationResults | MailChannelsResponse` | Validate enrolled webhook endpoints with a test event. |
 | `validate_async` | `validate_async(*, request_id: str | None = None) -> WebhookValidationResults | MailChannelsResponse` | Validate enrolled webhook endpoints with a test event using async HTTP. |
 | `verify` | `verify(headers: dict[str, str], body: bytes | str, public_key: str | bytes | Mapping[str, Any] | WebhookPublicKey, *, max_age_seconds: int = 300, max_skew_seconds: int = 30, tolerance_seconds: int | None = None, now: int | None = None) -> bool` | Verify a MailChannels webhook digest, freshness, and Ed25519 signature. |
@@ -2435,13 +2439,14 @@ Fields:
 
 - Kind: `Pydantic model`
 - Summary: A configured MailChannels webhook endpoint.
-- Signature: `mailchannels.webhooks.Webhook(webhook: str)`
+- Signature: `mailchannels.webhooks.Webhook(webhook: str, failure_threshold: int | None)`
 
 Fields:
 
 | Field | Type | Required | Default |
 | --- | --- | --- | --- |
 | `webhook` | `str` | yes | `` |
+| `failure_threshold` | `int \| None` | no | `None` |
 
 #### `mailchannels.webhooks.WebhookBatch`
 
@@ -2633,10 +2638,12 @@ Methods:
 | --- | --- | --- |
 | `batches` | `batches(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches. |
 | `batches_async` | `batches_async(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches using async HTTP. |
-| `create` | `create(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events. |
-| `create_async` | `create_async(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events using async HTTP. |
+| `create` | `create(endpoint: str, *, failure_threshold: int | None = None) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events. |
+| `create_async` | `create_async(endpoint: str, *, failure_threshold: int | None = None) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events using async HTTP. |
 | `delete_all` | `delete_all() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint for the account. |
 | `delete_all_async` | `delete_all_async() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint using async HTTP. |
+| `delete_failure_threshold` | `delete_failure_threshold(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Remove the failure threshold from an enrolled webhook endpoint. |
+| `delete_failure_threshold_async` | `delete_failure_threshold_async(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Remove the failure threshold from a webhook endpoint using async HTTP. |
 | `list` | `list() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints. |
 | `list_async` | `list_async() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints using async HTTP. |
 | `parse_signature_input` | `parse_signature_input(value: str) -> SignatureParameters` | Parse a MailChannels RFC 9421 Signature-Input header value. |
@@ -2646,6 +2653,8 @@ Methods:
 | `resend_batch_async` | `resend_batch_async(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch using async HTTP. |
 | `signature_is_fresh` | `signature_is_fresh(parameters: SignatureParameters, *, max_age_seconds: int = 300, max_skew_seconds: int = 30, tolerance_seconds: int | None = None, now: int | None = None) -> bool` | Return whether a signature timestamp is within the allowed replay window. |
 | `signature_key_id` | `signature_key_id(headers: dict[str, str]) -> str | None` | Extract the signing key ID from webhook headers. |
+| `update` | `update(endpoint: str, *, failure_threshold: int) -> EmptyResponse | MailChannelsResponse` | Update the settings of an enrolled webhook endpoint. |
+| `update_async` | `update_async(endpoint: str, *, failure_threshold: int) -> EmptyResponse | MailChannelsResponse` | Update the settings of an enrolled webhook endpoint using async HTTP. |
 | `validate` | `validate(*, request_id: str | None = None) -> WebhookValidationResults | MailChannelsResponse` | Validate enrolled webhook endpoints with a test event. |
 | `validate_async` | `validate_async(*, request_id: str | None = None) -> WebhookValidationResults | MailChannelsResponse` | Validate enrolled webhook endpoints with a test event using async HTTP. |
 | `verify` | `verify(headers: dict[str, str], body: bytes | str, public_key: str | bytes | Mapping[str, Any] | WebhookPublicKey, *, max_age_seconds: int = 300, max_skew_seconds: int = 30, tolerance_seconds: int | None = None, now: int | None = None) -> bool` | Verify a MailChannels webhook digest, freshness, and Ed25519 signature. |
@@ -2663,16 +2672,20 @@ Methods:
 | --- | --- | --- |
 | `batches` | `batches(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches. |
 | `batches_async` | `batches_async(*, created_after: str | None = None, created_before: str | None = None, statuses: list_type[WebhookBatchStatus] | None = None, webhook: str | None = None, limit: int | None = None, offset: int | None = None) -> WebhookBatchResult | MailChannelsResponse` | Retrieve webhook delivery batches using async HTTP. |
-| `create` | `create(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events. |
-| `create_async` | `create_async(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events using async HTTP. |
+| `create` | `create(endpoint: str, *, failure_threshold: int | None = None) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events. |
+| `create_async` | `create_async(endpoint: str, *, failure_threshold: int | None = None) -> EmptyResponse | MailChannelsResponse` | Enroll a webhook endpoint for delivery events using async HTTP. |
 | `delete_all` | `delete_all() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint for the account. |
 | `delete_all_async` | `delete_all_async() -> EmptyResponse | MailChannelsResponse` | Delete every configured webhook endpoint using async HTTP. |
+| `delete_failure_threshold` | `delete_failure_threshold(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Remove the failure threshold from an enrolled webhook endpoint. |
+| `delete_failure_threshold_async` | `delete_failure_threshold_async(endpoint: str) -> EmptyResponse | MailChannelsResponse` | Remove the failure threshold from a webhook endpoint using async HTTP. |
 | `list` | `list() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints. |
 | `list_async` | `list_async() -> WebhookList | MailChannelsResponse` | Retrieve configured webhook endpoints using async HTTP. |
 | `public_key` | `public_key(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID. |
 | `public_key_async` | `public_key_async(key_id: str) -> WebhookPublicKey | MailChannelsResponse` | Retrieve a webhook public signing key by ID using async HTTP. |
 | `resend_batch` | `resend_batch(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch. |
 | `resend_batch_async` | `resend_batch_async(batch_id: int) -> WebhookResendResponse | MailChannelsResponse` | Synchronously resend one webhook batch using async HTTP. |
+| `update` | `update(endpoint: str, *, failure_threshold: int) -> EmptyResponse | MailChannelsResponse` | Update the settings of an enrolled webhook endpoint. |
+| `update_async` | `update_async(endpoint: str, *, failure_threshold: int) -> EmptyResponse | MailChannelsResponse` | Update the settings of an enrolled webhook endpoint using async HTTP. |
 | `validate` | `validate(*, request_id: str | None = None) -> WebhookValidationResults | MailChannelsResponse` | Validate enrolled webhook endpoints with a test event. |
 | `validate_async` | `validate_async(*, request_id: str | None = None) -> WebhookValidationResults | MailChannelsResponse` | Validate enrolled webhook endpoints with a test event using async HTTP. |
 | `verify` | `verify(headers: dict[str, str], body: bytes | str, public_key: str | bytes | Mapping[str, Any] | WebhookPublicKey, *, max_age_seconds: int = 300, max_skew_seconds: int = 30, tolerance_seconds: int | None = None, now: int | None = None) -> bool` | Verify a MailChannels webhook digest, freshness, and Ed25519 signature. |

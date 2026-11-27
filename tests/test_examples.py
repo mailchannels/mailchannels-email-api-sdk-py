@@ -146,10 +146,62 @@ def test_webhook_example_configures_and_verifies_metadata(monkeypatch) -> None:
     key_id = webhooks.verify_webhook_metadata(headers, body, {"key": "fake"})
 
     assert key_id == "mckey"
+    assert transport.calls[0]["json"] is None
     assert transport.calls[2]["params"] == {
         "statuses": "4xx,5xx,no_response",
         "limit": 50,
     }
+
+
+def test_webhook_example_manages_failure_thresholds() -> None:
+    """It exercises the webhook failure-threshold example helpers."""
+    endpoint = "https://example.com/events"
+    transport = FakeRequestsClient(SDKResponse(204, None, ""))
+    client = Client(api_key="test-key", http_client=transport)
+
+    webhooks.configure_webhook(client, endpoint, 5)
+    webhooks.set_failure_threshold(client, endpoint, 10)
+    webhooks.disable_failure_alerts(client, endpoint)
+
+    assert [
+        (call["method"], call["url"].rsplit("/tx/v1", 1)[1], call["json"])
+        for call in transport.calls
+    ] == [
+        ("POST", "/webhook", {"failure_threshold": 5}),
+        ("PATCH", "/webhook", {"failure_threshold": 10}),
+        ("DELETE", "/webhook/failure-threshold", None),
+    ]
+    assert all(call["params"] == {"endpoint": endpoint} for call in transport.calls)
+
+
+def test_webhook_example_reads_failure_thresholds() -> None:
+    """It maps each enrolled webhook to its threshold, including unset ones."""
+    transport = FakeRequestsClient(
+        SDKResponse(
+            200,
+            [
+                {"webhook": "https://example.com/a", "failure_threshold": 5},
+                {"webhook": "https://example.com/b", "failure_threshold": None},
+                {"webhook": "https://example.com/c"},
+            ],
+            "[]",
+        )
+    )
+    client = Client(api_key="test-key", http_client=transport)
+
+    assert webhooks.failure_thresholds(client) == {
+        "https://example.com/a": 5,
+        "https://example.com/b": None,
+        "https://example.com/c": None,
+    }
+
+
+def test_webhook_example_reads_no_thresholds_without_webhooks() -> None:
+    """It returns an empty mapping when no webhook is enrolled."""
+    transport = FakeRequestsClient(SDKResponse(200, [], "[]"))
+    client = Client(api_key="test-key", http_client=transport)
+
+    assert webhooks.failure_thresholds(client) == {}
 
 
 def test_usage_example_retrieves_parent_and_sub_account_usage() -> None:
